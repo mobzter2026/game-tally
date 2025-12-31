@@ -63,52 +63,54 @@ export default function AdminDashboard() {
   }
 
   const updateScore = async (playerId: string, pointsChange: number, reason: string) => {
-    const player = players.find(p => p.id === playerId)
-    if (!player) return
-  
-    const newScore = Math.max(0, player.score + pointsChange)
-  
-    const { error } = await supabase
-      .from('players')
-      .update({ score: newScore })
-      .eq('id', playerId)
-  
-    if (error) {
-      console.error('Error updating score:', error)
-      return
-    }
-  
-    await supabase.from('score_history').insert({
-      player_id: playerId,
-      points_changed: pointsChange,
-      reason,
-      admin_email: user?.email,
-    })
-  
-    fetchPlayers()
-    fetchHistory()
+  const player = players.find(p => p.id === playerId)
+  if (!player) return
+
+  const newScore = Math.max(0, player.score + pointsChange)
+
+  const { error } = await supabase
+    .from('players')
+    .update({ score: newScore } as any)
+    .eq('id', playerId)
+
+  if (error) {
+    console.error('Error updating score:', error)
+    return
   }
 
+  await supabase.from('score_history').insert({
+    player_id: playerId,
+    points_changed: pointsChange,
+    reason,
+    admin_email: user?.email,
+  } as any)
+
+  fetchPlayers()
+  fetchHistory()
+}
+
   const resetAll = async () => {
-    if (!confirm('Reset ALL scores to 0?')) return
+  if (!confirm('Reset ALL scores to 0?')) return
 
-    await supabase
-      .from('players')
-      .update({ score: 0 })
-      .neq('id', '00000000-0000-0000-0000-000000000000')
+  const { error } = await supabase
+    .from('players')
+    .update({ score: 0 } as any)
+    .neq('id', '00000000-0000-0000-0000-000000000000')
 
+  if (!error) {
     await supabase.from('score_history').insert(
       players.map(p => ({
         player_id: p.id,
         points_changed: -p.score,
         reason: 'Admin reset',
         admin_email: user?.email,
-      }))
+      })) as any
     )
 
     fetchPlayers()
     fetchHistory()
   }
+}
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
