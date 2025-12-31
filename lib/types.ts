@@ -67,3 +67,4 @@ export interface Database {
 }
 
 export type Game = Database['public']['Tables']['games']['Row']
+export type GameInsert = Database['public']['Tables']['games']['Insert']

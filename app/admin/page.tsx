@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { Game } from '@/lib/types'
+import type { Game, GameInsert } from '@/lib/types'
 
 const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
 const GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung']
@@ -72,30 +72,34 @@ export default function AdminDashboard() {
         return
       }
       
-      await supabase.from('games').insert({
+      const gameData: GameInsert = {
         game_type: newGame.game,
         game_date: newGame.date,
         players_in_game: [...newGame.team1, ...newGame.team2],
         team1: newGame.team1,
         team2: newGame.team2,
         winning_team: newGame.winningTeam,
-        created_by: user?.email
-      })
+        created_by: user?.email ?? null
+      }
+      
+      await (supabase.from('games').insert as any)(gameData)
     } else {
       if (newGame.playersInGame.length === 0 || newGame.winners.length === 0 || newGame.losers.length === 0) {
         alert('Please select players, winners and losers')
         return
       }
       
-      await supabase.from('games').insert({
+      const gameData: GameInsert = {
         game_type: newGame.game,
         game_date: newGame.date,
         players_in_game: newGame.playersInGame,
-        winners: newGame.winners,
-        runners_up: newGame.runnersUp,
-        losers: newGame.losers,
-        created_by: user?.email
-      })
+        winners: newGame.winners.length > 0 ? newGame.winners : null,
+        runners_up: newGame.runnersUp.length > 0 ? newGame.runnersUp : null,
+        losers: newGame.losers.length > 0 ? newGame.losers : null,
+        created_by: user?.email ?? null
+      }
+      
+      await (supabase.from('games').insert as any)(gameData)
     }
 
     setNewGame({
