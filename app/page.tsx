@@ -148,7 +148,7 @@ export default function PublicView() {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
-    return `${idx + 1}.`
+    return `#${idx + 1}`
   }
 
   if (loading) {
@@ -167,8 +167,8 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-5xl mx-auto mt-8">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-3">🏆 Live Leaderboard</h1>
-          <p className="text-slate-300 text-lg">Game Rankings</p>
+          <h1 className="text-5xl font-bold mb-3">Ultimate Card Championship Leaderboard 🏆</h1>
+          <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
         </div>
 
         {/* Tab Navigation */}
@@ -216,7 +216,7 @@ export default function PublicView() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700 bg-slate-900">
-                    <th className="text-left p-4">Rank</th>
+                    <th className="text-center p-4 w-20">Rank</th>
                     <th className="text-left p-4">Player</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
@@ -227,7 +227,7 @@ export default function PublicView() {
                 <tbody>
                   {playerStats.map((player, idx) => (
                     <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-3xl">{getMedal(idx)}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
@@ -252,7 +252,7 @@ export default function PublicView() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700 bg-slate-900">
-                    <th className="text-left p-4">Rank</th>
+                    <th className="text-center p-4 w-20">Rank</th>
                     <th className="text-left p-4">Team</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
@@ -263,7 +263,7 @@ export default function PublicView() {
                 <tbody>
                   {rungTeamStats.map((team, idx) => (
                     <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-3xl">{getMedal(idx)}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{team.team}</td>
                       <td className="text-center p-4">{team.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
@@ -288,7 +288,7 @@ export default function PublicView() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700 bg-slate-900">
-                    <th className="text-left p-4">Rank</th>
+                    <th className="text-center p-4 w-20">Rank</th>
                     <th className="text-left p-4">Player</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
@@ -299,7 +299,7 @@ export default function PublicView() {
                 <tbody>
                   {rungPlayerStats.map((player, idx) => (
                     <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-3xl">{getMedal(idx)}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
