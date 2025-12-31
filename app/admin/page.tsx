@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Game } from '@/lib/types'
-import { Plus, X, LogOut, Eye } from 'lucide-react'
 
 const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
 const GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung']
@@ -177,14 +176,8 @@ export default function AdminDashboard() {
             <p className="text-slate-400">{user?.email}</p>
           </div>
           <div className="flex gap-3">
-            <a href="/" target="_blank" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded flex items-center gap-2">
-              <Eye size={18} />
-              View Public
-            </a>
-            <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded flex items-center gap-2">
-              <LogOut size={18} />
-              Logout
-            </button>
+            <a href="/" target="_blank" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">👁️ View Public</a>
+            <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">🚪 Logout</button>
           </div>
         </div>
 
@@ -297,14 +290,14 @@ export default function AdminDashboard() {
                         <div className="flex gap-2 flex-wrap mb-2">
                           {newGame.winners.map(w => (
                             <span key={w} className="bg-green-600 px-3 py-1 rounded flex items-center gap-2">
-                              {w} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('winners', w)} />
+                              {w} <span className="cursor-pointer" onClick={() => togglePlayer('winners', w)}>❌</span>
                             </span>
                           ))}
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
                             <button key={p} onClick={() => togglePlayer('winners', p)} className="px-4 py-2 rounded bg-slate-700">
-                              <Plus size={16} className="inline mr-1" />{p}
+                              ➕ {p}
                             </button>
                           ))}
                         </div>
@@ -315,14 +308,14 @@ export default function AdminDashboard() {
                         <div className="flex gap-2 flex-wrap mb-2">
                           {newGame.runnersUp.map(r => (
                             <span key={r} className="bg-blue-600 px-3 py-1 rounded flex items-center gap-2">
-                              {r} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('runnersUp', r)} />
+                              {r} <span className="cursor-pointer" onClick={() => togglePlayer('runnersUp', r)}>❌</span>
                             </span>
                           ))}
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
                             <button key={p} onClick={() => togglePlayer('runnersUp', p)} className="px-4 py-2 rounded bg-slate-700">
-                              <Plus size={16} className="inline mr-1" />{p}
+                              ➕ {p}
                             </button>
                           ))}
                         </div>
@@ -333,14 +326,14 @@ export default function AdminDashboard() {
                         <div className="flex gap-2 flex-wrap mb-2">
                           {newGame.losers.map(l => (
                             <span key={l} className="bg-red-600 px-3 py-1 rounded flex items-center gap-2">
-                              {l} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('losers', l)} />
+                              {l} <span className="cursor-pointer" onClick={() => togglePlayer('losers', l)}>❌</span>
                             </span>
                           ))}
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
                             <button key={p} onClick={() => togglePlayer('losers', p)} className="px-4 py-2 rounded bg-slate-700">
-                              <Plus size={16} className="inline mr-1" />{p}
+                              ➕ {p}
                             </button>
                           ))}
                         </div>
@@ -369,9 +362,7 @@ export default function AdminDashboard() {
                       <div className="font-bold">{game.game_type}</div>
                       <div className="text-sm text-slate-400">{new Date(game.game_date).toLocaleDateString()}</div>
                     </div>
-                    <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300">
-                      <X size={20} />
-                    </button>
+                    <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300">❌</button>
                   </div>
                   {game.game_type === 'Rung' ? (
                     <div className="text-sm">

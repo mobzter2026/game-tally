@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
-import { Trophy } from 'lucide-react'
 
 const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
 
@@ -81,10 +80,7 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-4xl mx-auto mt-8">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-3 flex items-center justify-center gap-3">
-            <Trophy className="text-yellow-400" size={50} />
-            Live Leaderboard
-          </h1>
+          <h1 className="text-5xl font-bold mb-3">🏆 Live Leaderboard</h1>
           <p className="text-slate-300 text-lg">Individual Games Rankings</p>
         </div>
 
