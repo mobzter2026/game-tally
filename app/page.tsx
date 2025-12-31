@@ -6,10 +6,19 @@ import type { Game } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 
+const GAME_EMOJIS: Record<string, string> = {
+  'Blackjack': '🃏',
+  'Monopoly': '🎲',
+  'Tai Ti': '🀄',
+  'Shithead': '💩',
+  'Rung': '🎴'
+}
+
 export default function PublicView() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'individual' | 'rung-teams' | 'rung-players'>('individual')
+  const [perfectGame, setPerfectGame] = useState<Game | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -34,26 +43,39 @@ export default function PublicView() {
       .order('game_date', { ascending: false })
       .order('created_at', { ascending: false })
 
-    if (data) setGames(data)
+    if (data) {
+      setGames(data)
+      
+      // Check for perfect game (winner got 3 points, everyone else got 0)
+      const latestIndividualGame = data.filter(g => g.game_type !== 'Rung')[0]
+      if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
+        // Check if it's a perfect game - need to verify from session data
+        // For now, we'll show it if there are losers and no runner-ups with significant scores
+        const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
+        if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
+          setPerfectGame(latestIndividualGame)
+        } else {
+          setPerfectGame(null)
+        }
+      }
+    }
     setLoading(false)
   }
 
   const getPlayerStats = () => {
     const stats: any = {}
     PLAYERS.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0 }
+      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, currentStreak: 0 }
     })
 
     const individualGames = games.filter(g => g.game_type !== 'Rung')
     individualGames.forEach(game => {
-      // Count games played for all players in the game
       if (game.players_in_game) {
         game.players_in_game.forEach(p => { 
           if (stats[p]) stats[p].gamesPlayed++ 
         })
       }
       
-      // Count their specific results
       if (game.winners) game.winners.forEach(w => { 
         if (stats[w]) {
           stats[w].wins++
@@ -71,6 +93,25 @@ export default function PublicView() {
       })
     })
 
+    // Calculate best streaks
+    PLAYERS.forEach(player => {
+      let currentStreak = 0
+      let bestStreak = 0
+      
+      [...individualGames].reverse().forEach(game => {
+        if (game.winners?.includes(player)) {
+          currentStreak++
+          if (currentStreak > bestStreak) {
+            bestStreak = currentStreak
+          }
+        } else if (game.players_in_game?.includes(player)) {
+          currentStreak = 0
+        }
+      })
+      
+      stats[player].bestStreak = bestStreak
+    })
+
     return PLAYERS
       .map(p => ({
         player: p,
@@ -86,19 +127,15 @@ export default function PublicView() {
     const rungGames = games.filter(g => g.game_type === 'Rung')
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
-        // Create team combo strings (sorted to treat [A,B] same as [B,A])
         const team1Key = [...game.team1].sort().join(' + ')
         const team2Key = [...game.team2].sort().join(' + ')
         
-        // Initialize stats if needed
         if (!teamStats[team1Key]) teamStats[team1Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
         if (!teamStats[team2Key]) teamStats[team2Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
         
-        // Count games
         teamStats[team1Key].gamesPlayed++
         teamStats[team2Key].gamesPlayed++
         
-        // Count wins and losses
         if (game.winning_team === 1) {
           teamStats[team1Key].wins++
           teamStats[team2Key].losses++
@@ -130,7 +167,6 @@ export default function PublicView() {
         const winningTeam = game.winning_team === 1 ? game.team1 : game.team2
         const losingTeam = game.winning_team === 1 ? game.team2 : game.team1
         
-        // Count games and wins for all players
         winningTeam.forEach(p => {
           if (stats[p]) {
             stats[p].gamesPlayed++
@@ -156,42 +192,12 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
-  const getStreaks = () => {
-    const streaks: Record<string, { current: number; best: number; type: string }> = {}
-    PLAYERS.forEach(p => {
-      streaks[p] = { current: 0, best: 0, type: '' }
-    })
-
-    const individualGames = [...games].filter(g => g.game_type !== 'Rung').reverse()
-    
-    individualGames.forEach(game => {
-      PLAYERS.forEach(player => {
-        if (game.winners?.includes(player)) {
-          if (streaks[player].type === 'win') {
-            streaks[player].current++
-          } else {
-            streaks[player].current = 1
-            streaks[player].type = 'win'
-          }
-          if (streaks[player].current > streaks[player].best) {
-            streaks[player].best = streaks[player].current
-          }
-        } else if (game.players_in_game?.includes(player)) {
-          if (streaks[player].type === 'win') {
-            streaks[player].current = 0
-            streaks[player].type = ''
-          }
-        }
-      })
-    })
-
-    return streaks
-  }
-
-  const getMedal = (idx: number) => {
+  const getMedal = (idx: number, isShithead: boolean = false) => {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
+    // For Shithead, last place gets poop emoji
+    if (isShithead && idx === PLAYERS.length - 1) return '💩'
     return `${idx + 1}`
   }
 
@@ -200,6 +206,32 @@ export default function PublicView() {
     if (game.runners_up?.includes(player)) return 'bg-blue-600'
     if (game.losers?.includes(player)) return 'bg-red-600'
     return 'bg-slate-600'
+  }
+
+  const sortPlayersInGame = (game: Game) => {
+    if (!game.players_in_game) return []
+    
+    return [...game.players_in_game].sort((a, b) => {
+      const aIsWinner = game.winners?.includes(a)
+      const bIsWinner = game.winners?.includes(b)
+      const aIsRunner = game.runners_up?.includes(a)
+      const bIsRunner = game.runners_up?.includes(b)
+      const aIsSurvived = !aIsWinner && !aIsRunner && !game.losers?.includes(a)
+      const bIsSurvived = !bIsWinner && !bIsRunner && !game.losers?.includes(b)
+      const aIsLoser = game.losers?.includes(a)
+      const bIsLoser = game.losers?.includes(b)
+      
+      if (aIsWinner && !bIsWinner) return -1
+      if (!aIsWinner && bIsWinner) return 1
+      if (aIsRunner && !bIsRunner) return -1
+      if (!aIsRunner && bIsRunner) return 1
+      if (aIsSurvived && !bIsSurvived) return -1
+      if (!aIsSurvived && bIsSurvived) return 1
+      if (aIsLoser && !bIsLoser) return 1
+      if (!aIsLoser && bIsLoser) return -1
+      
+      return 0
+    })
   }
 
   if (loading) {
@@ -213,16 +245,6 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
   const rungPlayerStats = getRungPlayerStats()
-  const streaks = getStreaks()
-
-  // Get top streak
-  const topStreakEntry = Object.entries(streaks)
-    .filter(([_, s]) => s.current > 0)
-    .sort((a, b) => b[1].current - a[1].current)[0]
-  
-  const topStreak = topStreakEntry ? { player: topStreakEntry[0], streak: topStreakEntry[1].current } : null
-
-  // Get recent games based on active tab
   const recentGames = activeTab === 'individual' 
     ? games.filter(g => g.game_type !== 'Rung').slice(0, 20)
     : games.filter(g => g.game_type === 'Rung').slice(0, 20)
@@ -234,15 +256,16 @@ export default function PublicView() {
           <h1 className="text-4xl md:text-5xl font-bold mb-3 whitespace-nowrap">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
-          {/* Hot Streak Banner */}
-          {topStreak && topStreak.streak >= 3 && (
-            <div className="mt-4 inline-block bg-gradient-to-r from-orange-600 to-red-600 px-6 py-2 rounded-full animate-pulse">
-              <span className="text-xl font-bold">🔥 {topStreak.player} is on a {topStreak.streak} game win streak! 🔥</span>
+          {/* Perfect Game Banner */}
+          {perfectGame && (
+            <div className="mt-4 inline-block bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 rounded-full">
+              <span className="text-xl font-bold">
+                ⚡ {perfectGame.winners?.[0]} dominated {perfectGame.game_type} on {new Date(perfectGame.game_date).toLocaleDateString()} - Perfect sweep! ⚡
+              </span>
             </div>
           )}
         </div>
 
-        {/* Tab Navigation */}
         <div className="flex gap-2 mb-6 justify-center flex-wrap">
           <button
             onClick={() => setActiveTab('individual')}
@@ -276,12 +299,12 @@ export default function PublicView() {
           </button>
         </div>
 
-        {/* Individual Games Leaderboard */}
         {activeTab === 'individual' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-2xl font-bold">Individual Games Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Blackjack, Monopoly, Tai Ti, Shithead • Runner-ups earn 25% credit</p>
+              <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
+              <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+              <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -294,7 +317,7 @@ export default function PublicView() {
                     <th className="text-center p-4">2nd</th>
                     <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
-                    <th className="text-center p-4">🔥 Streak</th>
+                    <th className="text-center p-4">🔥 Best</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -308,8 +331,8 @@ export default function PublicView() {
                       <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
                       <td className="text-center p-4">
-                        {streaks[player.player].current > 0 ? (
-                          <span className="text-orange-400 font-bold">{streaks[player.player].current}W</span>
+                        {player.bestStreak > 0 ? (
+                          <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
                         ) : (
                           <span className="text-slate-500">-</span>
                         )}
@@ -322,7 +345,6 @@ export default function PublicView() {
           </div>
         )}
 
-        {/* Rung Team Combos Leaderboard */}
         {activeTab === 'rung-teams' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
@@ -358,7 +380,6 @@ export default function PublicView() {
           </div>
         )}
 
-        {/* Rung Individual Players Leaderboard */}
         {activeTab === 'rung-players' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
@@ -394,22 +415,21 @@ export default function PublicView() {
           </div>
         )}
 
-        {/* Recent Games - 2 Column Layout */}
         <div className="bg-slate-800 rounded-xl p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
             <h2 className="text-2xl font-bold">📜 Recent Games</h2>
-            <div className="text-sm text-slate-400">
-              <span className="inline-block bg-green-600 px-2 py-0.5 rounded mr-2">Winner</span>
-              <span className="inline-block bg-blue-600 px-2 py-0.5 rounded mr-2">2nd</span>
-              <span className="inline-block bg-red-600 px-2 py-0.5 rounded mr-2">Loser</span>
-              <span className="inline-block bg-slate-600 px-2 py-0.5 rounded">Survived</span>
+            <div className="text-sm">
+              <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
+              <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
+              <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survived</span>
+              <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recentGames.map(game => (
               <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                <div className="text-slate-400 text-sm mb-2">
-                  {game.game_type} {game.game_type === 'Shithead' ? '💩' : ''} • {new Date(game.game_date).toLocaleDateString()}
+                <div className="text-slate-300 text-base font-bold mb-2">
+                  {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {game.game_type === 'Rung' ? (
@@ -427,7 +447,7 @@ export default function PublicView() {
                       ))}
                     </>
                   ) : (
-                    game.players_in_game?.map(player => (
+                    sortPlayersInGame(game).map(player => (
                       <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
                         {player}
                       </span>
