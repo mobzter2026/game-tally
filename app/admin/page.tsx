@@ -65,21 +65,26 @@ export default function AdminDashboard() {
   const updateScore = async (playerId: string, pointsChange: number, reason: string) => {
     const player = players.find(p => p.id === playerId)
     if (!player) return
-
+  
     const newScore = Math.max(0, player.score + pointsChange)
-
-    await supabase
+  
+    const { error } = await supabase
       .from('players')
       .update({ score: newScore })
       .eq('id', playerId)
-
+  
+    if (error) {
+      console.error('Error updating score:', error)
+      return
+    }
+  
     await supabase.from('score_history').insert({
       player_id: playerId,
       points_changed: pointsChange,
       reason,
       admin_email: user?.email,
     })
-
+  
     fetchPlayers()
     fetchHistory()
   }
