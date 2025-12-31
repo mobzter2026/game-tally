@@ -8,6 +8,12 @@ import type { GameSession, GameSessionInsert, Round, RoundInsert } from '@/lib/t
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Shithead']
 
+const GAME_EMOJIS: Record<string, string> = {
+  'Monopoly': '🎲',
+  'Tai Ti': '🀄',
+  'Shithead': '💩'
+}
+
 export default function ScoringPage() {
   const [sessions, setSessions] = useState<GameSession[]>([])
   const [activeSession, setActiveSession] = useState<GameSession | null>(null)
@@ -20,7 +26,6 @@ export default function ScoringPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  // New session form
   const [newSession, setNewSession] = useState({
     game: 'Monopoly',
     date: new Date().toISOString().split('T')[0],
@@ -39,7 +44,6 @@ export default function ScoringPage() {
   }, [activeSession])
 
   useEffect(() => {
-    // Calculate scores from rounds
     const newScores: Record<string, number> = {}
     activeSession?.players.forEach(p => newScores[p] = 0)
     rounds.forEach(round => {
@@ -180,20 +184,15 @@ export default function ScoringPage() {
     }
 
     await (supabase.from('rounds').insert as any)(roundData)
-
-    // Fetch updated rounds to get new scores
     await fetchRounds(activeSession.id)
   }
 
-  // Check if game is over after scores update
   useEffect(() => {
     if (!activeSession || rounds.length === 0) return
 
-    // Find max score
     const maxScore = Math.max(...Object.values(scores))
     
     if (maxScore >= activeSession.win_threshold) {
-      // Add small delay to ensure UI updates before alert
       setTimeout(() => finalizeSession(), 100)
     }
   }, [scores])
@@ -215,19 +214,9 @@ export default function ScoringPage() {
     
     if (!confirm('Cancel this session? All round data will be deleted.')) return
 
-    // Delete all rounds
-    await supabase
-      .from('rounds')
-      .delete()
-      .eq('session_id', activeSession.id)
+    await supabase.from('rounds').delete().eq('session_id', activeSession.id)
+    await supabase.from('game_sessions').delete().eq('id', activeSession.id)
 
-    // Delete session
-    await supabase
-      .from('game_sessions')
-      .delete()
-      .eq('id', activeSession.id)
-
-    // Custom alert
     const alertDiv = document.createElement('div')
     alertDiv.innerHTML = '<strong>Computer says:</strong><br>Session cancelled'
     alertDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:20px 40px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5);z-index:9999;font-family:monospace;font-size:18px;text-align:center'
@@ -243,18 +232,15 @@ export default function ScoringPage() {
   const finalizeSession = async () => {
     if (!activeSession) return
 
-    // Calculate final standings based on current scores
     const sortedPlayers = Object.entries(scores)
       .filter(([player, _]) => activeSession.players.includes(player))
       .sort((a, b) => {
-        // For Shithead, invert the sorting (lowest score wins)
         if (activeSession.game_type === 'Shithead') {
           return a[1] - b[1]
         }
         return b[1] - a[1]
       })
 
-    // Get unique scores in order
     const uniqueScores = [...new Set(sortedPlayers.map(([_, score]) => score))].sort((a, b) => {
       if (activeSession.game_type === 'Shithead') {
         return a - b
@@ -262,30 +248,25 @@ export default function ScoringPage() {
       return b - a
     })
 
-    // Winner: player with best score (just one)
     const bestScore = uniqueScores[0]
     const topPlayers = sortedPlayers.filter(([_, score]) => score === bestScore)
-    const winners = [topPlayers[0][0]] // Take only the first one
+    const winners = [topPlayers[0][0]]
 
-    // Runners-up: all players with the second-best score (if exists and different from best)
     let runnersUp: string[] = []
     if (uniqueScores.length > 1) {
       const secondScore = uniqueScores[1]
       runnersUp = sortedPlayers.filter(([_, score]) => score === secondScore).map(([player, _]) => player)
     }
 
-    // Losers: all players with the worst score (if more than 2 unique scores)
     let losers: string[] = []
     if (uniqueScores.length > 2) {
       const worstScore = uniqueScores[uniqueScores.length - 1]
       losers = sortedPlayers.filter(([_, score]) => score === worstScore).map(([player, _]) => player)
     } else if (uniqueScores.length === 2 && winners.length === 1) {
-      // If only 2 unique scores and 1 winner, everyone else is a loser
       losers = sortedPlayers.filter(([player, _]) => !winners.includes(player)).map(([player, _]) => player)
-      runnersUp = [] // Clear runner-ups in this case
+      runnersUp = []
     }
 
-    // Create final game record
     await (supabase.from('games').insert as any)({
       game_type: activeSession.game_type,
       game_date: activeSession.game_date,
@@ -298,11 +279,9 @@ export default function ScoringPage() {
       created_at: new Date().toISOString()
     })
 
-    // Mark session as completed
     await (supabase.from('game_sessions').update as any)({ status: 'completed' })
       .eq('id', activeSession.id)
 
-    // Custom alert
     const alertDiv = document.createElement('div')
     alertDiv.innerHTML = `<strong>Computer says:</strong><br>Game Over! 🏆<br>Winner: ${winners[0]} (${bestScore} points)`
     alertDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:30px 50px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5);z-index:9999;font-family:monospace;font-size:20px;text-align:center;line-height:1.6'
@@ -330,9 +309,9 @@ export default function ScoringPage() {
       .filter(([player, _]) => activeSession.players.includes(player))
       .sort((a, b) => {
         if (activeSession.game_type === 'Shithead') {
-          return a[1] - b[1] // Ascending for Shithead
+          return a[1] - b[1]
         }
-        return b[1] - a[1] // Descending for others
+        return b[1] - a[1]
       })
   }
 
@@ -365,11 +344,10 @@ export default function ScoringPage() {
           </div>
         </div>
 
-        {/* Session Summary Modal */}
         {viewingSession && viewingScores && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => {setViewingSession(null); setViewingScores(null)}}>
             <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-2xl font-bold mb-4">{viewingSession.game_type} Session Stats</h3>
+              <h3 className="text-2xl font-bold mb-4">{GAME_EMOJIS[viewingSession.game_type]} {viewingSession.game_type} Session Stats</h3>
               <div className="space-y-2 mb-4">
                 {Object.entries(viewingScores).sort((a, b) => {
                   if (viewingSession.game_type === 'Shithead') {
@@ -392,7 +370,6 @@ export default function ScoringPage() {
 
         {!activeSession ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* New Session */}
             <div className="bg-slate-800 rounded-xl p-6">
               <h2 className="text-2xl font-bold mb-4">Start New Scoring Session</h2>
               
@@ -404,7 +381,7 @@ export default function ScoringPage() {
                     onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
                     className="w-full p-3 bg-slate-700 rounded-lg"
                   >
-                    {SCORE_GAMES.map(g => <option key={g} value={g}>{g} {g === 'Shithead' ? '💩' : ''}</option>)}
+                    {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
                   </select>
                 </div>
 
@@ -419,9 +396,7 @@ export default function ScoringPage() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm">
-                    Win Threshold
-                  </label>
+                  <label className="block mb-2 text-sm">Win Threshold</label>
                   <input
                     type="number"
                     min="1"
@@ -456,39 +431,36 @@ export default function ScoringPage() {
               </div>
             </div>
 
-            {/* Recent Sessions */}
             <div className="bg-slate-800 rounded-xl p-6">
               <h2 className="text-2xl font-bold mb-4">Recent Sessions</h2>
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {sessions.map(session => (
                   <div key={session.id} className="bg-slate-700 rounded-lg p-3">
                     <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="font-bold">{session.game_type} {session.game_type === 'Shithead' ? '💩' : ''}</div>
+                      <div className="flex-1">
+                        <div className="font-bold">{GAME_EMOJIS[session.game_type]} {session.game_type}</div>
                         <div className="text-sm text-slate-400">{new Date(session.game_date).toLocaleDateString()}</div>
+                        <div className="text-sm mb-2">Players: {session.players.join(', ')}</div>
+                        <div className="flex gap-2">
+                          {session.status === 'in_progress' && (
+                            <button
+                              onClick={() => setActiveSession(session)}
+                              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
+                            >
+                              Resume
+                            </button>
+                          )}
+                          <button
+                            onClick={() => showSessionSummary(session)}
+                            className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
+                          >
+                            Stats
+                          </button>
+                        </div>
                       </div>
-                      <span className={`px-3 py-1 rounded text-sm ${session.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}`}>
+                      <span className={`px-3 py-1 rounded text-sm ml-2 ${session.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}`}>
                         {session.status}
                       </span>
-                    </div>
-                    <div className="text-sm mb-2">
-                      Players: {session.players.join(', ')}
-                    </div>
-                    <div className="flex gap-2">
-                      {session.status === 'in_progress' && (
-                        <button
-                          onClick={() => setActiveSession(session)}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm"
-                        >
-                          Resume
-                        </button>
-                      )}
-                      <button
-                        onClick={() => showSessionSummary(session)}
-                        className="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded text-sm"
-                      >
-                        View Stats
-                      </button>
                     </div>
                   </div>
                 ))}
@@ -497,11 +469,10 @@ export default function ScoringPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Scoring Interface */}
             <div className="bg-slate-800 rounded-xl p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">
-                  {activeSession.game_type} {activeSession.game_type === 'Shithead' ? '💩' : ''}
+                  {GAME_EMOJIS[activeSession.game_type]} {activeSession.game_type}
                 </h2>
                 <button
                   onClick={() => setActiveSession(null)}
@@ -574,7 +545,6 @@ export default function ScoringPage() {
               </button>
             </div>
 
-            {/* Round History */}
             <div className="bg-slate-800 rounded-xl p-6">
               <h2 className="text-2xl font-bold mb-4">Round History</h2>
               <div className="space-y-2 max-h-[600px] overflow-y-auto">

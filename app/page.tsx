@@ -20,7 +20,6 @@ export default function PublicView() {
   const [activeTab, setActiveTab] = useState<'individual' | 'rung-teams' | 'rung-players'>('individual')
   const [perfectGame, setPerfectGame] = useState<Game | null>(null)
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
-  const [lastShitheadLoser, setLastShitheadLoser] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -49,7 +48,6 @@ export default function PublicView() {
       const gamesData = data as Game[]
       setGames(gamesData)
       
-      // Check for perfect game
       const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
       if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
         const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
@@ -60,13 +58,7 @@ export default function PublicView() {
         }
       }
 
-      // Check for last Shithead loser
       const shitheadGames = gamesData.filter(g => g.game_type === 'Shithead')
-      if (shitheadGames.length > 0 && shitheadGames[0].losers && shitheadGames[0].losers.length > 0) {
-        setLastShitheadLoser(shitheadGames[0].losers[0])
-      }
-
-      // Check for Shithead losing streak (3+ losses in a row)
       const reversedShitheadGames = shitheadGames.slice().reverse()
       PLAYERS.forEach(player => {
         let streak = 0
@@ -89,7 +81,7 @@ export default function PublicView() {
   const getPlayerStats = () => {
     const stats: any = {}
     PLAYERS.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0 }
+      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
     })
 
     const individualGames = games.filter(g => g.game_type !== 'Rung')
@@ -115,6 +107,13 @@ export default function PublicView() {
       if (game.losers) game.losers.forEach(l => { 
         if (stats[l]) stats[l].losses++ 
       })
+
+      // Count Shithead losses specifically
+      if (game.game_type === 'Shithead' && game.losers) {
+        game.losers.forEach(l => {
+          if (stats[l]) stats[l].shitheadLosses++
+        })
+      }
     })
 
     PLAYERS.forEach(player => {
@@ -216,12 +215,10 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
-  const getMedal = (idx: number, playerName: string) => {
+  const getMedal = (idx: number) => {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
-    // Show poop emoji for last Shithead loser
-    if (lastShitheadLoser === playerName) return '💩'
     return `${idx + 1}`
   }
 
@@ -280,7 +277,6 @@ export default function PublicView() {
           <h1 className="text-4xl md:text-5xl font-bold mb-3 whitespace-nowrap">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
-          {/* Perfect Game Banner */}
           {perfectGame && (
             <div className="mt-4 inline-block bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 rounded-full">
               <span className="text-xl font-bold">
@@ -289,9 +285,8 @@ export default function PublicView() {
             </div>
           )}
 
-          {/* Shithead Losing Streak Banner */}
           {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
-            <div className="mt-4 inline-block bg-gradient-to-r from-brown-700 to-orange-900 px-6 py-2 rounded-full">
+            <div className="mt-4 inline-block bg-gradient-to-r from-amber-800 to-orange-900 px-6 py-2 rounded-full">
               <span className="text-xl font-bold">
                 💩 {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! 💩
               </span>
@@ -349,6 +344,7 @@ export default function PublicView() {
                     <th className="text-center p-4">Wins</th>
                     <th className="text-center p-4">2nd</th>
                     <th className="text-center p-4">Losses</th>
+                    <th className="text-center p-4">💩</th>
                     <th className="text-center p-4">Win Rate</th>
                     <th className="text-center p-4">🔥 Best</th>
                   </tr>
@@ -356,12 +352,13 @@ export default function PublicView() {
                 <tbody>
                   {playerStats.map((player, idx) => (
                     <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-center text-2xl">{getMedal(idx, player.player)}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                       <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
                       <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                      <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
                       <td className="text-center p-4">
                         {player.bestStreak > 0 ? (
@@ -399,7 +396,7 @@ export default function PublicView() {
                 <tbody>
                   {rungTeamStats.map((team, idx) => (
                     <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-center text-2xl">{getMedal(idx, '')}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{team.team}</td>
                       <td className="text-center p-4">{team.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
@@ -434,7 +431,7 @@ export default function PublicView() {
                 <tbody>
                   {rungPlayerStats.map((player, idx) => (
                     <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-center text-2xl">{getMedal(idx, '')}</td>
+                      <td className="p-4 text-center text-2xl">{getMedal(idx)}</td>
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
