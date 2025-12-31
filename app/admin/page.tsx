@@ -225,7 +225,7 @@ export default function AdminDashboard() {
               {newGame.game === 'Rung' ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block mb-2 text-sm">Team 1</label>
+                    <label className="block mb-2 text-sm">Team 1</label><button type="button" onClick={() => setNewGame({ ...newGame, team1: PLAYERS })} className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs">Select All</button>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm">Team 2</label>
+                    <label className="block mb-2 text-sm">Team 2</label><button type="button" onClick={() => setNewGame({ ...newGame, team2: PLAYERS })} className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs">Select All</button>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button

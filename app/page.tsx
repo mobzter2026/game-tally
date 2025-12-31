@@ -396,7 +396,7 @@ export default function PublicView() {
           </div>
           
           {showFilter && (
-            <div className="flex gap-2 flex-wrap">
+            <div><button onClick={() => setSelectedPlayers(PLAYERS)} className="mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">Select All</button><div className="flex gap-2 flex-wrap">
               {PLAYERS.map(player => (
                 <button
                   key={player}

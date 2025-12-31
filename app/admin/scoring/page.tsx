@@ -408,7 +408,7 @@ export default function ScoringPage() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm">Select Players</label>
+                  <label className="block mb-2 text-sm">Select Players</label><button type="button" onClick={() => setNewSession({ ...newSession, players: PLAYERS })} className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs">Select All</button>
                   <div className="flex gap-2 flex-wrap">
                     {PLAYERS.map(p => (
                       <button
