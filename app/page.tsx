@@ -148,13 +148,13 @@ export default function PublicView() {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
-    return `#${idx + 1}`
+    return `${idx + 1}`
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-2xl">Loading...</div>
+        <div className="text-white text-2xl font-mono">Loading...</div>
       </div>
     )
   }
@@ -164,10 +164,10 @@ export default function PublicView() {
   const rungPlayerStats = getRungPlayerStats()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-5xl mx-auto mt-8">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-3">Ultimate Card Championship Leaderboard 🏆</h1>
+          <h1 className="text-5xl font-bold mb-3">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
         </div>
 
@@ -313,27 +313,54 @@ export default function PublicView() {
           </div>
         )}
 
-        <div className="bg-slate-800 rounded-xl p-6">
-          <h2 className="text-2xl font-bold mb-4">Recent Games ({games.length})</h2>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {games.slice(0, 10).map(game => (
-              <div key={game.id} className="bg-slate-700 rounded-lg p-3">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="font-bold">{game.game_type}</div>
-                  <div className="text-sm text-slate-400">{new Date(game.game_date).toLocaleDateString()}</div>
+        {/* Recent Games - 3 Column Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Winners Column */}
+          <div className="bg-slate-800 rounded-xl p-4">
+            <h3 className="text-lg font-bold mb-3 text-green-400 flex items-center gap-2">
+              🏆 Recent Winners
+            </h3>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
+                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
+                  <div className="font-semibold text-green-300">{game.winners?.join(', ')}</div>
+                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
                 </div>
-                {game.game_type === 'Rung' ? (
-                  <div className="text-sm">
-                    <span className="text-green-400">Winners: </span>
-                    {(game.winning_team === 1 ? game.team1 : game.team2)?.join(' + ')}
-                  </div>
-                ) : (
-                  <div className="text-sm">
-                    {game.winners && <div><span className="text-green-400">Winners: </span>{game.winners.join(', ')}</div>}
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Runners-Up Column */}
+          <div className="bg-slate-800 rounded-xl p-4">
+            <h3 className="text-lg font-bold mb-3 text-blue-400 flex items-center gap-2">
+              🥈 Recent Runners-Up
+            </h3>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {games.filter(g => g.game_type !== 'Rung' && g.runners_up && g.runners_up.length > 0).slice(0, 10).map(game => (
+                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
+                  <div className="font-semibold text-blue-300">{game.runners_up?.join(', ')}</div>
+                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                </div>
+              ))}
+              {games.filter(g => g.game_type !== 'Rung' && g.runners_up && g.runners_up.length > 0).length === 0 && (
+                <div className="text-slate-500 text-sm text-center py-4">No runners-up yet</div>
+              )}
+            </div>
+          </div>
+
+          {/* Losers Column */}
+          <div className="bg-slate-800 rounded-xl p-4">
+            <h3 className="text-lg font-bold mb-3 text-red-400 flex items-center gap-2">
+              💀 Recent Losers
+            </h3>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
+                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
+                  <div className="font-semibold text-red-300">{game.losers?.join(', ')}</div>
+                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
