@@ -302,6 +302,10 @@ export default function ScoringPage() {
     }
   }
 
+  const selectAllPlayers = () => {
+    setNewSession({ ...newSession, players: PLAYERS })
+  }
+
   const getSortedScores = () => {
     if (!activeSession) return []
     
@@ -361,7 +365,7 @@ export default function ScoringPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={() => {setViewingSession(null); setViewingScores(null)}} className="w-full bg-orange-700 hover:bg-orange-800 py-2 rounded">
+              <button onClick={() => {setViewingSession(null); setViewingScores(null)}} className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded">
                 Close
               </button>
             </div>
@@ -408,7 +412,14 @@ export default function ScoringPage() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm">Select Players</label><button type="button" onClick={() => setNewSession({ ...newSession, players: PLAYERS })} className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs">Select All</button>
+                  <label className="block mb-2 text-sm">Select Players</label>
+                  <button
+                    type="button"
+                    onClick={selectAllPlayers}
+                    className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                  >
+                    Select All
+                  </button>
                   <div className="flex gap-2 flex-wrap">
                     {PLAYERS.map(p => (
                       <button
@@ -426,7 +437,7 @@ export default function ScoringPage() {
                   onClick={createSession}
                   className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded font-bold"
                 >
-                  🎮 Start Scoring Session
+                  ✍️ Record Scores Now
                 </button>
               </div>
             </div>
@@ -458,7 +469,7 @@ export default function ScoringPage() {
                           onClick={() => showSessionSummary(session)}
                           className="bg-orange-700 hover:bg-orange-800 px-3 py-1 rounded text-sm whitespace-nowrap"
                         >
-                          Stats
+                          View Stats
                         </button>
                       </div>
                     </div>
@@ -514,7 +525,7 @@ export default function ScoringPage() {
                   <button
                     key={player}
                     onClick={() => addRound(player)}
-                    className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded font-bold"
+                    className="w-full bg-green-600 hover:bg-green-700 py-3 rounded font-bold"
                   >
                     ✓ {player}
                   </button>
@@ -532,7 +543,7 @@ export default function ScoringPage() {
 
               <button
                 onClick={finalizeSession}
-                className="w-full bg-orange-700 hover:bg-orange-800 py-2 rounded mb-2"
+                className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded mb-2"
               >
                 🏁 Finish Game Early
               </button>
