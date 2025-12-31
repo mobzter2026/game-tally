@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   const fetchHistory = async () => {
     const { data } = await supabase
       .from('score_history')
-      .select(`*, players (name)`)
+      .select('*, players (name)')
       .order('created_at', { ascending: false })
       .limit(20)
 
