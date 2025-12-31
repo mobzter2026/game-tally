@@ -46,11 +46,8 @@ export default function PublicView() {
     if (data) {
       setGames(data)
       
-      // Check for perfect game (winner got 3 points, everyone else got 0)
       const latestIndividualGame = data.filter(g => g.game_type !== 'Rung')[0]
       if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
-        // Check if it's a perfect game - need to verify from session data
-        // For now, we'll show it if there are losers and no runner-ups with significant scores
         const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
         if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
           setPerfectGame(latestIndividualGame)
@@ -65,7 +62,7 @@ export default function PublicView() {
   const getPlayerStats = () => {
     const stats: any = {}
     PLAYERS.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, currentStreak: 0 }
+      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0 }
     })
 
     const individualGames = games.filter(g => g.game_type !== 'Rung')
@@ -93,12 +90,12 @@ export default function PublicView() {
       })
     })
 
-    // Calculate best streaks
     PLAYERS.forEach(player => {
       let currentStreak = 0
       let bestStreak = 0
       
-      [...individualGames].reverse().forEach(game => {
+      const reversedGames = individualGames.slice().reverse()
+      reversedGames.forEach(game => {
         if (game.winners?.includes(player)) {
           currentStreak++
           if (currentStreak > bestStreak) {
@@ -127,8 +124,8 @@ export default function PublicView() {
     const rungGames = games.filter(g => g.game_type === 'Rung')
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
-        const team1Key = [...game.team1].sort().join(' + ')
-        const team2Key = [...game.team2].sort().join(' + ')
+        const team1Key = game.team1.slice().sort().join(' + ')
+        const team2Key = game.team2.slice().sort().join(' + ')
         
         if (!teamStats[team1Key]) teamStats[team1Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
         if (!teamStats[team2Key]) teamStats[team2Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
@@ -192,12 +189,10 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
-  const getMedal = (idx: number, isShithead: boolean = false) => {
+  const getMedal = (idx: number) => {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
-    // For Shithead, last place gets poop emoji
-    if (isShithead && idx === PLAYERS.length - 1) return '💩'
     return `${idx + 1}`
   }
 
@@ -211,7 +206,7 @@ export default function PublicView() {
   const sortPlayersInGame = (game: Game) => {
     if (!game.players_in_game) return []
     
-    return [...game.players_in_game].sort((a, b) => {
+    return game.players_in_game.slice().sort((a, b) => {
       const aIsWinner = game.winners?.includes(a)
       const bIsWinner = game.winners?.includes(b)
       const aIsRunner = game.runners_up?.includes(a)
@@ -256,7 +251,6 @@ export default function PublicView() {
           <h1 className="text-4xl md:text-5xl font-bold mb-3 whitespace-nowrap">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
-          {/* Perfect Game Banner */}
           {perfectGame && (
             <div className="mt-4 inline-block bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 rounded-full">
               <span className="text-xl font-bold">
