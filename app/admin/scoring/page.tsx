@@ -104,7 +104,8 @@ export default function ScoringPage() {
     if (data) {
       const sessionScores: Record<string, number> = {}
       session.players.forEach(p => sessionScores[p] = 0)
-      data.forEach(round => {
+      const roundsData = data as Round[]
+      roundsData.forEach(round => {
         if (sessionScores[round.winner] !== undefined) {
           sessionScores[round.winner]++
         }
