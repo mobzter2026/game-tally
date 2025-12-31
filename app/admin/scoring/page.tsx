@@ -404,8 +404,39 @@ export default function ScoringPage() {
                     value={newSession.threshold}
                     onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
                     className="w-full p-3 bg-slate-700 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm">Select Players</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {PLAYERS.map(p => (
+                      <button
+                        key={p}
+                        onClick={() => togglePlayer(p)}
+                        className={`px-4 py-2 rounded ${newSession.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={createSession}
+                  className="w-full bg-green-600 hover:bg-green-700 py-3 rounded font-bold"
+                >
+                  🎮 Start Scoring Session
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 rounded-xl p-6">
+              <h2 className="text-2xl font-bold mb-4">Recent Sessions</h2>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {sessions.map(session => (
                   <div key={session.id} className="bg-slate-700 rounded-lg p-3">
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="font-bold">{GAME_EMOJIS[session.game_type]} {session.game_type}</div>
                         <div className="text-sm text-slate-400">{new Date(session.game_date).toLocaleDateString()}</div>
@@ -430,39 +461,6 @@ export default function ScoringPage() {
                           Stats
                         </button>
                       </div>
-                    </div>
-                  </div>
-
-            <div className="bg-slate-800 rounded-xl p-6">
-              <h2 className="text-2xl font-bold mb-4">Recent Sessions</h2>
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {sessions.map(session => (
-                  <div key={session.id} className="bg-slate-700 rounded-lg p-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <div className="font-bold">{GAME_EMOJIS[session.game_type]} {session.game_type}</div>
-                        <div className="text-sm text-slate-400">{new Date(session.game_date).toLocaleDateString()}</div>
-                        <div className="text-sm mb-2">Players: {session.players.join(', ')}</div>
-                        <div className="flex gap-2">
-                          {session.status === 'in_progress' && (
-                            <button
-                              onClick={() => setActiveSession(session)}
-                              className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm"
-                            >
-                              Resume
-                            </button>
-                          )}
-                          <button
-                            onClick={() => showSessionSummary(session)}
-                            className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm"
-                          >
-                            Stats
-                          </button>
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 rounded text-sm ml-2 ${session.status === 'completed' ? 'bg-red-600' : 'bg-yellow-600'}`}>
-                        {session.status === 'completed' ? 'Game Over' : session.status}
-                      </span>
                     </div>
                   </div>
                 ))}
