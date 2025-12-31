@@ -451,7 +451,7 @@ export default function ScoringPage() {
                         )}
                       </div>
                       <div className="ml-2 flex flex-col gap-2">
-                        <span className={`px-3 py-1 rounded text-sm text-center ${session.status === 'completed' ? 'bg-red-600' : 'bg-yellow-600'}`}>
+                        <span className={`px-3 py-1 rounded text-sm text-center ${session.status === 'completed' ? 'bg-red-800' : 'bg-yellow-600'}`}>
                           {session.status === 'completed' ? 'Game Over' : session.status}
                         </span>
                         <button
