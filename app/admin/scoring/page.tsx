@@ -15,7 +15,8 @@ export default function ScoringPage() {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
-  const [showSummary, setShowSummary] = useState(false)
+  const [viewingSession, setViewingSession] = useState<GameSession | null>(null)
+  const [viewingScores, setViewingScores] = useState<Record<string, number> | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -93,6 +94,26 @@ export default function ScoringPage() {
     if (data) setRounds(data as Round[])
   }
 
+  const fetchSessionSummary = async (session: GameSession) => {
+    const { data } = await supabase
+      .from('rounds')
+      .select('*')
+      .eq('session_id', session.id)
+      .order('round_number', { ascending: true })
+
+    if (data) {
+      const sessionScores: Record<string, number> = {}
+      session.players.forEach(p => sessionScores[p] = 0)
+      data.forEach(round => {
+        if (sessionScores[round.winner] !== undefined) {
+          sessionScores[round.winner]++
+        }
+      })
+      return sessionScores
+    }
+    return null
+  }
+
   const createSession = async () => {
     if (newSession.players.length < 2) {
       alert('Select at least 2 players')
@@ -122,6 +143,28 @@ export default function ScoringPage() {
       })
       fetchSessions()
     }
+  }
+
+  const removePlayer = async (player: string) => {
+    if (!activeSession || rounds.length > 0) {
+      alert('Cannot remove players after rounds have been played')
+      return
+    }
+
+    if (!confirm(`Remove ${player} from this session?`)) return
+
+    const updatedPlayers = activeSession.players.filter(p => p !== player)
+    
+    if (updatedPlayers.length < 2) {
+      alert('Must have at least 2 players')
+      return
+    }
+
+    await (supabase.from('game_sessions').update as any)({ players: updatedPlayers })
+      .eq('id', activeSession.id)
+
+    setActiveSession({ ...activeSession, players: updatedPlayers })
+    fetchSessions()
   }
 
   const addRound = async (winner: string) => {
@@ -166,6 +209,36 @@ export default function ScoringPage() {
     fetchRounds(activeSession.id)
   }
 
+  const cancelSession = async () => {
+    if (!activeSession) return
+    
+    if (!confirm('Cancel this session? All round data will be deleted.')) return
+
+    // Delete all rounds
+    await supabase
+      .from('rounds')
+      .delete()
+      .eq('session_id', activeSession.id)
+
+    // Delete session
+    await supabase
+      .from('game_sessions')
+      .delete()
+      .eq('id', activeSession.id)
+
+    // Custom alert
+    const alertDiv = document.createElement('div')
+    alertDiv.innerHTML = '<strong>Computer says:</strong><br>Session cancelled'
+    alertDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:20px 40px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5);z-index:9999;font-family:monospace;font-size:18px;text-align:center'
+    document.body.appendChild(alertDiv)
+    setTimeout(() => document.body.removeChild(alertDiv), 2000)
+
+    setActiveSession(null)
+    setRounds([])
+    setScores({})
+    fetchSessions()
+  }
+
   const finalizeSession = async () => {
     if (!activeSession) return
 
@@ -188,9 +261,10 @@ export default function ScoringPage() {
       return b - a
     })
 
-    // Winners: all players with the best score
+    // Winner: player with best score (just one)
     const bestScore = uniqueScores[0]
-    const winners = sortedPlayers.filter(([_, score]) => score === bestScore).map(([player, _]) => player)
+    const topPlayers = sortedPlayers.filter(([_, score]) => score === bestScore)
+    const winners = [topPlayers[0][0]] // Take only the first one
 
     // Runners-up: all players with the second-best score (if exists and different from best)
     let runnersUp: string[] = []
@@ -219,15 +293,21 @@ export default function ScoringPage() {
       runners_up: runnersUp.length > 0 ? runnersUp : null,
       losers: losers.length > 0 ? losers : null,
       session_id: activeSession.id,
-      created_by: user?.email
+      created_by: user?.email,
+      created_at: new Date().toISOString()
     })
 
     // Mark session as completed
     await (supabase.from('game_sessions').update as any)({ status: 'completed' })
       .eq('id', activeSession.id)
 
-    const winnerNames = winners.join(', ')
-    alert(`Game Over! 🏆 Winner(s): ${winnerNames} (${bestScore} points)`)
+    // Custom alert
+    const alertDiv = document.createElement('div')
+    alertDiv.innerHTML = `<strong>Computer says:</strong><br>Game Over! 🏆<br>Winner: ${winners[0]} (${bestScore} points)`
+    alertDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:30px 50px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5);z-index:9999;font-family:monospace;font-size:20px;text-align:center;line-height:1.6'
+    document.body.appendChild(alertDiv)
+    setTimeout(() => document.body.removeChild(alertDiv), 3000)
+
     setActiveSession(null)
     setRounds([])
     setScores({})
@@ -255,6 +335,14 @@ export default function ScoringPage() {
       })
   }
 
+  const showSessionSummary = async (session: GameSession) => {
+    const scores = await fetchSessionSummary(session)
+    if (scores) {
+      setViewingSession(session)
+      setViewingScores(scores)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -275,6 +363,31 @@ export default function ScoringPage() {
             <a href="/admin" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">← Back to Admin</a>
           </div>
         </div>
+
+        {/* Session Summary Modal */}
+        {viewingSession && viewingScores && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => {setViewingSession(null); setViewingScores(null)}}>
+            <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-2xl font-bold mb-4">{viewingSession.game_type} Session Stats</h3>
+              <div className="space-y-2 mb-4">
+                {Object.entries(viewingScores).sort((a, b) => {
+                  if (viewingSession.game_type === 'Shithead') {
+                    return a[1] - b[1]
+                  }
+                  return b[1] - a[1]
+                }).map(([player, score]) => (
+                  <div key={player} className="flex justify-between bg-slate-700 p-3 rounded">
+                    <span className="font-bold">{player}</span>
+                    <span className="text-yellow-400 font-bold text-xl">{score}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => {setViewingSession(null); setViewingScores(null)}} className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded">
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {!activeSession ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -306,7 +419,7 @@ export default function ScoringPage() {
 
                 <div>
                   <label className="block mb-2 text-sm">
-                    {newSession.game === 'Shithead' ? 'First to LOSE' : 'First to WIN'} (Points)
+                    Win Threshold
                   </label>
                   <input
                     type="number"
@@ -352,23 +465,30 @@ export default function ScoringPage() {
                       <div>
                         <div className="font-bold">{session.game_type} {session.game_type === 'Shithead' ? '💩' : ''}</div>
                         <div className="text-sm text-slate-400">{new Date(session.game_date).toLocaleDateString()}</div>
-                        <div className="text-sm text-slate-400">First to {session.win_threshold}</div>
                       </div>
                       <span className={`px-3 py-1 rounded text-sm ${session.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}`}>
                         {session.status}
                       </span>
                     </div>
-                    <div className="text-sm">
+                    <div className="text-sm mb-2">
                       Players: {session.players.join(', ')}
                     </div>
-                    {session.status === 'in_progress' && (
+                    <div className="flex gap-2">
+                      {session.status === 'in_progress' && (
+                        <button
+                          onClick={() => setActiveSession(session)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm"
+                        >
+                          Resume
+                        </button>
+                      )}
                       <button
-                        onClick={() => setActiveSession(session)}
-                        className="mt-2 w-full bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm"
+                        onClick={() => showSessionSummary(session)}
+                        className="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded text-sm"
                       >
-                        Resume Session
+                        View Stats
                       </button>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -391,44 +511,32 @@ export default function ScoringPage() {
               </div>
 
               <div className="mb-4 p-4 bg-slate-700 rounded">
-                <div className="text-sm text-slate-400 mb-2">
-                  {activeSession.game_type === 'Shithead' ? 'First to LOSE' : 'First to WIN'}: {activeSession.win_threshold} rounds
-                </div>
                 <div className="text-sm text-slate-400">Round: {rounds.length + 1}</div>
               </div>
 
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-xl font-bold">Current Scores</h3>
-                <button
-                  onClick={() => setShowSummary(!showSummary)}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                >
-                  {showSummary ? 'Hide' : 'Show'} Summary
-                </button>
-              </div>
-
-              {showSummary && (
-                <div className="mb-4 p-4 bg-slate-700 rounded">
-                  <h4 className="font-bold mb-2">Current Standings:</h4>
-                  {getSortedScores().map(([player, score], idx) => (
-                    <div key={player} className="flex justify-between py-1">
-                      <span>{idx + 1}. {player}</span>
-                      <span className="font-bold">{score}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
+              <h3 className="text-xl font-bold mb-3">Current Scores</h3>
               <div className="space-y-2 mb-6">
                 {getSortedScores().map(([player, score]) => (
                   <div key={player} className="flex justify-between items-center bg-slate-700 p-3 rounded">
-                    <span className="font-bold text-lg">{player}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-lg">{player}</span>
+                      {rounds.length === 0 && (
+                        <button
+                          onClick={() => removePlayer(player)}
+                          className="text-red-400 hover:text-red-300 text-xs"
+                        >
+                          ❌
+                        </button>
+                      )}
+                    </div>
                     <span className="text-2xl font-bold text-yellow-400">{score}</span>
                   </div>
                 ))}
               </div>
 
-              <h3 className="text-xl font-bold mb-3">Who won this round?</h3>
+              <h3 className="text-xl font-bold mb-3">
+                {activeSession.game_type === 'Shithead' ? 'Who lost this round?' : 'Who won this round?'}
+              </h3>
               <div className="space-y-2 mb-4">
                 {activeSession.players.map(player => (
                   <button
@@ -444,7 +552,7 @@ export default function ScoringPage() {
               {rounds.length > 0 && (
                 <button
                   onClick={undoLastRound}
-                  className="w-full bg-orange-600 hover:bg-orange-700 py-2 rounded"
+                  className="w-full bg-orange-600 hover:bg-orange-700 py-2 rounded mb-2"
                 >
                   ↶ Undo Last Round
                 </button>
@@ -452,9 +560,16 @@ export default function ScoringPage() {
 
               <button
                 onClick={finalizeSession}
-                className="w-full mt-2 bg-purple-600 hover:bg-purple-700 py-2 rounded"
+                className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded mb-2"
               >
                 🏁 Finish Game Early
+              </button>
+
+              <button
+                onClick={cancelSession}
+                className="w-full bg-red-600 hover:bg-red-700 py-2 rounded"
+              >
+                ❌ Cancel Session
               </button>
             </div>
 
