@@ -44,9 +44,10 @@ export default function PublicView() {
       .order('created_at', { ascending: false })
 
     if (data) {
-      setGames(data)
+      const gamesData = data as Game[]
+      setGames(gamesData)
       
-      const latestIndividualGame = data.filter(g => g.game_type !== 'Rung')[0]
+      const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
       if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
         const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
         if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
