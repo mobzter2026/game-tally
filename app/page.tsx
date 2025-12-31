@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
+const MIN_GAMES_FOR_RANKING = 5
 
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
@@ -20,6 +21,8 @@ export default function PublicView() {
   const [activeTab, setActiveTab] = useState<'individual' | 'rung-teams' | 'rung-players'>('individual')
   const [perfectGame, setPerfectGame] = useState<Game | null>(null)
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
+  const [showFilter, setShowFilter] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -47,44 +50,83 @@ export default function PublicView() {
     if (data) {
       const gamesData = data as Game[]
       setGames(gamesData)
-      
-      const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
-      if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
-        const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
-        if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
-          setPerfectGame(latestIndividualGame)
-        } else {
-          setPerfectGame(null)
-        }
-      }
-
-      const shitheadGames = gamesData.filter(g => g.game_type === 'Shithead')
-      const reversedShitheadGames = shitheadGames.slice().reverse()
-      PLAYERS.forEach(player => {
-        let streak = 0
-        for (const game of reversedShitheadGames) {
-          if (game.losers?.includes(player)) {
-            streak++
-          } else if (game.players_in_game?.includes(player)) {
-            break
-          }
-        }
-        
-        if (streak >= 3) {
-          setShitheadLosingStreak({ player, streak })
-        }
-      })
+      checkPerfectGameAndStreak(gamesData)
     }
     setLoading(false)
   }
 
+  const checkPerfectGameAndStreak = (gamesData: Game[]) => {
+    const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
+    if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
+      const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
+      if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
+        setPerfectGame(latestIndividualGame)
+      } else {
+        setPerfectGame(null)
+      }
+    }
+
+    const shitheadGames = gamesData.filter(g => g.game_type === 'Shithead')
+    const reversedShitheadGames = shitheadGames.slice().reverse()
+    let foundStreak = false
+    PLAYERS.forEach(player => {
+      if (foundStreak) return
+      let streak = 0
+      for (const game of reversedShitheadGames) {
+        if (game.losers?.includes(player)) {
+          streak++
+        } else if (game.players_in_game?.includes(player)) {
+          break
+        }
+      }
+      
+      if (streak >= 3) {
+        setShitheadLosingStreak({ player, streak })
+        foundStreak = true
+      }
+    })
+    if (!foundStreak) setShitheadLosingStreak(null)
+  }
+
+  const togglePlayerFilter = (player: string) => {
+    if (selectedPlayers.includes(player)) {
+      setSelectedPlayers(selectedPlayers.filter(p => p !== player))
+    } else {
+      setSelectedPlayers([...selectedPlayers, player])
+    }
+  }
+
+  const clearFilter = () => {
+    setSelectedPlayers([])
+  }
+
+  const getFilteredGames = () => {
+    if (selectedPlayers.length === 0) return games
+
+    return games.filter(game => {
+      if (game.game_type === 'Rung') {
+        const allPlayers = [...(game.team1 || []), ...(game.team2 || [])]
+        return allPlayers.length === selectedPlayers.length && 
+               selectedPlayers.every(p => allPlayers.includes(p))
+      } else {
+        const gamePlayers = game.players_in_game || []
+        return gamePlayers.length === selectedPlayers.length && 
+               selectedPlayers.every(p => gamePlayers.includes(p))
+      }
+    })
+  }
+
+  const filteredGames = getFilteredGames()
+
   const getPlayerStats = () => {
     const stats: any = {}
-    PLAYERS.forEach(p => {
+    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+    
+    activePlayers.forEach(p => {
       stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
     })
 
-    const individualGames = games.filter(g => g.game_type !== 'Rung')
+    const individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
     individualGames.forEach(game => {
       if (game.players_in_game) {
         game.players_in_game.forEach(p => { 
@@ -115,7 +157,7 @@ export default function PublicView() {
       }
     })
 
-    PLAYERS.forEach(player => {
+    activePlayers.forEach(player => {
       let currentStreak = 0
       let bestStreak = 0
       
@@ -134,19 +176,20 @@ export default function PublicView() {
       stats[player].bestStreak = bestStreak
     })
 
-    return PLAYERS
+    return activePlayers
       .map(p => ({
         player: p,
         ...stats[p],
         winRate: stats[p].gamesPlayed > 0 ? ((stats[p].weightedWins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
       }))
+      .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
   }
 
   const getRungTeamStats = () => {
     const teamStats: any = {}
     
-    const rungGames = games.filter(g => g.game_type === 'Rung')
+    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
         const team1Key = game.team1.slice().sort().join(' + ')
@@ -174,16 +217,19 @@ export default function PublicView() {
         ...stats,
         winRate: stats.gamesPlayed > 0 ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(0) : '0'
       }))
+      .filter(t => t.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
   const getRungPlayerStats = () => {
     const stats: any = {}
-    PLAYERS.forEach(p => {
+    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+    
+    activePlayers.forEach(p => {
       stats[p] = { gamesPlayed: 0, wins: 0, losses: 0 }
     })
 
-    const rungGames = games.filter(g => g.game_type === 'Rung')
+    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
         const winningTeam = game.winning_team === 1 ? game.team1 : game.team2
@@ -205,40 +251,34 @@ export default function PublicView() {
       }
     })
 
-    return PLAYERS
+    return activePlayers
       .map(p => ({
         player: p,
         ...stats[p],
         winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
       }))
+      .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
   const getMedal = (sortedList: any[], currentIndex: number, getWinRate: (item: any) => string) => {
     const currentWinRate = getWinRate(sortedList[currentIndex])
     
-    // Find actual position (accounting for ties)
     let position = 1
     for (let i = 0; i < currentIndex; i++) {
       if (getWinRate(sortedList[i]) !== currentWinRate) {
-        position = i + 2 // Next position after all ties
+        position = i + 2
       }
     }
     
-    // Check if current player is tied with previous
     if (currentIndex > 0 && getWinRate(sortedList[currentIndex - 1]) === currentWinRate) {
       position = getMedalPosition(sortedList, currentIndex - 1, getWinRate)
     }
     
-    // Only show medals for top 3 positions (accounting for ties at 3rd)
     if (position === 1) return '🥇'
     if (position === 2) return '🥈'
-    if (position === 3) {
-      // If tied at 3rd, show medal
-      return '🥉'
-    }
+    if (position === 3) return '🥉'
     
-    // Check if this is a tie with 3rd place
     const thirdPlaceWinRate = sortedList.find((_, idx) => getMedalPosition(sortedList, idx, getWinRate) === 3)
     if (thirdPlaceWinRate && getWinRate(sortedList[currentIndex]) === getWinRate(thirdPlaceWinRate)) {
       return '🥉'
@@ -306,8 +346,8 @@ export default function PublicView() {
   const rungTeamStats = getRungTeamStats()
   const rungPlayerStats = getRungPlayerStats()
   const recentGames = activeTab === 'individual' 
-    ? games.filter(g => g.game_type !== 'Rung').slice(0, 20)
-    : games.filter(g => g.game_type === 'Rung').slice(0, 20)
+    ? filteredGames.filter(g => g.game_type !== 'Rung').slice(0, 20)
+    : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
@@ -329,6 +369,54 @@ export default function PublicView() {
               <span className="text-xl font-bold">
                 💩 {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! 💩
               </span>
+            </div>
+          )}
+        </div>
+
+        {/* Player Filter */}
+        <div className="mb-6 bg-slate-800 rounded-xl p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-bold">Filter by Players</h3>
+            <div className="flex gap-2">
+              {selectedPlayers.length > 0 && (
+                <button
+                  onClick={clearFilter}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                >
+                  Clear ({selectedPlayers.length})
+                </button>
+              )}
+              <button
+                onClick={() => setShowFilter(!showFilter)}
+                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
+              >
+                {showFilter ? 'Hide' : 'Show'} Filter
+              </button>
+            </div>
+          </div>
+          
+          {showFilter && (
+            <div className="flex gap-2 flex-wrap">
+              {PLAYERS.map(player => (
+                <button
+                  key={player}
+                  onClick={() => togglePlayerFilter(player)}
+                  className={`px-4 py-2 rounded transition ${
+                    selectedPlayers.includes(player)
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : 'bg-slate-700 hover:bg-slate-600'
+                  }`}
+                >
+                  {selectedPlayers.includes(player) && '✓ '}
+                  {player}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {selectedPlayers.length > 0 && (
+            <div className="mt-3 text-sm text-slate-400">
+              Showing only games with exactly: {selectedPlayers.join(', ')} • {filteredGames.length} games found
             </div>
           )}
         </div>
@@ -372,7 +460,7 @@ export default function PublicView() {
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
                 <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
+                <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25% • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -390,25 +478,33 @@ export default function PublicView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {playerStats.map((player, idx) => (
-                      <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                        <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
-                        <td className="p-4 font-bold text-xl">{player.player}</td>
-                        <td className="text-center p-4">{player.gamesPlayed}</td>
-                        <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                        <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-                        <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                        <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
-                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                        <td className="text-center p-4">
-                          {player.bestStreak > 0 ? (
-                            <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
-                          ) : (
-                            <span className="text-slate-500">-</span>
-                          )}
+                    {playerStats.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="text-center p-8 text-slate-400">
+                          No players qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      playerStats.map((player, idx) => (
+                        <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
+                          <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
+                          <td className="p-4 font-bold text-xl">{player.player}</td>
+                          <td className="text-center p-4">{player.gamesPlayed}</td>
+                          <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                          <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+                          <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                          <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
+                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                          <td className="text-center p-4">
+                            {player.bestStreak > 0 ? (
+                              <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -425,20 +521,26 @@ export default function PublicView() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recentGames.map(game => (
-                  <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                    <div className="text-slate-300 text-base font-bold mb-2">
-                      {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                    </div>
-                    <div className="flex gap-1 flex-wrap">
-                      {sortPlayersInGame(game).map(player => (
-                        <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                          {player}
-                        </span>
-                      ))}
-                    </div>
+                {recentGames.length === 0 ? (
+                  <div className="col-span-2 text-center p-8 text-slate-400">
+                    No games found with selected filter
                   </div>
-                ))}
+                ) : (
+                  recentGames.map(game => (
+                    <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                      <div className="text-slate-300 text-base font-bold mb-2">
+                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      </div>
+                      <div className="flex gap-1 flex-wrap">
+                        {sortPlayersInGame(game).map(player => (
+                          <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                            {player}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </>
@@ -449,7 +551,7 @@ export default function PublicView() {
             <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold">Best Rung Team Combinations</h2>
-                <p className="text-slate-400 text-sm mt-1">Which duos dominate together?</p>
+                <p className="text-slate-400 text-sm mt-1">Which duos dominate together? • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -464,16 +566,24 @@ export default function PublicView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rungTeamStats.map((team, idx) => (
-                      <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                        <td className="p-4 text-center text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
-                        <td className="p-4 font-bold text-xl">{team.team}</td>
-                        <td className="text-center p-4">{team.gamesPlayed}</td>
-                        <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
-                        <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
-                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
+                    {rungTeamStats.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center p-8 text-slate-400">
+                          No teams qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
+                        </td>
                       </tr>
-                    ))}
+                    ) : (
+                      rungTeamStats.map((team, idx) => (
+                        <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
+                          <td className="p-4 text-center text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
+                          <td className="p-4 font-bold text-xl">{team.team}</td>
+                          <td className="text-center p-4">{team.gamesPlayed}</td>
+                          <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
+                          <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
+                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -488,26 +598,32 @@ export default function PublicView() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recentGames.map(game => (
-                  <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                    <div className="text-slate-300 text-base font-bold mb-2">
-                      {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                    </div>
-                    <div className="flex gap-1 flex-wrap">
-                      {game.team1?.map(player => (
-                        <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                          {player}
-                        </span>
-                      ))}
-                      <span className="text-slate-400 px-2">vs</span>
-                      {game.team2?.map(player => (
-                        <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                          {player}
-                        </span>
-                      ))}
-                    </div>
+                {recentGames.length === 0 ? (
+                  <div className="col-span-2 text-center p-8 text-slate-400">
+                    No games found with selected filter
                   </div>
-                ))}
+                ) : (
+                  recentGames.map(game => (
+                    <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                      <div className="text-slate-300 text-base font-bold mb-2">
+                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      </div>
+                      <div className="flex gap-1 flex-wrap">
+                        {game.team1?.map(player => (
+                          <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                            {player}
+                          </span>
+                        ))}
+                        <span className="text-slate-400 px-2">vs</span>
+                        {game.team2?.map(player => (
+                          <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                            {player}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </>
@@ -517,7 +633,7 @@ export default function PublicView() {
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
               <h2 className="text-2xl font-bold">Rung Individual Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate</p>
+              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -532,16 +648,24 @@ export default function PublicView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rungPlayerStats.map((player, idx) => (
-                    <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                      <td className="p-4 text-center text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
-                      <td className="p-4 font-bold text-xl">{player.player}</td>
-                      <td className="text-center p-4">{player.gamesPlayed}</td>
-                      <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                      <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                      <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                  {rungPlayerStats.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center p-8 text-slate-400">
+                        No players qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
+                      </td>
                     </tr>
-                  ))}
+                  ) : (
+                    rungPlayerStats.map((player, idx) => (
+                      <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
+                        <td className="p-4 text-center text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
+                        <td className="p-4 font-bold text-xl">{player.player}</td>
+                        <td className="text-center p-4">{player.gamesPlayed}</td>
+                        <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                        <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
