@@ -15,6 +15,7 @@ export default function ScoringPage() {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [showSummary, setShowSummary] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -136,14 +137,22 @@ export default function ScoringPage() {
 
     await (supabase.from('rounds').insert as any)(roundData)
 
-    fetchRounds(activeSession.id)
-
-    // Check if game is over
-    const newScore = (scores[winner] || 0) + 1
-    if (newScore >= activeSession.win_threshold) {
-      await finalizeSession()
-    }
+    // Fetch updated rounds to get new scores
+    await fetchRounds(activeSession.id)
   }
+
+  // Check if game is over after scores update
+  useEffect(() => {
+    if (!activeSession || rounds.length === 0) return
+
+    // Find max score
+    const maxScore = Math.max(...Object.values(scores))
+    
+    if (maxScore >= activeSession.win_threshold) {
+      // Add small delay to ensure UI updates before alert
+      setTimeout(() => finalizeSession(), 100)
+    }
+  }, [scores])
 
   const undoLastRound = async () => {
     if (!activeSession || rounds.length === 0) return
@@ -160,8 +169,9 @@ export default function ScoringPage() {
   const finalizeSession = async () => {
     if (!activeSession) return
 
-    // Calculate final standings
+    // Calculate final standings based on current scores
     const sortedPlayers = Object.entries(scores)
+      .filter(([player, _]) => activeSession.players.includes(player))
       .sort((a, b) => {
         // For Shithead, invert the sorting (lowest score wins)
         if (activeSession.game_type === 'Shithead') {
@@ -170,9 +180,18 @@ export default function ScoringPage() {
         return b[1] - a[1]
       })
 
+    // Winner is first
     const winners = [sortedPlayers[0][0]]
-    const runnersUp = sortedPlayers.length > 1 ? [sortedPlayers[1][0]] : []
-    const losers = sortedPlayers.length > 2 ? [sortedPlayers[sortedPlayers.length - 1][0]] : []
+    
+    // Runner-up is second (if exists and not tied with winner)
+    const runnersUp = sortedPlayers.length > 1 && sortedPlayers[1][1] !== sortedPlayers[0][1]
+      ? [sortedPlayers[1][0]] 
+      : []
+    
+    // Loser is last (if exists and not tied)
+    const losers = sortedPlayers.length > 2 && sortedPlayers[sortedPlayers.length - 1][1] !== sortedPlayers[sortedPlayers.length - 2][1]
+      ? [sortedPlayers[sortedPlayers.length - 1][0]] 
+      : []
 
     // Create final game record
     await (supabase.from('games').insert as any)({
@@ -190,9 +209,10 @@ export default function ScoringPage() {
     await (supabase.from('game_sessions').update as any)({ status: 'completed' })
       .eq('id', activeSession.id)
 
-    alert(`Game Over! Winner: ${winners[0]}`)
+    alert(`Game Over! 🏆 Winner: ${winners[0]} (${scores[winners[0]]} points)`)
     setActiveSession(null)
     setRounds([])
+    setScores({})
     fetchSessions()
   }
 
@@ -202,6 +222,19 @@ export default function ScoringPage() {
     } else {
       setNewSession({ ...newSession, players: [...newSession.players, player] })
     }
+  }
+
+  const getSortedScores = () => {
+    if (!activeSession) return []
+    
+    return Object.entries(scores)
+      .filter(([player, _]) => activeSession.players.includes(player))
+      .sort((a, b) => {
+        if (activeSession.game_type === 'Shithead') {
+          return a[1] - b[1] // Ascending for Shithead
+        }
+        return b[1] - a[1] // Descending for others
+      })
   }
 
   if (loading) {
@@ -346,12 +379,33 @@ export default function ScoringPage() {
                 <div className="text-sm text-slate-400">Round: {rounds.length + 1}</div>
               </div>
 
-              <h3 className="text-xl font-bold mb-3">Current Scores</h3>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-xl font-bold">Current Scores</h3>
+                <button
+                  onClick={() => setShowSummary(!showSummary)}
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+                >
+                  {showSummary ? 'Hide' : 'Show'} Summary
+                </button>
+              </div>
+
+              {showSummary && (
+                <div className="mb-4 p-4 bg-slate-700 rounded">
+                  <h4 className="font-bold mb-2">Current Standings:</h4>
+                  {getSortedScores().map(([player, score], idx) => (
+                    <div key={player} className="flex justify-between py-1">
+                      <span>{idx + 1}. {player}</span>
+                      <span className="font-bold">{score}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="space-y-2 mb-6">
-                {activeSession.players.map(player => (
+                {getSortedScores().map(([player, score]) => (
                   <div key={player} className="flex justify-between items-center bg-slate-700 p-3 rounded">
                     <span className="font-bold text-lg">{player}</span>
-                    <span className="text-2xl font-bold text-yellow-400">{scores[player] || 0}</span>
+                    <span className="text-2xl font-bold text-yellow-400">{score}</span>
                   </div>
                 ))}
               </div>
