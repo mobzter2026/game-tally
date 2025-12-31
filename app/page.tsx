@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
-const MIN_GAMES_FOR_RANKING = 5
+const MIN_GAMES_FOR_RANKING = 0  // Changed from 5 to 0 to show rankings immediately
 
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
@@ -94,6 +94,10 @@ export default function PublicView() {
     } else {
       setSelectedPlayers([...selectedPlayers, player])
     }
+  }
+
+  const selectAllPlayers = () => {
+    setSelectedPlayers(PLAYERS)
   }
 
   const clearFilter = () => {
@@ -396,22 +400,30 @@ export default function PublicView() {
           </div>
           
           {showFilter && (
-            <div><button onClick={() => setSelectedPlayers(PLAYERS)} className="mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">Select All</button><div className="flex gap-2 flex-wrap">
-              {PLAYERS.map(player => (
-                <button
-                  key={player}
-                  onClick={() => togglePlayerFilter(player)}
-                  className={`px-4 py-2 rounded transition ${
-                    selectedPlayers.includes(player)
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-slate-700 hover:bg-slate-600'
-                  }`}
-                >
-                  {selectedPlayers.includes(player) && '✓ '}
-                  {player}
-                </button>
-              ))}
-            </div>
+            <>
+              <button
+                onClick={selectAllPlayers}
+                className="mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+              >
+                Select All
+              </button>
+              <div className="flex gap-2 flex-wrap">
+                {PLAYERS.map(player => (
+                  <button
+                    key={player}
+                    onClick={() => togglePlayerFilter(player)}
+                    className={`px-4 py-2 rounded transition ${
+                      selectedPlayers.includes(player)
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    {selectedPlayers.includes(player) && '✓ '}
+                    {player}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
           
           {selectedPlayers.length > 0 && (
@@ -460,7 +472,7 @@ export default function PublicView() {
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
                 <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25% • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
+                <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -481,7 +493,7 @@ export default function PublicView() {
                     {playerStats.length === 0 ? (
                       <tr>
                         <td colSpan={9} className="text-center p-8 text-slate-400">
-                          No players qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
+                          No games played yet.
                         </td>
                       </tr>
                     ) : (
@@ -551,7 +563,7 @@ export default function PublicView() {
             <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold">Best Rung Team Combinations</h2>
-                <p className="text-slate-400 text-sm mt-1">Which duos dominate together? • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
+                <p className="text-slate-400 text-sm mt-1">Which duos dominate together?</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -569,7 +581,7 @@ export default function PublicView() {
                     {rungTeamStats.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="text-center p-8 text-slate-400">
-                          No teams qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
+                          No teams have played yet.
                         </td>
                       </tr>
                     ) : (
@@ -633,7 +645,7 @@ export default function PublicView() {
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
               <h2 className="text-2xl font-bold">Rung Individual Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate • Minimum {MIN_GAMES_FOR_RANKING} games to qualify</p>
+              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -651,7 +663,7 @@ export default function PublicView() {
                   {rungPlayerStats.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center p-8 text-slate-400">
-                        No players qualify yet. Need at least {MIN_GAMES_FOR_RANKING} games.
+                        No Rung games played yet.
                       </td>
                     </tr>
                   ) : (
