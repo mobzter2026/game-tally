@@ -361,7 +361,7 @@ export default function ScoringPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={() => {setViewingSession(null); setViewingScores(null)}} className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded">
+              <button onClick={() => {setViewingSession(null); setViewingScores(null)}} className="w-full bg-orange-700 hover:bg-orange-800 py-2 rounded">
                 Close
               </button>
             </div>
@@ -456,7 +456,7 @@ export default function ScoringPage() {
                         </span>
                         <button
                           onClick={() => showSessionSummary(session)}
-                          className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm whitespace-nowrap"
+                          className="bg-orange-700 hover:bg-orange-800 px-3 py-1 rounded text-sm whitespace-nowrap"
                         >
                           Stats
                         </button>
@@ -532,7 +532,7 @@ export default function ScoringPage() {
 
               <button
                 onClick={finalizeSession}
-                className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded mb-2"
+                className="w-full bg-orange-700 hover:bg-orange-800 py-2 rounded mb-2"
               >
                 🏁 Finish Game Early
               </button>
