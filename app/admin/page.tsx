@@ -3,179 +3,394 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { Player, ScoreHistory } from '@/lib/types'
+import type { Game } from '@/lib/types'
+import { Plus, X, LogOut, Eye } from 'lucide-react'
+
+const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
+const GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung']
 
 export default function AdminDashboard() {
-    const [players, setPlayers] = useState<Player[]>([])
-    const [history, setHistory] = useState<ScoreHistory[]>([])
-    const [loading, setLoading] = useState(true)
-    const [user, setUser] = useState<any>(null)
-    const router = useRouter()
-    const supabase = createClient()
+  const [games, setGames] = useState<Game[]>([])
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const [newGame, setNewGame] = useState({
+    game: 'Blackjack',
+    date: new Date().toISOString().split('T')[0],
+    playersInGame: [] as string[],
+    winners: [] as string[],
+    runnersUp: [] as string[],
+    losers: [] as string[],
+    team1: [] as string[],
+    team2: [] as string[],
+    winningTeam: 1
+  })
+  const router = useRouter()
+  const supabase = createClient()
 
-    useEffect(() => {
-        checkAuth()
-    }, [])
+  useEffect(() => {
+    checkAuth()
+  }, [])
 
-    const checkAuth = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            router.push('/admin/login')
-            return
-        }
-
-        const { data: adminData } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('id', user.id)
-            .single()
-
-        if (!adminData) {
-            await supabase.auth.signOut()
-            router.push('/admin/login')
-            return
-        }
-
-        setUser(user)
-        fetchPlayers()
-        fetchHistory()
-        setLoading(false)
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      router.push('/admin/login')
+      return
     }
 
-    const fetchPlayers = async () => {
-        const { data } = await supabase
-            .from('players')
-            .select('*')
-            .order('score', { ascending: false })
+    const { data: adminData } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', user.id)
+      .single()
 
-        if (data) setPlayers(data)
+    if (!adminData) {
+      await supabase.auth.signOut()
+      router.push('/admin/login')
+      return
     }
 
-    const fetchHistory = async () => {
-        const { data } = await supabase
-            .from('score_history')
-            .select('*, players (name)')
-            .order('created_at', { ascending: false })
-            .limit(20)
+    setUser(user)
+    fetchGames()
+    setLoading(false)
+  }
 
-        if (data) setHistory(data as any)
+  const fetchGames = async () => {
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .order('game_date', { ascending: false })
+      .order('created_at', { ascending: false })
+
+    if (data) setGames(data)
+  }
+
+  const addGame = async () => {
+    if (newGame.game === 'Rung') {
+      if (newGame.team1.length !== 2 || newGame.team2.length !== 2) {
+        alert('Rung requires 2 players per team')
+        return
+      }
+      
+      await supabase.from('games').insert({
+        game_type: newGame.game,
+        game_date: newGame.date,
+        players_in_game: [...newGame.team1, ...newGame.team2],
+        team1: newGame.team1,
+        team2: newGame.team2,
+        winning_team: newGame.winningTeam,
+        created_by: user?.email
+      })
+    } else {
+      if (newGame.playersInGame.length === 0 || newGame.winners.length === 0 || newGame.losers.length === 0) {
+        alert('Please select players, winners and losers')
+        return
+      }
+      
+      await supabase.from('games').insert({
+        game_type: newGame.game,
+        game_date: newGame.date,
+        players_in_game: newGame.playersInGame,
+        winners: newGame.winners,
+        runners_up: newGame.runnersUp,
+        losers: newGame.losers,
+        created_by: user?.email
+      })
     }
 
-    const updateScore = async (playerId: string, pointsChange: number, reason: string) => {
-        const player = players.find(p => p.id === playerId)
-        if (!player) return
+    setNewGame({
+      game: 'Blackjack',
+      date: new Date().toISOString().split('T')[0],
+      playersInGame: [],
+      winners: [],
+      runnersUp: [],
+      losers: [],
+      team1: [],
+      team2: [],
+      winningTeam: 1
+    })
+    fetchGames()
+  }
 
-        const newScore = Math.max(0, player.score + pointsChange)
-
-        await supabase
-            .from('players')
-            .update({ score: newScore })
-            .eq('id', playerId)
-
-        await supabase.from('score_history').insert({
-            player_id: playerId,
-            points_changed: pointsChange,
-            reason,
-            admin_email: user?.email,
-        })
-
-        fetchPlayers()
-        fetchHistory()
+  const deleteGame = async (id: string) => {
+    if (confirm('Delete this game?')) {
+      await supabase.from('games').delete().eq('id', id)
+      fetchGames()
     }
+  }
 
-    const resetAll = async () => {
-        if (!confirm('Reset ALL scores to 0?')) return
-
-        await supabase
-            .from('players')
-            .update({ score: 0 })
-            .neq('id', '00000000-0000-0000-0000-000000000000')
-
-        await supabase.from('score_history').insert(
-            players.map(p => ({
-                player_id: p.id,
-                points_changed: -p.score,
-                reason: 'Admin reset',
-                admin_email: user?.email,
-            }))
-        )
-
-        fetchPlayers()
-        fetchHistory()
+  const toggleTeamPlayer = (team: 'team1' | 'team2', player: string) => {
+    const currentTeam = newGame[team]
+    const otherTeam = team === 'team1' ? 'team2' : 'team1'
+    
+    if (currentTeam.includes(player)) {
+      setNewGame({ ...newGame, [team]: currentTeam.filter(p => p !== player) })
+    } else if (!newGame[otherTeam].includes(player) && currentTeam.length < 2) {
+      setNewGame({ ...newGame, [team]: [...currentTeam, player] })
     }
+  }
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
-        router.push('/')
+  const togglePlayerInGame = (player: string) => {
+    const current = newGame.playersInGame
+    if (current.includes(player)) {
+      setNewGame({
+        ...newGame,
+        playersInGame: current.filter(p => p !== player),
+        winners: newGame.winners.filter(p => p !== player),
+        runnersUp: newGame.runnersUp.filter(p => p !== player),
+        losers: newGame.losers.filter(p => p !== player)
+      })
+    } else {
+      setNewGame({ ...newGame, playersInGame: [...current, player] })
     }
+  }
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-2xl">Loading...</div>
-            </div>
-        )
+  const togglePlayer = (category: 'winners' | 'runnersUp' | 'losers', player: string) => {
+    const current = newGame[category]
+    if (current.includes(player)) {
+      setNewGame({ ...newGame, [category]: current.filter(p => p !== player) })
+    } else {
+      setNewGame({ ...newGame, [category]: [...current, player] })
     }
+  }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
+
+  if (loading) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
-            <div className="max-w-6xl mx-auto mt-4">
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-                        <p className="text-slate-400">{user?.email}</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <a href="/" target="_blank" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">View Public Board</a>
-                        <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Logout</button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-slate-800 rounded-xl p-6">
-                        <div className="flex justify-between mb-6">
-                            <h2 className="text-2xl font-bold">Manage Scores</h2>
-                            <button onClick={resetAll} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">Reset All</button>
-                        </div>
-                        <div className="space-y-4">
-                            {players.map((player) => (
-                                <div key={player.id} className="bg-slate-700 rounded-lg p-4">
-                                    <div className="mb-3">
-                                        <div className="font-bold text-xl">{player.name}</div>
-                                        <div className="text-3xl font-bold text-yellow-400">{player.score}</div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={() => updateScore(player.id, 1, '+1')} className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded">+1</button>
-                                        <button onClick={() => updateScore(player.id, 5, '+5')} className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded">+5</button>
-                                        <button onClick={() => updateScore(player.id, -1, '-1')} className="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded" disabled={player.score === 0}>-1</button>
-                                        <button onClick={() => updateScore(player.id, -5, '-5')} className="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded" disabled={player.score === 0}>-5</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="bg-slate-800 rounded-xl p-6">
-                        <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                            {history.map((entry) => (
-                                <div key={entry.id} className="bg-slate-700 rounded-lg p-3">
-                                    <div className="flex justify-between mb-1">
-                                        <div className="font-semibold">{(entry as any).players?.name}</div>
-                                        <div className={`font-bold ${entry.points_changed > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {entry.points_changed > 0 ? '+' : ''}{entry.points_changed}
-                                        </div>
-                                    </div>
-                                    <div className="text-sm text-slate-400">{entry.reason}</div>
-                                    <div className="text-xs text-slate-500 mt-1">{new Date(entry.created_at).toLocaleString()}</div>
-                                </div>
-                            ))}
-                            {history.length === 0 && <div className="text-center text-slate-400 py-8">No activity yet</div>}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
     )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
+      <div className="max-w-6xl mx-auto mt-4">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-slate-400">{user?.email}</p>
+          </div>
+          <div className="flex gap-3">
+            <a href="/" target="_blank" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded flex items-center gap-2">
+              <Eye size={18} />
+              View Public
+            </a>
+            <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded flex items-center gap-2">
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-slate-800 rounded-xl p-6">
+            <h2 className="text-2xl font-bold mb-4">Add New Game</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm">Game Type</label>
+                <select
+                  value={newGame.game}
+                  onChange={(e) => setNewGame({ 
+                    ...newGame, 
+                    game: e.target.value,
+                    playersInGame: [],
+                    winners: [],
+                    runnersUp: [],
+                    losers: [],
+                    team1: [],
+                    team2: []
+                  })}
+                  className="w-full p-3 bg-slate-700 rounded-lg"
+                >
+                  {GAMES.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm">Date</label>
+                <input
+                  type="date"
+                  value={newGame.date}
+                  onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
+                  className="w-full p-3 bg-slate-700 rounded-lg"
+                />
+              </div>
+
+              {newGame.game === 'Rung' ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-2 text-sm">Team 1</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
+                        <button
+                          key={p}
+                          onClick={() => toggleTeamPlayer('team1', p)}
+                          disabled={!newGame.team1.includes(p) && (newGame.team2.includes(p) || newGame.team1.length >= 2)}
+                          className={`px-4 py-2 rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'} disabled:opacity-50`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm">Team 2</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
+                        <button
+                          key={p}
+                          onClick={() => toggleTeamPlayer('team2', p)}
+                          disabled={!newGame.team2.includes(p) && (newGame.team1.includes(p) || newGame.team2.length >= 2)}
+                          className={`px-4 py-2 rounded ${newGame.team2.includes(p) ? 'bg-green-600' : 'bg-slate-700'} disabled:opacity-50`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block mb-2 text-sm">Winning Team</label>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setNewGame({ ...newGame, winningTeam: 1 })}
+                        className={`px-6 py-3 rounded ${newGame.winningTeam === 1 ? 'bg-blue-600' : 'bg-slate-700'}`}
+                      >
+                        Team 1 ({newGame.team1.join('+') || 'Empty'})
+                      </button>
+                      <button
+                        onClick={() => setNewGame({ ...newGame, winningTeam: 2 })}
+                        className={`px-6 py-3 rounded ${newGame.winningTeam === 2 ? 'bg-green-600' : 'bg-slate-700'}`}
+                      >
+                        Team 2 ({newGame.team2.join('+') || 'Empty'})
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-slate-700/50 rounded p-3">
+                    <label className="block mb-2 text-sm text-yellow-400">Players in Game</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
+                        <button
+                          key={p}
+                          onClick={() => togglePlayerInGame(p)}
+                          className={`px-4 py-2 rounded ${newGame.playersInGame.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {newGame.playersInGame.length > 0 && (
+                    <>
+                      <div>
+                        <label className="block mb-2 text-sm">Winners</label>
+                        <div className="flex gap-2 flex-wrap mb-2">
+                          {newGame.winners.map(w => (
+                            <span key={w} className="bg-green-600 px-3 py-1 rounded flex items-center gap-2">
+                              {w} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('winners', w)} />
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
+                            <button key={p} onClick={() => togglePlayer('winners', p)} className="px-4 py-2 rounded bg-slate-700">
+                              <Plus size={16} className="inline mr-1" />{p}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block mb-2 text-sm">Runner-Up (Optional)</label>
+                        <div className="flex gap-2 flex-wrap mb-2">
+                          {newGame.runnersUp.map(r => (
+                            <span key={r} className="bg-blue-600 px-3 py-1 rounded flex items-center gap-2">
+                              {r} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('runnersUp', r)} />
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
+                            <button key={p} onClick={() => togglePlayer('runnersUp', p)} className="px-4 py-2 rounded bg-slate-700">
+                              <Plus size={16} className="inline mr-1" />{p}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block mb-2 text-sm">Losers</label>
+                        <div className="flex gap-2 flex-wrap mb-2">
+                          {newGame.losers.map(l => (
+                            <span key={l} className="bg-red-600 px-3 py-1 rounded flex items-center gap-2">
+                              {l} <X size={16} className="cursor-pointer" onClick={() => togglePlayer('losers', l)} />
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {newGame.playersInGame.filter(p => !newGame.winners.includes(p) && !newGame.runnersUp.includes(p) && !newGame.losers.includes(p)).map(p => (
+                            <button key={p} onClick={() => togglePlayer('losers', p)} className="px-4 py-2 rounded bg-slate-700">
+                              <Plus size={16} className="inline mr-1" />{p}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <button
+                onClick={addGame}
+                className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded font-bold"
+              >
+                Add Game Result
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-slate-800 rounded-xl p-6">
+            <h2 className="text-2xl font-bold mb-4">Recent Games ({games.length})</h2>
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {games.map(game => (
+                <div key={game.id} className="bg-slate-700 rounded-lg p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="font-bold">{game.game_type}</div>
+                      <div className="text-sm text-slate-400">{new Date(game.game_date).toLocaleDateString()}</div>
+                    </div>
+                    <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300">
+                      <X size={20} />
+                    </button>
+                  </div>
+                  {game.game_type === 'Rung' ? (
+                    <div className="text-sm">
+                      <div className="text-green-400">Winners: {(game.winning_team === 1 ? game.team1 : game.team2)?.join(' + ')}</div>
+                      <div className="text-red-400">Losers: {(game.winning_team === 1 ? game.team2 : game.team1)?.join(' + ')}</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm space-y-1">
+                      {game.winners && <div className="text-green-400">Winners: {game.winners.join(', ')}</div>}
+                      {game.runners_up && game.runners_up.length > 0 && <div className="text-blue-400">Runner-Up: {game.runners_up.join(', ')}</div>}
+                      {game.losers && <div className="text-red-400">Losers: {game.losers.join(', ')}</div>}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
