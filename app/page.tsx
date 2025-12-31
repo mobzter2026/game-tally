@@ -63,7 +63,7 @@ export default function PublicView() {
       .map(p => ({
         player: p,
         ...stats[p],
-        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(1) : '0'
+        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
       }))
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
@@ -79,18 +79,20 @@ export default function PublicView() {
         const team2Key = [...game.team2].sort().join(' + ')
         
         // Initialize stats if needed
-        if (!teamStats[team1Key]) teamStats[team1Key] = { gamesPlayed: 0, wins: 0 }
-        if (!teamStats[team2Key]) teamStats[team2Key] = { gamesPlayed: 0, wins: 0 }
+        if (!teamStats[team1Key]) teamStats[team1Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
+        if (!teamStats[team2Key]) teamStats[team2Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
         
         // Count games
         teamStats[team1Key].gamesPlayed++
         teamStats[team2Key].gamesPlayed++
         
-        // Count wins
+        // Count wins and losses
         if (game.winning_team === 1) {
           teamStats[team1Key].wins++
+          teamStats[team2Key].losses++
         } else {
           teamStats[team2Key].wins++
+          teamStats[team1Key].losses++
         }
       }
     })
@@ -99,7 +101,7 @@ export default function PublicView() {
       .map(([team, stats]: [string, any]) => ({
         team,
         ...stats,
-        winRate: stats.gamesPlayed > 0 ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(1) : '0'
+        winRate: stats.gamesPlayed > 0 ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(0) : '0'
       }))
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
@@ -137,7 +139,7 @@ export default function PublicView() {
       .map(p => ({
         player: p,
         ...stats[p],
-        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(1) : '0'
+        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
       }))
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
@@ -163,7 +165,7 @@ export default function PublicView() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
-      <div className="max-w-4xl mx-auto mt-8">
+      <div className="max-w-5xl mx-auto mt-8">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold mb-3">🏆 Live Leaderboard</h1>
           <p className="text-slate-300 text-lg">Game Rankings</p>
@@ -218,6 +220,7 @@ export default function PublicView() {
                     <th className="text-left p-4">Player</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
+                    <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
                   </tr>
                 </thead>
@@ -228,6 +231,7 @@ export default function PublicView() {
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                      <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
                     </tr>
                   ))}
@@ -252,6 +256,7 @@ export default function PublicView() {
                     <th className="text-left p-4">Team</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
+                    <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
                   </tr>
                 </thead>
@@ -262,6 +267,7 @@ export default function PublicView() {
                       <td className="p-4 font-bold text-xl">{team.team}</td>
                       <td className="text-center p-4">{team.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
+                      <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
                     </tr>
                   ))}
@@ -286,6 +292,7 @@ export default function PublicView() {
                     <th className="text-left p-4">Player</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
+                    <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
                   </tr>
                 </thead>
@@ -296,6 +303,7 @@ export default function PublicView() {
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                      <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
                     </tr>
                   ))}
