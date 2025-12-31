@@ -180,27 +180,44 @@ export default function ScoringPage() {
         return b[1] - a[1]
       })
 
-    // Winner is first
-    const winners = [sortedPlayers[0][0]]
-    
-    // Runner-up is second (if exists and not tied with winner)
-    const runnersUp = sortedPlayers.length > 1 && sortedPlayers[1][1] !== sortedPlayers[0][1]
-      ? [sortedPlayers[1][0]] 
-      : []
-    
-    // Loser is last (if exists and not tied)
-    const losers = sortedPlayers.length > 2 && sortedPlayers[sortedPlayers.length - 1][1] !== sortedPlayers[sortedPlayers.length - 2][1]
-      ? [sortedPlayers[sortedPlayers.length - 1][0]] 
-      : []
+    // Get unique scores in order
+    const uniqueScores = [...new Set(sortedPlayers.map(([_, score]) => score))].sort((a, b) => {
+      if (activeSession.game_type === 'Shithead') {
+        return a - b
+      }
+      return b - a
+    })
+
+    // Winners: all players with the best score
+    const bestScore = uniqueScores[0]
+    const winners = sortedPlayers.filter(([_, score]) => score === bestScore).map(([player, _]) => player)
+
+    // Runners-up: all players with the second-best score (if exists and different from best)
+    let runnersUp: string[] = []
+    if (uniqueScores.length > 1) {
+      const secondScore = uniqueScores[1]
+      runnersUp = sortedPlayers.filter(([_, score]) => score === secondScore).map(([player, _]) => player)
+    }
+
+    // Losers: all players with the worst score (if more than 2 unique scores)
+    let losers: string[] = []
+    if (uniqueScores.length > 2) {
+      const worstScore = uniqueScores[uniqueScores.length - 1]
+      losers = sortedPlayers.filter(([_, score]) => score === worstScore).map(([player, _]) => player)
+    } else if (uniqueScores.length === 2 && winners.length === 1) {
+      // If only 2 unique scores and 1 winner, everyone else is a loser
+      losers = sortedPlayers.filter(([player, _]) => !winners.includes(player)).map(([player, _]) => player)
+      runnersUp = [] // Clear runner-ups in this case
+    }
 
     // Create final game record
     await (supabase.from('games').insert as any)({
       game_type: activeSession.game_type,
       game_date: activeSession.game_date,
       players_in_game: activeSession.players,
-      winners: winners,
-      runners_up: runnersUp,
-      losers: losers,
+      winners: winners.length > 0 ? winners : null,
+      runners_up: runnersUp.length > 0 ? runnersUp : null,
+      losers: losers.length > 0 ? losers : null,
       session_id: activeSession.id,
       created_by: user?.email
     })
@@ -209,7 +226,8 @@ export default function ScoringPage() {
     await (supabase.from('game_sessions').update as any)({ status: 'completed' })
       .eq('id', activeSession.id)
 
-    alert(`Game Over! 🏆 Winner: ${winners[0]} (${scores[winners[0]]} points)`)
+    const winnerNames = winners.join(', ')
+    alert(`Game Over! 🏆 Winner(s): ${winnerNames} (${bestScore} points)`)
     setActiveSession(null)
     setRounds([])
     setScores({})
