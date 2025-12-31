@@ -222,6 +222,11 @@ export default function PublicView() {
   
   const topStreak = topStreakEntry ? { player: topStreakEntry[0], streak: topStreakEntry[1].current } : null
 
+  // Get recent games based on active tab
+  const recentGames = activeTab === 'individual' 
+    ? games.filter(g => g.game_type !== 'Rung').slice(0, 20)
+    : games.filter(g => g.game_type === 'Rung').slice(0, 20)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-5xl mx-auto mt-8">
@@ -230,7 +235,7 @@ export default function PublicView() {
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
           {/* Hot Streak Banner */}
-          {topStreak && topStreak.streak >= 2 && (
+          {topStreak && topStreak.streak >= 3 && (
             <div className="mt-4 inline-block bg-gradient-to-r from-orange-600 to-red-600 px-6 py-2 rounded-full animate-pulse">
               <span className="text-xl font-bold">🔥 {topStreak.player} is on a {topStreak.streak} game win streak! 🔥</span>
             </div>
@@ -389,19 +394,45 @@ export default function PublicView() {
           </div>
         )}
 
-        {/* Recent Games - Compact History */}
+        {/* Recent Games - 2 Column Layout */}
         <div className="bg-slate-800 rounded-xl p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">📜 Recent Games</h2>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {games.filter(g => g.game_type !== 'Rung').slice(0, 20).map(game => (
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">📜 Recent Games</h2>
+            <div className="text-sm text-slate-400">
+              <span className="inline-block bg-green-600 px-2 py-0.5 rounded mr-2">Winner</span>
+              <span className="inline-block bg-blue-600 px-2 py-0.5 rounded mr-2">2nd</span>
+              <span className="inline-block bg-red-600 px-2 py-0.5 rounded mr-2">Loser</span>
+              <span className="inline-block bg-slate-600 px-2 py-0.5 rounded">Survived</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recentGames.map(game => (
               <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                <div className="text-slate-400 text-sm mb-2">{game.game_type} {game.game_type === 'Shithead' ? '💩' : ''} • {new Date(game.game_date).toLocaleDateString()}</div>
+                <div className="text-slate-400 text-sm mb-2">
+                  {game.game_type} {game.game_type === 'Shithead' ? '💩' : ''} • {new Date(game.game_date).toLocaleDateString()}
+                </div>
                 <div className="flex gap-1 flex-wrap">
-                  {game.players_in_game?.map(player => (
-                    <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                      {player}
-                    </span>
-                  ))}
+                  {game.game_type === 'Rung' ? (
+                    <>
+                      {game.team1?.map(player => (
+                        <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                          {player}
+                        </span>
+                      ))}
+                      <span className="text-slate-400 px-2">vs</span>
+                      {game.team2?.map(player => (
+                        <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                          {player}
+                        </span>
+                      ))}
+                    </>
+                  ) : (
+                    game.players_in_game?.map(player => (
+                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                        {player}
+                      </span>
+                    ))
+                  )}
                 </div>
               </div>
             ))}
