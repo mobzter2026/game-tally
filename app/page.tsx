@@ -157,7 +157,7 @@ export default function PublicView() {
   }
 
   const getStreaks = () => {
-    const streaks: any = {}
+    const streaks: Record<string, { current: number; best: number; type: string }> = {}
     PLAYERS.forEach(p => {
       streaks[p] = { current: 0, best: 0, type: '' }
     })
@@ -216,9 +216,11 @@ export default function PublicView() {
   const streaks = getStreaks()
 
   // Get top streak
-  const topStreak = Object.entries(streaks)
-    .filter(([_, s]: [string, any]) => s.current > 0)
-    .sort((a: any, b: any) => b[1].current - a[1].current)[0]
+  const topStreakEntry = Object.entries(streaks)
+    .filter(([_, s]) => s.current > 0)
+    .sort((a, b) => b[1].current - a[1].current)[0]
+  
+  const topStreak = topStreakEntry ? { player: topStreakEntry[0], streak: topStreakEntry[1].current } : null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
@@ -228,9 +230,9 @@ export default function PublicView() {
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
           {/* Hot Streak Banner */}
-          {topStreak && topStreak[1].current >= 2 && (
+          {topStreak && topStreak.streak >= 2 && (
             <div className="mt-4 inline-block bg-gradient-to-r from-orange-600 to-red-600 px-6 py-2 rounded-full animate-pulse">
-              <span className="text-xl font-bold">🔥 {topStreak[0]} is on a {topStreak[1].current} game win streak! 🔥</span>
+              <span className="text-xl font-bold">🔥 {topStreak.player} is on a {topStreak.streak} game win streak! 🔥</span>
             </div>
           )}
         </div>
