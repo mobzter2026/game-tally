@@ -187,9 +187,7 @@ export default function ScoringPage() {
     })
 
     // Mark session as completed
-    await supabase
-      .from('game_sessions')
-      .update({ status: 'completed' })
+    await (supabase.from('game_sessions').update as any)({ status: 'completed' })
       .eq('id', activeSession.id)
 
     alert(`Game Over! Winner: ${winners[0]}`)
