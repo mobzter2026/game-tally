@@ -145,7 +145,7 @@ export default function AdminDashboard() {
         return
       }
 
-      const gameData: GameInsert = {
+      const gameData: any = {
         game_type: newGame.type,
         game_date: newGame.date,
         team1: newGame.team1,
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
         return
       }
 
-      const gameData: GameInsert = {
+      const gameData: any = {
         game_type: newGame.type,
         game_date: newGame.date,
         players_in_game: newGame.players,
