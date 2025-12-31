@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 
-const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
+const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 
 export default function PublicView() {
   const [games, setGames] = useState<Game[]>([])
@@ -45,9 +45,17 @@ export default function PublicView() {
 
     const individualGames = games.filter(g => g.game_type !== 'Rung')
     individualGames.forEach(game => {
-      if (game.winners) game.winners.forEach(w => { stats[w].gamesPlayed++; stats[w].wins++ })
-      if (game.runners_up) game.runners_up.forEach(r => { stats[r].gamesPlayed++; stats[r].runnerUps++ })
-      if (game.losers) game.losers.forEach(l => { stats[l].gamesPlayed++; stats[l].losses++ })
+      // Count games played for all players in the game
+      if (game.players_in_game) {
+        game.players_in_game.forEach(p => { 
+          if (stats[p]) stats[p].gamesPlayed++ 
+        })
+      }
+      
+      // Then count their specific results
+      if (game.winners) game.winners.forEach(w => { if (stats[w]) stats[w].wins++ })
+      if (game.runners_up) game.runners_up.forEach(r => { if (stats[r]) stats[r].runnerUps++ })
+      if (game.losers) game.losers.forEach(l => { if (stats[l]) stats[l].losses++ })
     })
 
     return PLAYERS
