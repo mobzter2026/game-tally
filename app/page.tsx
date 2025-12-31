@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
-const MIN_GAMES_FOR_RANKING = 0  // Changed from 5 to 0 to show rankings immediately
+const MIN_GAMES_FOR_RANKING = 0
 
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
@@ -15,6 +15,8 @@ const GAME_EMOJIS: Record<string, string> = {
   'Rung': '🎴'
 }
 
+const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
+
 export default function PublicView() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,6 +25,7 @@ export default function PublicView() {
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [showFilter, setShowFilter] = useState(false)
+  const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const supabase = createClient()
 
   useEffect(() => {
@@ -105,24 +108,32 @@ export default function PublicView() {
   }
 
   const getFilteredGames = () => {
-    if (selectedPlayers.length === 0) return games
+    let filtered = games
 
-    return games.filter(game => {
-      if (game.game_type === 'Rung') {
-        const allPlayers = [...(game.team1 || []), ...(game.team2 || [])]
-        return allPlayers.length === selectedPlayers.length && 
-               selectedPlayers.every(p => allPlayers.includes(p))
-      } else {
-        const gamePlayers = game.players_in_game || []
-        return gamePlayers.length === selectedPlayers.length && 
-               selectedPlayers.every(p => gamePlayers.includes(p))
-      }
-    })
+    if (selectedPlayers.length > 0) {
+      filtered = filtered.filter(game => {
+        if (game.game_type === 'Rung') {
+          const allPlayers = [...(game.team1 || []), ...(game.team2 || [])]
+          return allPlayers.length === selectedPlayers.length && 
+                 selectedPlayers.every(p => allPlayers.includes(p))
+        } else {
+          const gamePlayers = game.players_in_game || []
+          return gamePlayers.length === selectedPlayers.length && 
+                 selectedPlayers.every(p => gamePlayers.includes(p))
+        }
+      })
+    }
+
+    if (selectedGameType !== 'All Games' && selectedGameType !== 'Each Game') {
+      filtered = filtered.filter(g => g.game_type === selectedGameType)
+    }
+
+    return filtered
   }
 
   const filteredGames = getFilteredGames()
 
-  const getPlayerStats = () => {
+  const getPlayerStatsForGame = (gameType?: string) => {
     const stats: any = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
     
@@ -130,7 +141,11 @@ export default function PublicView() {
       stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
     })
 
-    const individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
+    let individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
+    if (gameType) {
+      individualGames = individualGames.filter(g => g.game_type === gameType)
+    }
+
     individualGames.forEach(game => {
       if (game.players_in_game) {
         game.players_in_game.forEach(p => { 
@@ -189,6 +204,8 @@ export default function PublicView() {
       .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
   }
+
+  const getPlayerStats = () => getPlayerStatsForGame()
 
   const getRungTeamStats = () => {
     const teamStats: any = {}
@@ -377,7 +394,6 @@ export default function PublicView() {
           )}
         </div>
 
-        {/* Player Filter */}
         <div className="mb-6 bg-slate-800 rounded-xl p-4">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-bold">Filter by Players</h3>
@@ -468,93 +484,148 @@ export default function PublicView() {
 
         {activeTab === 'individual' && (
           <>
-            <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
-                <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700 bg-slate-900">
-                      <th className="text-center p-4 w-20">Rank</th>
-                      <th className="text-left p-4">Player</th>
-                      <th className="text-center p-4">Games</th>
-                      <th className="text-center p-4">Wins</th>
-                      <th className="text-center p-4">2nd</th>
-                      <th className="text-center p-4">Losses</th>
-                      <th className="text-center p-4">💩</th>
-                      <th className="text-center p-4">Win Rate</th>
-                      <th className="text-center p-4">🔥 Best</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {playerStats.length === 0 ? (
-                      <tr>
-                        <td colSpan={9} className="text-center p-8 text-slate-400">
-                          No games played yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      playerStats.map((player, idx) => (
-                        <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                          <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
-                          <td className="p-4 font-bold text-xl">{player.player}</td>
-                          <td className="text-center p-4">{player.gamesPlayed}</td>
-                          <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                          <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-                          <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                          <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
-                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                          <td className="text-center p-4">
-                            {player.bestStreak > 0 ? (
-                              <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
-                            ) : (
-                              <span className="text-slate-500">-</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="bg-slate-800 rounded-xl p-6 mb-8">
-              <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <h2 className="text-2xl font-bold">📜 Recent Games</h2>
-                <div className="text-sm">
-                  <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
-                  <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
-                  <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survived</span>
-                  <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recentGames.length === 0 ? (
-                  <div className="col-span-2 text-center p-8 text-slate-400">
-                    No games found with selected filter
-                  </div>
-                ) : (
-                  recentGames.map(game => (
-                    <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                      <div className="text-slate-300 text-base font-bold mb-2">
-                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+            {selectedGameType === 'Each Game' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {INDIVIDUAL_GAMES.map(gameType => {
+                  const gameStats = getPlayerStatsForGame(gameType).slice(0, 3)
+                  return (
+                    <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
+                      <div className="p-4 border-b border-slate-700 bg-slate-900">
+                        <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
+                        <p className="text-slate-400 text-xs mt-1">Top 3 Players</p>
                       </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {sortPlayersInGame(game).map(player => (
-                          <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                            {player}
-                          </span>
-                        ))}
+                      <div className="p-4">
+                        {gameStats.length === 0 ? (
+                          <div className="text-center text-slate-400 py-4">No games played</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {gameStats.map((player, idx) => (
+                              <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{getMedal(gameStats, idx, (p) => p.winRate)}</span>
+                                  <span className="font-bold">{player.player}</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
+                                  <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))
-                )}
+                  )
+                })}
               </div>
-            </div>
+            ) : (
+              <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
+                <div className="p-6 border-b border-slate-700">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
+                      <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                      <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
+                    </div>
+                    <div>
+                      <select
+                        value={selectedGameType}
+                        onChange={(e) => setSelectedGameType(e.target.value)}
+                        className="px-3 py-2 bg-slate-700 rounded text-sm"
+                      >
+                        <option value="All Games">All Games</option>
+                        <option value="Each Game">Each Game</option>
+                        {INDIVIDUAL_GAMES.map(game => (
+                          <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-700 bg-slate-900">
+                        <th className="text-center p-4 w-20">Rank</th>
+                        <th className="text-left p-4">Player</th>
+                        <th className="text-center p-4">Games</th>
+                        <th className="text-center p-4">Wins</th>
+                        <th className="text-center p-4">2nd</th>
+                        <th className="text-center p-4">Losses</th>
+                        <th className="text-center p-4">💩</th>
+                        <th className="text-center p-4">Win Rate</th>
+                        <th className="text-center p-4">🔥 Best</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {playerStats.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="text-center p-8 text-slate-400">
+                            No games played yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        playerStats.map((player, idx) => (
+                          <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
+                            <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
+                            <td className="p-4 font-bold text-xl">{player.player}</td>
+                            <td className="text-center p-4">{player.gamesPlayed}</td>
+                            <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                            <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+                            <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                            <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
+                            <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                            <td className="text-center p-4">
+                              {player.bestStreak > 0 ? (
+                                <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
+                              ) : (
+                                <span className="text-slate-500">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {selectedGameType !== 'Each Game' && (
+              <div className="bg-slate-800 rounded-xl p-6 mb-8">
+                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                  <h2 className="text-2xl font-bold">📜 Recent Games</h2>
+                  <div className="text-sm">
+                    <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
+                    <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
+                    <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survived</span>
+                    <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recentGames.length === 0 ? (
+                    <div className="col-span-2 text-center p-8 text-slate-400">
+                      No games found with selected filter
+                    </div>
+                  ) : (
+                    recentGames.map(game => (
+                      <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                        <div className="text-slate-300 text-base font-bold mb-2">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        </div>
+                        <div className="flex gap-1 flex-wrap">
+                          {sortPlayersInGame(game).map(player => (
+                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                              {player}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
 
