@@ -459,7 +459,7 @@ export default function ScoringPage() {
                         </div>
                       </div>
                       <span className={`px-3 py-1 rounded text-sm ml-2 ${session.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}`}>
-                        {session.status}
+                        {session.status === 'completed' ? 'Game Over' : session.status}
                       </span>
                     </div>
                   </div>
