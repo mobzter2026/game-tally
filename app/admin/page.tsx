@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Game, GameInsert } from '@/lib/types'
 
-const PLAYERS = ['R', 'M', 'T', 'S', 'F', 'Y']
+const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung']
 
 export default function AdminDashboard() {
@@ -389,4 +389,3 @@ export default function AdminDashboard() {
     </div>
   )
 }
-
