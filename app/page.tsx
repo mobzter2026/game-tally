@@ -226,7 +226,7 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-5xl mx-auto mt-8">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-3">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 whitespace-nowrap">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
           {/* Hot Streak Banner */}
