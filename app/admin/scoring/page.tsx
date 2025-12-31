@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { GameSession, Round } from '@/lib/types'
+import type { GameSession, GameSessionInsert, Round, RoundInsert } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Shithead']
@@ -98,16 +98,16 @@ export default function ScoringPage() {
       return
     }
 
-    const { data, error } = await supabase
-      .from('game_sessions')
-      .insert({
-        game_type: newSession.game,
-        game_date: newSession.date,
-        players: newSession.players,
-        win_threshold: newSession.threshold,
-        status: 'in_progress',
-        created_by: user?.email
-      })
+    const sessionData: GameSessionInsert = {
+      game_type: newSession.game,
+      game_date: newSession.date,
+      players: newSession.players,
+      win_threshold: newSession.threshold,
+      status: 'in_progress',
+      created_by: user?.email ?? null
+    }
+
+    const { data, error } = await (supabase.from('game_sessions').insert as any)(sessionData)
       .select()
       .single()
 
@@ -128,13 +128,13 @@ export default function ScoringPage() {
 
     const roundNumber = rounds.length + 1
 
-    await supabase
-      .from('rounds')
-      .insert({
-        session_id: activeSession.id,
-        round_number: roundNumber,
-        winner: winner
-      })
+    const roundData: RoundInsert = {
+      session_id: activeSession.id,
+      round_number: roundNumber,
+      winner: winner
+    }
+
+    await (supabase.from('rounds').insert as any)(roundData)
 
     fetchRounds(activeSession.id)
 
