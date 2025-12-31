@@ -180,6 +180,7 @@ export default function AdminDashboard() {
             <p className="text-slate-400">{user?.email}</p>
           </div>
           <div className="flex gap-3">
+            <a href="/admin/scoring" className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">🎯 Live Scoring</a>
             <a href="/" target="_blank" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">👁️ View Public</a>
             <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">🚪 Logout</button>
           </div>
@@ -187,7 +188,8 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-slate-800 rounded-xl p-6">
-            <h2 className="text-2xl font-bold mb-4">Add New Game</h2>
+            <h2 className="text-2xl font-bold mb-4">Add New Game (Quick Entry)</h2>
+            <p className="text-sm text-slate-400 mb-4">For round-based games (Monopoly, Tai Ti, Shithead), use 🎯 Live Scoring instead!</p>
             
             <div className="space-y-4">
               <div>
@@ -206,7 +208,7 @@ export default function AdminDashboard() {
                   })}
                   className="w-full p-3 bg-slate-700 rounded-lg"
                 >
-                  {GAMES.map(g => <option key={g} value={g}>{g}</option>)}
+                  {GAMES.map(g => <option key={g} value={g}>{g} {g === 'Shithead' ? '💩' : ''}</option>)}
                 </select>
               </div>
 
@@ -363,7 +365,7 @@ export default function AdminDashboard() {
                 <div key={game.id} className="bg-slate-700 rounded-lg p-3">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="font-bold">{game.game_type}</div>
+                      <div className="font-bold">{game.game_type} {game.game_type === 'Shithead' ? '💩' : ''}</div>
                       <div className="text-sm text-slate-400">{new Date(game.game_date).toLocaleDateString()}</div>
                     </div>
                     <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300">❌</button>
