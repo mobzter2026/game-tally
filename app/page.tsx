@@ -156,11 +156,50 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
+  const getStreaks = () => {
+    const streaks: any = {}
+    PLAYERS.forEach(p => {
+      streaks[p] = { current: 0, best: 0, type: '' }
+    })
+
+    const individualGames = [...games].filter(g => g.game_type !== 'Rung').reverse()
+    
+    individualGames.forEach(game => {
+      PLAYERS.forEach(player => {
+        if (game.winners?.includes(player)) {
+          if (streaks[player].type === 'win') {
+            streaks[player].current++
+          } else {
+            streaks[player].current = 1
+            streaks[player].type = 'win'
+          }
+          if (streaks[player].current > streaks[player].best) {
+            streaks[player].best = streaks[player].current
+          }
+        } else if (game.players_in_game?.includes(player)) {
+          if (streaks[player].type === 'win') {
+            streaks[player].current = 0
+            streaks[player].type = ''
+          }
+        }
+      })
+    })
+
+    return streaks
+  }
+
   const getMedal = (idx: number) => {
     if (idx === 0) return '🥇'
     if (idx === 1) return '🥈'
     if (idx === 2) return '🥉'
     return `${idx + 1}`
+  }
+
+  const getPlayerBadgeColor = (game: Game, player: string) => {
+    if (game.winners?.includes(player)) return 'bg-green-600'
+    if (game.runners_up?.includes(player)) return 'bg-blue-600'
+    if (game.losers?.includes(player)) return 'bg-red-600'
+    return 'bg-slate-600'
   }
 
   if (loading) {
@@ -174,6 +213,12 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
   const rungPlayerStats = getRungPlayerStats()
+  const streaks = getStreaks()
+
+  // Get top streak
+  const topStreak = Object.entries(streaks)
+    .filter(([_, s]: [string, any]) => s.current > 0)
+    .sort((a: any, b: any) => b[1].current - a[1].current)[0]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
@@ -181,6 +226,13 @@ export default function PublicView() {
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold mb-3">🏆 Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
+          
+          {/* Hot Streak Banner */}
+          {topStreak && topStreak[1].current >= 2 && (
+            <div className="mt-4 inline-block bg-gradient-to-r from-orange-600 to-red-600 px-6 py-2 rounded-full animate-pulse">
+              <span className="text-xl font-bold">🔥 {topStreak[0]} is on a {topStreak[1].current} game win streak! 🔥</span>
+            </div>
+          )}
         </div>
 
         {/* Tab Navigation */}
@@ -235,6 +287,7 @@ export default function PublicView() {
                     <th className="text-center p-4">2nd</th>
                     <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
+                    <th className="text-center p-4">🔥 Streak</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,6 +300,13 @@ export default function PublicView() {
                       <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
                       <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                      <td className="text-center p-4">
+                        {streaks[player.player].current > 0 ? (
+                          <span className="text-orange-400 font-bold">{streaks[player.player].current}W</span>
+                        ) : (
+                          <span className="text-slate-500">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -338,7 +398,14 @@ export default function PublicView() {
               {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
                 <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
                   <div className="font-semibold text-green-300">{game.winners?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="flex gap-1 flex-wrap">
+                    {game.players_in_game?.map(player => (
+                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
+                        {player}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -353,7 +420,14 @@ export default function PublicView() {
               {games.filter(g => g.game_type !== 'Rung' && g.runners_up && g.runners_up.length > 0).slice(0, 10).map(game => (
                 <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
                   <div className="font-semibold text-blue-300">{game.runners_up?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="flex gap-1 flex-wrap">
+                    {game.players_in_game?.map(player => (
+                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
+                        {player}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -368,7 +442,14 @@ export default function PublicView() {
               {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
                 <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
                   <div className="font-semibold text-red-300">{game.losers?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
+                  <div className="flex gap-1 flex-wrap">
+                    {game.players_in_game?.map(player => (
+                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
+                        {player}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
