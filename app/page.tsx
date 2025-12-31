@@ -41,7 +41,7 @@ export default function PublicView() {
   const getPlayerStats = () => {
     const stats: any = {}
     PLAYERS.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0 }
+      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0 }
     })
 
     const individualGames = games.filter(g => g.game_type !== 'Rung')
@@ -53,19 +53,31 @@ export default function PublicView() {
         })
       }
       
-      // Then count their specific results
-      if (game.winners) game.winners.forEach(w => { if (stats[w]) stats[w].wins++ })
-      if (game.runners_up) game.runners_up.forEach(r => { if (stats[r]) stats[r].runnerUps++ })
-      if (game.losers) game.losers.forEach(l => { if (stats[l]) stats[l].losses++ })
+      // Count their specific results
+      if (game.winners) game.winners.forEach(w => { 
+        if (stats[w]) {
+          stats[w].wins++
+          stats[w].weightedWins += 1
+        }
+      })
+      if (game.runners_up) game.runners_up.forEach(r => { 
+        if (stats[r]) {
+          stats[r].runnerUps++
+          stats[r].weightedWins += 0.25
+        }
+      })
+      if (game.losers) game.losers.forEach(l => { 
+        if (stats[l]) stats[l].losses++ 
+      })
     })
 
     return PLAYERS
       .map(p => ({
         player: p,
         ...stats[p],
-        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
+        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].weightedWins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
       }))
-      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
+      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
   }
 
   const getRungTeamStats = () => {
@@ -210,7 +222,7 @@ export default function PublicView() {
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
               <h2 className="text-2xl font-bold">Individual Games Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Blackjack, Monopoly, Tai Ti, Shithead</p>
+              <p className="text-slate-400 text-sm mt-1">Blackjack, Monopoly, Tai Ti, Shithead • Runner-ups earn 25% credit</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -220,6 +232,7 @@ export default function PublicView() {
                     <th className="text-left p-4">Player</th>
                     <th className="text-center p-4">Games</th>
                     <th className="text-center p-4">Wins</th>
+                    <th className="text-center p-4">2nd</th>
                     <th className="text-center p-4">Losses</th>
                     <th className="text-center p-4">Win Rate</th>
                   </tr>
@@ -231,6 +244,7 @@ export default function PublicView() {
                       <td className="p-4 font-bold text-xl">{player.player}</td>
                       <td className="text-center p-4">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                      <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
                       <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
                     </tr>
@@ -342,9 +356,6 @@ export default function PublicView() {
                   <div className="text-slate-400 text-xs">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
                 </div>
               ))}
-              {games.filter(g => g.game_type !== 'Rung' && g.runners_up && g.runners_up.length > 0).length === 0 && (
-                <div className="text-slate-500 text-sm text-center py-4">No runners-up yet</div>
-              )}
             </div>
           </div>
 
