@@ -389,72 +389,22 @@ export default function PublicView() {
           </div>
         )}
 
-        {/* Recent Games - 3 Column Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* Winners Column */}
-          <div className="bg-slate-800 rounded-xl p-4">
-            <h3 className="text-lg font-bold mb-3 text-green-400 flex items-center gap-2">
-              🏆 Recent Winners
-            </h3>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
-                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
-                  <div className="font-semibold text-green-300">{game.winners?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
-                  <div className="flex gap-1 flex-wrap">
-                    {game.players_in_game?.map(player => (
-                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
-                        {player}
-                      </span>
-                    ))}
-                  </div>
+        {/* Recent Games - Compact History */}
+        <div className="bg-slate-800 rounded-xl p-6 mb-8">
+          <h2 className="text-2xl font-bold mb-4">📜 Recent Games</h2>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {games.filter(g => g.game_type !== 'Rung').slice(0, 20).map(game => (
+              <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                <div className="text-slate-400 text-sm mb-2">{game.game_type} {game.game_type === 'Shithead' ? '💩' : ''} • {new Date(game.game_date).toLocaleDateString()}</div>
+                <div className="flex gap-1 flex-wrap">
+                  {game.players_in_game?.map(player => (
+                    <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                      {player}
+                    </span>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Runners-Up Column */}
-          <div className="bg-slate-800 rounded-xl p-4">
-            <h3 className="text-lg font-bold mb-3 text-blue-400 flex items-center gap-2">
-              🥈 Recent Runners-Up
-            </h3>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {games.filter(g => g.game_type !== 'Rung' && g.runners_up && g.runners_up.length > 0).slice(0, 10).map(game => (
-                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
-                  <div className="font-semibold text-blue-300">{game.runners_up?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
-                  <div className="flex gap-1 flex-wrap">
-                    {game.players_in_game?.map(player => (
-                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
-                        {player}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Losers Column */}
-          <div className="bg-slate-800 rounded-xl p-4">
-            <h3 className="text-lg font-bold mb-3 text-red-400 flex items-center gap-2">
-              💀 Recent Losers
-            </h3>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {games.filter(g => g.game_type !== 'Rung').slice(0, 10).map(game => (
-                <div key={game.id} className="bg-slate-700/50 rounded p-2 text-sm">
-                  <div className="font-semibold text-red-300">{game.losers?.join(', ')}</div>
-                  <div className="text-slate-400 text-xs mb-1">{game.game_type} • {new Date(game.game_date).toLocaleDateString()}</div>
-                  <div className="flex gap-1 flex-wrap">
-                    {game.players_in_game?.map(player => (
-                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-0.5 rounded text-xs`}>
-                        {player}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
