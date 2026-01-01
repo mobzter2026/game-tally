@@ -430,24 +430,14 @@ export default function PublicView() {
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Filter by Players</h3>
               <div className="flex gap-2">
-            {showFilter && (
-              <div className="grid grid-cols-6 gap-2">
-                {PLAYERS.map(player => (
+                {showFilter && (
                   <button
-                    key={player}
-                    onClick={() => togglePlayerFilter(player)}
-                    className={`px-4 py-2 rounded transition ${
-                      selectedPlayers.includes(player)
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
+                    onClick={selectAllPlayers}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                   >
-                    <div>{player}</div>
-                    {selectedPlayers.includes(player) && <div className="text-xs mt-1">✓</div>}
+                    Select All
                   </button>
-                ))}
-              </div>
-            )}
+                )}
                 {selectedPlayers.length > 0 && (
                   <button
                     onClick={clearFilter}
@@ -465,7 +455,7 @@ export default function PublicView() {
               </div>
             </div>
             
-           {showFilter && (
+            {showFilter && (
               <div className="grid grid-cols-6 gap-2">
                 {PLAYERS.map(player => (
                   <button
@@ -479,18 +469,6 @@ export default function PublicView() {
                   >
                     <div className="text-sm">{player}</div>
                     {selectedPlayers.includes(player) && <div className="text-xs mt-1">✓</div>}
-                  </button>
-                ))}
-              </div>
-            )}
-                    className={`px-4 py-2 rounded transition ${
-                      selectedPlayers.includes(player)
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    {selectedPlayers.includes(player) && '✓ '}
-                    {player}
                   </button>
                 ))}
               </div>
