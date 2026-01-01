@@ -584,7 +584,7 @@ export default function PublicView() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column */}
                     <div>
-                      <h2 className="text-2xl font-bold mb-3">The Friendship Ruiner League</h2>
+                      <h2 className="text-2xl font-bold mb-3">The Ultimate Backstab Board 🔪</h2>
                       <div className="flex gap-2 mb-3">
                         <button
                           onClick={() => setHallView('fame')}
