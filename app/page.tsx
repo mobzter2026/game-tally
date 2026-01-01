@@ -27,6 +27,7 @@ export default function PublicView() {
   const [showFilter, setShowFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
+  const [previousRankings, setPreviousRankings] = useState<Record<string, number>>({})
   const supabase = createClient()
 
   useEffect(() => {
@@ -43,6 +44,40 @@ export default function PublicView() {
       supabase.removeChannel(channel)
     }
   }, [])
+
+  useEffect(() => {
+    // Load previous rankings from localStorage
+    const stored = localStorage.getItem('playerRankings')
+    if (stored) {
+      setPreviousRankings(JSON.parse(stored))
+    }
+  }, [])
+
+  useEffect(() => {
+    // Update rankings when games change
+    if (games.length > 0 && activeTab === 'individual' && hallView === 'none' && selectedGameType === 'All Games' && selectedPlayers.length === 0) {
+      const stats = getPlayerStats()
+      const currentRankings: Record<string, number> = {}
+      stats.forEach((player, idx) => {
+        currentRankings[player.player] = idx + 1
+      })
+      
+      // Store current rankings for next comparison
+      const stored = localStorage.getItem('playerRankings')
+      if (stored) {
+        // We have previous rankings, so this is an update
+        const timeout = setTimeout(() => {
+          localStorage.setItem('playerRankings', JSON.stringify(currentRankings))
+        }, 2000) // Wait 2 seconds before updating so user can see the movement
+        
+        return () => clearTimeout(timeout)
+      } else {
+        // First load
+        setPreviousRankings(currentRankings)
+        localStorage.setItem('playerRankings', JSON.stringify(currentRankings))
+      }
+    }
+  }, [games, activeTab, hallView, selectedGameType, selectedPlayers])
 
   const fetchGames = async () => {
     const { data } = await supabase
@@ -349,6 +384,20 @@ export default function PublicView() {
     return position
   }
 
+  const getRankMovement = (player: string, currentRank: number) => {
+    if (!previousRankings[player]) return '➖'
+    const previousRank = previousRankings[player]
+    if (currentRank < previousRank) return '📈'
+    if (currentRank > previousRank) return '📉'
+    return '➖'
+  }
+
+  const getMovementColor = (movement: string) => {
+    if (movement === '📈') return 'text-green-400'
+    if (movement === '📉') return 'text-red-400'
+    return 'text-slate-500'
+  }
+
   const getPlayerBadgeColor = (game: Game, player: string) => {
     if (game.winners?.includes(player)) return 'bg-green-600'
     if (game.runners_up?.includes(player)) return 'bg-blue-600'
@@ -430,7 +479,7 @@ export default function PublicView() {
               {selectedPlayers.length > 0 && (
                 <button
                   onClick={clearFilter}
-                  className="px-3 py-1 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm"
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
                 >
                   Clear ({selectedPlayers.length})
                 </button>
@@ -459,7 +508,7 @@ export default function PublicView() {
                     onClick={() => togglePlayerFilter(player)}
                     className={`px-4 py-2 rounded transition ${
                       selectedPlayers.includes(player)
-                        ? 'bg-[#1ABC9C] hover:bg-[#16A085]'
+                        ? 'bg-green-600 hover:bg-green-700'
                         : 'bg-slate-700 hover:bg-slate-600'
                     }`}
                   >
@@ -634,8 +683,15 @@ export default function PublicView() {
                           <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
                             <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-4 font-bold text-xl">
-                              {player.player}
-                              {worstShitheadPlayer === player.player && ' 💩'}
+                              <div className="flex items-center gap-2">
+                                <span className={`text-lg ${getMovementColor(getRankMovement(player.player, idx + 1))}`}>
+                                  {getRankMovement(player.player, idx + 1)}
+                                </span>
+                                <span>
+                                  {player.player}
+                                  {worstShitheadPlayer === player.player && ' 💩'}
+                                </span>
+                              </div>
                             </td>
                             <td className="text-center p-4">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
