@@ -539,7 +539,7 @@ export default function PublicView() {
                     
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-[#0A6B5A]' : 'bg-[#8B2E1F]'}`}>
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-800' : 'bg-gray-700'}`}>
                           <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-200 text-xs mt-1">
                             {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
