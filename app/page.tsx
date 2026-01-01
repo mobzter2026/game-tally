@@ -423,13 +423,21 @@ export default function PublicView() {
           )}
         </div>
 
-        {/* Side by side: Filter + Tab Buttons */}
+        {/* Sleeker Side by Side Layout */}
         <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Filter Section */}
+          {/* Filter Section - Compact */}
           <div className="bg-slate-800 rounded-xl p-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Filter by Players</h3>
               <div className="flex gap-2">
+                {showFilter && (
+                  <button
+                    onClick={selectAllPlayers}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+                  >
+                    Select All
+                  </button>
+                )}
                 {selectedPlayers.length > 0 && (
                   <button
                     onClick={clearFilter}
@@ -442,77 +450,69 @@ export default function PublicView() {
                   onClick={() => setShowFilter(!showFilter)}
                   className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
                 >
-                  {showFilter ? 'Hide' : 'Show'} Filter
+                  {showFilter ? 'Hide Filter' : 'Show Filter'}
                 </button>
               </div>
             </div>
             
             {showFilter && (
-              <>
-                <button
-                  onClick={selectAllPlayers}
-                  className="mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                >
-                  Select All
-                </button>
-                <div className="flex gap-2 flex-wrap">
-                  {PLAYERS.map(player => (
-                    <button
-                      key={player}
-                      onClick={() => togglePlayerFilter(player)}
-                      className={`px-4 py-2 rounded transition ${
-                        selectedPlayers.includes(player)
-                          ? 'bg-green-600 hover:bg-green-700'
-                          : 'bg-slate-700 hover:bg-slate-600'
-                      }`}
-                    >
-                      {selectedPlayers.includes(player) && '✓ '}
-                      {player}
-                    </button>
-                  ))}
-                </div>
-              </>
+              <div className="flex gap-2 flex-wrap">
+                {PLAYERS.map(player => (
+                  <button
+                    key={player}
+                    onClick={() => togglePlayerFilter(player)}
+                    className={`px-4 py-2 rounded transition ${
+                      selectedPlayers.includes(player)
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    {selectedPlayers.includes(player) && '✓ '}
+                    {player}
+                  </button>
+                ))}
+              </div>
             )}
             
-            {selectedPlayers.length > 0 && (
-              <div className="mt-3 text-sm text-slate-400">
-                Showing only games with exactly: {selectedPlayers.join(', ')} • {filteredGames.length} games found
+            {selectedPlayers.length > 0 && !showFilter && (
+              <div className="text-sm text-slate-400">
+                {selectedPlayers.join(', ')} • {filteredGames.length} games
               </div>
             )}
           </div>
 
-          {/* Tab Buttons */}
-          <div className="bg-slate-800 rounded-xl p-4 flex items-center justify-center">
-            <div className="flex gap-2 flex-wrap justify-center w-full">
-              <button
-                onClick={() => setActiveTab('individual')}
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
-                  activeTab === 'individual'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                }`}
-              >
-                Individual Games
-              </button>
+          {/* Tab Buttons - Compact Grid */}
+          <div className="bg-slate-800 rounded-xl p-4">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setActiveTab('rung-teams')}
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
                   activeTab === 'rung-teams'
                     ? 'bg-purple-600 text-white'
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                Rung - Team Combos
+                Rung - Teams
               </button>
               <button
                 onClick={() => setActiveTab('rung-players')}
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
                   activeTab === 'rung-players'
                     ? 'bg-purple-600 text-white'
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
                 Rung - Individual
+              </button>
+              <button
+                onClick={() => setActiveTab('individual')}
+                className={`px-4 py-2 rounded-lg font-semibold transition text-sm col-span-2 ${
+                  activeTab === 'individual'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                Individual Games
               </button>
             </div>
           </div>
