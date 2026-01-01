@@ -283,7 +283,12 @@ export default function ScoringPage() {
       .eq('id', activeSession.id)
 
     const alertDiv = document.createElement('div')
-    alertDiv.innerHTML = `<strong>Computer says:</strong><br>Game Over! 🏆<br>Winner: ${winners[0]} (${bestScore} points)`
+    if (activeSession.game_type === 'Shithead' && losers.length > 0) {
+      const realShithead = losers[losers.length - 1]
+      alertDiv.innerHTML = `<strong>Computer says:</strong><br>${winners[0]} is the winner but ${realShithead} is the real Shithead! 💩`
+    } else {
+      alertDiv.innerHTML = `<strong>Computer says:</strong><br>Game Over! 🏆<br>Winner: ${winners[0]} (${bestScore} points)`
+    }
     alertDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:30px 50px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.5);z-index:9999;font-family:monospace;font-size:20px;text-align:center;line-height:1.6'
     document.body.appendChild(alertDiv)
     setTimeout(() => document.body.removeChild(alertDiv), 3000)

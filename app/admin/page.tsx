@@ -130,14 +130,6 @@ export default function AdminDashboard() {
     setNewGame({ ...newGame, players: PLAYERS })
   }
 
-  const selectAllTeam1 = () => {
-    setNewGame({ ...newGame, team1: PLAYERS })
-  }
-
-  const selectAllTeam2 = () => {
-    setNewGame({ ...newGame, team2: PLAYERS })
-  }
-
   const addGame = async () => {
     if (newGame.type === 'Rung') {
       if (newGame.team1.length === 0 || newGame.team2.length === 0) {
@@ -257,13 +249,6 @@ export default function AdminDashboard() {
                 <>
                   <div>
                     <label className="block mb-2 text-sm">Team 1</label>
-                    <button
-                      type="button"
-                      onClick={selectAllTeam1}
-                      className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
-                    >
-                      Select All
-                    </button>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
@@ -279,13 +264,6 @@ export default function AdminDashboard() {
 
                   <div>
                     <label className="block mb-2 text-sm">Team 2</label>
-                    <button
-                      type="button"
-                      onClick={selectAllTeam2}
-                      className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
-                    >
-                      Select All
-                    </button>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
