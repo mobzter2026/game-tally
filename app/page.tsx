@@ -456,7 +456,7 @@ export default function PublicView() {
             </div>
             
             {showFilter && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-6 gap-2">
                 {PLAYERS.map(player => (
                   <button
                     key={player}
