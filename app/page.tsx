@@ -604,8 +604,8 @@ export default function PublicView() {
                     
                     {/* Right Column */}
                     <div className="text-right">
-                      <p className="text-slate-400 text-sm mb-4"1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                      <p className="text-slate-400 text-xs mb-3"1">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                      <p className="text-slate-400 text-sm mb-4">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                      <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
                       <select
                         value={selectedGameType}
                         onChange={(e) => setSelectedGameType(e.target.value)}
