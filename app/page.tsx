@@ -27,7 +27,6 @@ export default function PublicView() {
   const [showFilter, setShowFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
-  const [previousRankings, setPreviousRankings] = useState<Record<string, number>>({})
   const supabase = createClient()
 
   useEffect(() => {
@@ -384,19 +383,7 @@ export default function PublicView() {
     return position
   }
 
-  const getRankMovement = (player: string, currentRank: number) => {
-    if (!previousRankings[player]) return '➖'
-    const previousRank = previousRankings[player]
-    if (currentRank < previousRank) return '📈'
-    if (currentRank > previousRank) return '📉'
-    return '➖'
-  }
 
-  const getMovementColor = (movement: string) => {
-    if (movement === '📈') return 'text-green-400'
-    if (movement === '📉') return 'text-red-400'
-    return 'text-slate-500'
-  }
 
   const getPlayerBadgeColor = (game: Game, player: string) => {
     if (game.winners?.includes(player)) return 'bg-green-600'
@@ -581,7 +568,7 @@ export default function PublicView() {
                     
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-[#1ABC9C]' : 'bg-[#C0392B]'}`}>
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-[#0E8C73]' : 'bg-[#C0392B]'}`}>
                           <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-300 text-xs mt-1">
                             {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
@@ -632,7 +619,7 @@ export default function PublicView() {
                     <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-[#1ABC9C] hover:bg-[#16A085] rounded text-sm font-bold"
+                        className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
                       >
                         ⭐ Hall of Fame
                       </button>
@@ -684,209 +671,3 @@ export default function PublicView() {
                             <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-4 font-bold text-xl">
                               <div className="flex items-center gap-2">
-                                <span className={`text-lg ${getMovementColor(getRankMovement(player.player, idx + 1))}`}>
-                                  {getRankMovement(player.player, idx + 1)}
-                                </span>
-                                <span>
-                                  {player.player}
-                                  {worstShitheadPlayer === player.player && ' 💩'}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="text-center p-4">{player.gamesPlayed}</td>
-                            <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                            <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-                            <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
-                            <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                            <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
-                            <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                            <td className="text-center p-4">
-                              {player.bestStreak > 0 ? (
-                                <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
-                              ) : (
-                                <span className="text-slate-500">-</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {hallView === 'none' && (
-              <div className="bg-slate-800 rounded-xl p-6 mb-8">
-                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                  <h2 className="text-2xl font-bold">📜 Recent Games</h2>
-                  <div className="text-sm">
-                    <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
-                    <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
-                    <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survived</span>
-                    <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {recentGames.length === 0 ? (
-                    <div className="col-span-2 text-center p-8 text-slate-400">
-                      No games found with selected filter
-                    </div>
-                  ) : (
-                    recentGames.map(game => (
-                      <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                        <div className="text-slate-300 text-base font-bold mb-2">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                        </div>
-                        <div className="flex gap-1 flex-wrap">
-                          {sortPlayersInGame(game).map(player => (
-                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                              {player}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {activeTab === 'rung-teams' && (
-          <>
-            <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-2xl font-bold">Best Rung Team Combinations</h2>
-                <p className="text-slate-400 text-sm mt-1">Which duos dominate together?</p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700 bg-slate-900">
-                      <th className="text-center p-4 w-20">Rank</th>
-                      <th className="text-left p-4">Team</th>
-                      <th className="text-center p-4">Games</th>
-                      <th className="text-center p-4">Wins</th>
-                      <th className="text-center p-4">Losses</th>
-                      <th className="text-center p-4">Win Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rungTeamStats.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center p-8 text-slate-400">
-                          No teams have played yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      rungTeamStats.map((team, idx) => (
-                        <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                          <td className="p-4 text-center text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
-                          <td className="p-4 font-bold text-xl">{team.team}</td>
-                          <td className="text-center p-4">{team.gamesPlayed}</td>
-                          <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
-                          <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
-                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="bg-slate-800 rounded-xl p-6 mb-8">
-              <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <h2 className="text-2xl font-bold">📜 Recent Games</h2>
-                <div className="text-sm">
-                  <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
-                  <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recentGames.length === 0 ? (
-                  <div className="col-span-2 text-center p-8 text-slate-400">
-                    No games found with selected filter
-                  </div>
-                ) : (
-                  recentGames.map(game => (
-                    <div key={game.id} className="bg-slate-700/50 rounded p-3">
-                      <div className="text-slate-300 text-base font-bold mb-2">
-                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                      </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {game.team1?.map(player => (
-                          <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                            {player}
-                          </span>
-                        ))}
-                        <span className="text-slate-400 px-2">vs</span>
-                        {game.team2?.map(player => (
-                          <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
-                            {player}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {activeTab === 'rung-players' && (
-          <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
-            <div className="p-6 border-b border-slate-700">
-              <h2 className="text-2xl font-bold">Rung Individual Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-700 bg-slate-900">
-                    <th className="text-center p-4 w-20">Rank</th>
-                    <th className="text-left p-4">Player</th>
-                    <th className="text-center p-4">Games</th>
-                    <th className="text-center p-4">Wins</th>
-                    <th className="text-center p-4">Losses</th>
-                    <th className="text-center p-4">Win Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rungPlayerStats.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center p-8 text-slate-400">
-                        No Rung games played yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    rungPlayerStats.map((player, idx) => (
-                      <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                        <td className="p-4 text-center text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
-                        <td className="p-4 font-bold text-xl">
-                          {player.player}
-                          {worstShitheadPlayer === player.player && ' 💩'}
-                        </td>
-                        <td className="text-center p-4">{player.gamesPlayed}</td>
-                        <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                        <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mt-8">
-          <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
-        </div>
-      </div>
-    </div>
-  )
-}

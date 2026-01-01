@@ -152,6 +152,7 @@ export default function AdminDashboard() {
       const gameData: any = {
         game_type: newGame.type,
         game_date: newGame.date,
+        players_in_game: [], // Empty array for Rung games
         team1: newGame.team1,
         team2: newGame.team2,
         winning_team: newGame.winningTeam,
