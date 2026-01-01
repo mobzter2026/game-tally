@@ -465,7 +465,7 @@ export default function PublicView() {
               </div>
             </div>
             
-            {showFilter && (
+           {showFilter && (
               <div className="grid grid-cols-6 gap-2">
                 {PLAYERS.map(player => (
                   <button
@@ -477,7 +477,7 @@ export default function PublicView() {
                         : 'bg-slate-700 hover:bg-slate-600'
                     }`}
                   >
-                    <div>{player}</div>
+                    <div className="text-sm">{player}</div>
                     {selectedPlayers.includes(player) && <div className="text-xs mt-1">✓</div>}
                   </button>
                 ))}
