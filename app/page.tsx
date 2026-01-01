@@ -714,8 +714,8 @@ export default function PublicView() {
           <>
             <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
               <div className="p-6 border-b border-slate-700">
-                <h2 className="text-2xl font-bold">Best Rung Team Combinations</h2>
-                <p className="text-slate-400 text-sm mt-1">Which duos dominate together?</p>
+                <h2 className="text-2xl font-bold">Rung - Double Trouble Leaderboard</h2>
+                <p className="text-slate-400 text-sm mt-1">Twice the players, Double the Chaos !!</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -796,8 +796,8 @@ export default function PublicView() {
         {activeTab === 'rung-players' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-2xl font-bold">Rung Individual Rankings</h2>
-              <p className="text-slate-400 text-sm mt-1">Performance regardless of teammate</p>
+              <h2 className="text-2xl font-bold">Rung - Carry or Be Carried</h2>
+              <p className="text-slate-400 text-sm mt-1">The Illusion of Skill</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
