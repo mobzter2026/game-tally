@@ -139,7 +139,7 @@ export default function PublicView() {
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
     
     activePlayers.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
+      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, survivals: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
     })
 
     let individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
@@ -163,9 +163,24 @@ export default function PublicView() {
       if (game.runners_up) game.runners_up.forEach(r => { 
         if (stats[r]) {
           stats[r].runnerUps++
-          stats[r].weightedWins += 0.25
+          stats[r].weightedWins += 0.4
         }
       })
+      
+      // Calculate survivals (players who didn't win, get 2nd, or lose)
+      if (game.players_in_game) {
+        const winners = game.winners || []
+        const runnersUp = game.runners_up || []
+        const losers = game.losers || []
+        
+        game.players_in_game.forEach(p => {
+          if (stats[p] && !winners.includes(p) && !runnersUp.includes(p) && !losers.includes(p)) {
+            stats[p].survivals++
+            stats[p].weightedWins += 0.1
+          }
+        })
+      }
+      
       if (game.losers) game.losers.forEach(l => { 
         if (stats[l]) stats[l].losses++ 
       })
@@ -517,9 +532,9 @@ export default function PublicView() {
                     
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-yellow-900' : 'bg-slate-900'}`}>
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-blue-700' : 'bg-slate-900'}`}>
                           <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
-                          <p className="text-slate-400 text-xs mt-1">
+                          <p className="text-slate-300 text-xs mt-1">
                             {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
                           </p>
                         </div>
@@ -563,12 +578,12 @@ export default function PublicView() {
                     <div className="flex-1">
                       <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
                       <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                      <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
+                      <p className="text-slate-400 text-xs mt-1">Wins: 100% • 2nd: 40% • Survival: 10%</p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm font-bold"
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-bold"
                       >
                         ⭐ Hall of Fame
                       </button>
@@ -600,6 +615,7 @@ export default function PublicView() {
                         <th className="text-center p-4">Games</th>
                         <th className="text-center p-4">Wins</th>
                         <th className="text-center p-4">2nd</th>
+                        <th className="text-center p-4">Survived</th>
                         <th className="text-center p-4">Losses</th>
                         <th className="text-center p-4">💩</th>
                         <th className="text-center p-4">Win Rate</th>
@@ -609,7 +625,7 @@ export default function PublicView() {
                     <tbody>
                       {playerStats.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="text-center p-8 text-slate-400">
+                          <td colSpan={10} className="text-center p-8 text-slate-400">
                             No games played yet.
                           </td>
                         </tr>
@@ -624,6 +640,7 @@ export default function PublicView() {
                             <td className="text-center p-4">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                             <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+                            <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
                             <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                             <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
                             <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>

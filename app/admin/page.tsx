@@ -114,6 +114,10 @@ export default function AdminDashboard() {
     if (newGame.team1.includes(player)) {
       setNewGame({ ...newGame, team1: newGame.team1.filter(p => p !== player) })
     } else {
+      if (newGame.team1.length >= 2) {
+        alert('Team 1 can only have 2 players maximum')
+        return
+      }
       setNewGame({ ...newGame, team1: [...newGame.team1, player] })
     }
   }
@@ -122,6 +126,10 @@ export default function AdminDashboard() {
     if (newGame.team2.includes(player)) {
       setNewGame({ ...newGame, team2: newGame.team2.filter(p => p !== player) })
     } else {
+      if (newGame.team2.length >= 2) {
+        alert('Team 2 can only have 2 players maximum')
+        return
+      }
       setNewGame({ ...newGame, team2: [...newGame.team2, player] })
     }
   }
@@ -136,6 +144,10 @@ export default function AdminDashboard() {
         alert('Please select players for both teams')
         return
       }
+      if (newGame.team1.length > 2 || newGame.team2.length > 2) {
+        alert('Each team can have maximum 2 players')
+        return
+      }
 
       const gameData: any = {
         game_type: newGame.type,
@@ -147,7 +159,13 @@ export default function AdminDashboard() {
         created_at: new Date().toISOString()
       }
 
-      await (supabase.from('games').insert as any)(gameData)
+      const { error } = await (supabase.from('games').insert as any)(gameData)
+      
+      if (error) {
+        console.error('Error adding Rung game:', error)
+        alert('Error adding game. Check console for details.')
+        return
+      }
     } else {
       if (newGame.players.length === 0) {
         alert('Please select at least one player')
@@ -165,7 +183,13 @@ export default function AdminDashboard() {
         created_at: new Date().toISOString()
       }
 
-      await (supabase.from('games').insert as any)(gameData)
+      const { error } = await (supabase.from('games').insert as any)(gameData)
+      
+      if (error) {
+        console.error('Error adding game:', error)
+        alert('Error adding game. Check console for details.')
+        return
+      }
     }
 
     setNewGame({
@@ -248,7 +272,7 @@ export default function AdminDashboard() {
               {newGame.type === 'Rung' ? (
                 <>
                   <div>
-                    <label className="block mb-2 text-sm">Team 1</label>
+                    <label className="block mb-2 text-sm">Team 1 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
@@ -263,7 +287,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm">Team 2</label>
+                    <label className="block mb-2 text-sm">Team 2 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
