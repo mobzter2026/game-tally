@@ -585,9 +585,9 @@ export default function PublicView() {
                     {/* Left Column */}
                     <div>
                       <h2 className="text-2xl font-bold mb-3">The Ultimate Backstab Board 🔪</h2>
+                      <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory 😈</p>
                       <div className="flex gap-2 mb-3">
                         <button
-                      <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory 😈</p>
                           onClick={() => setHallView('fame')}
                           className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
                         >
