@@ -430,7 +430,7 @@ export default function PublicView() {
               {selectedPlayers.length > 0 && (
                 <button
                   onClick={clearFilter}
-                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                  className="px-3 py-1 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm"
                 >
                   Clear ({selectedPlayers.length})
                 </button>
@@ -459,7 +459,7 @@ export default function PublicView() {
                     onClick={() => togglePlayerFilter(player)}
                     className={`px-4 py-2 rounded transition ${
                       selectedPlayers.includes(player)
-                        ? 'bg-green-600 hover:bg-green-700'
+                        ? 'bg-[#1ABC9C] hover:bg-[#16A085]'
                         : 'bg-slate-700 hover:bg-slate-600'
                     }`}
                   >
@@ -532,7 +532,7 @@ export default function PublicView() {
                     
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-blue-700' : 'bg-slate-900'}`}>
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-[#1ABC9C]' : 'bg-[#C0392B]'}`}>
                           <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-300 text-xs mt-1">
                             {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
@@ -583,13 +583,13 @@ export default function PublicView() {
                     <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-bold"
+                        className="px-4 py-2 bg-[#1ABC9C] hover:bg-[#16A085] rounded text-sm font-bold"
                       >
                         ⭐ Hall of Fame
                       </button>
                       <button
                         onClick={() => setHallView('shame')}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
+                        className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
                       >
                         🤡 Hall of Shame
                       </button>
