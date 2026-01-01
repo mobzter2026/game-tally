@@ -581,13 +581,10 @@ export default function PublicView() {
             ) : (
               <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
                 <div className="p-6 border-b border-slate-700">
-                  <div className="flex justify-between items-start mb-2 flex-wrap gap-4">
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
-                      <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                      <p className="text-slate-400 text-xs mt-1">Wins: 100% • 2nd: 40% • Survival: 10%</p>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-3">The Friendship Ruiner League</h2>
+                    
+                    <div className="flex gap-2 justify-center mb-3">
                       <button
                         onClick={() => setHallView('fame')}
                         className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
@@ -600,17 +597,21 @@ export default function PublicView() {
                       >
                         🤡 Hall of Shame
                       </button>
-                      <select
-                        value={selectedGameType}
-                        onChange={(e) => setSelectedGameType(e.target.value)}
-                        className="px-3 py-2 bg-slate-700 rounded text-sm"
-                      >
-                        <option value="All Games">🌍 All Games</option>
-                        {INDIVIDUAL_GAMES.map(game => (
-                          <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
-                        ))}
-                      </select>
                     </div>
+                    
+                    <p className="text-slate-400 text-sm mb-1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                    <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                    
+                    <select
+                      value={selectedGameType}
+                      onChange={(e) => setSelectedGameType(e.target.value)}
+                      className="px-3 py-2 bg-slate-700 rounded text-sm"
+                    >
+                      <option value="All Games">🌍 All Games</option>
+                      {INDIVIDUAL_GAMES.map(game => (
+                        <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
