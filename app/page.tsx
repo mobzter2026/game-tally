@@ -456,7 +456,7 @@ export default function PublicView() {
             </div>
             
             {showFilter && (
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-3 gap-2">
                 {PLAYERS.map(player => (
                   <button
                     key={player}
@@ -581,37 +581,41 @@ export default function PublicView() {
             ) : (
               <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
                 <div className="p-6 border-b border-slate-700">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-3">The Friendship Ruiner League</h2>
-                    
-                    <div className="flex gap-2 justify-center mb-3">
-                      <button
-                        onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
-                      >
-                        ⭐ Hall of Fame
-                      </button>
-                      <button
-                        onClick={() => setHallView('shame')}
-                        className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
-                      >
-                        🤡 Hall of Shame
-                      </button>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left Column */}
+                    <div>
+                      <h2 className="text-2xl font-bold mb-3">The Friendship Ruiner League</h2>
+                      <div className="flex gap-2 mb-3">
+                        <button
+                          onClick={() => setHallView('fame')}
+                          className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
+                        >
+                          ⭐ Hall of Fame
+                        </button>
+                        <button
+                          onClick={() => setHallView('shame')}
+                          className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
+                        >
+                          🤡 Hall of Shame
+                        </button>
+                      </div>
                     </div>
                     
-                    <p className="text-slate-400 text-sm mb-1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                    <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
-                    
-                    <select
-                      value={selectedGameType}
-                      onChange={(e) => setSelectedGameType(e.target.value)}
-                      className="px-3 py-2 bg-slate-700 rounded text-sm"
-                    >
-                      <option value="All Games">🌍 All Games</option>
-                      {INDIVIDUAL_GAMES.map(game => (
-                        <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
-                      ))}
-                    </select>
+                    {/* Right Column */}
+                    <div className="text-right">
+                      <p className="text-slate-400 text-sm mb-1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                      <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                      <select
+                        value={selectedGameType}
+                        onChange={(e) => setSelectedGameType(e.target.value)}
+                        className="px-3 py-2 bg-slate-700 rounded text-sm"
+                      >
+                        <option value="All Games">🌍 All Games</option>
+                        {INDIVIDUAL_GAMES.map(game => (
+                          <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
