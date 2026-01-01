@@ -585,7 +585,7 @@ export default function PublicView() {
                     {/* Left Column */}
                     <div>
                       <h2 className="text-2xl font-bold mb-1">The Ultimate Backstab Board 🔪</h2>
-                      <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional, Betrayal Mandatory 😈</p>
+                      <p className="text-slate-400 text-sm mb-4"2 italic">Friendship Optional, Betrayal Mandatory 😈</p>
                       <div className="flex gap-2 mb-3">
                         <button
                           onClick={() => setHallView('fame')}
@@ -604,8 +604,8 @@ export default function PublicView() {
                     
                     {/* Right Column */}
                     <div className="text-right">
-                      <p className="text-slate-400 text-sm mb-1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                      <p className="text-slate-400 text-xs mb-1">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                      <p className="text-slate-400 text-sm mb-4"1">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                      <p className="text-slate-400 text-xs mb-3"1">Wins: 100% • 2nd: 40% • Survival: 10%</p>
                       <select
                         value={selectedGameType}
                         onChange={(e) => setSelectedGameType(e.target.value)}
