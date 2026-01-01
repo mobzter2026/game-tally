@@ -584,8 +584,8 @@ export default function PublicView() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Left Column */}
                     <div>
-                      <h2 className="text-2xl font-bold mb-3">The Ultimate Backstab Board 🔪</h2>
-                      <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory 😈</p>
+                      <h2 className="text-2xl font-bold mb-1">The Ultimate Backstab Board 🔪</h2>
+                      <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional, Betrayal Mandatory 😈</p>
                       <div className="flex gap-2 mb-3">
                         <button
                           onClick={() => setHallView('fame')}
