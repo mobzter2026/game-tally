@@ -468,7 +468,7 @@ export default function PublicView() {
                     }`}
                   >
                     <div className="text-sm">{player}</div>
-                    {selectedPlayers.includes(player) && <div className="text-xs mt-1">✓</div>}
+                    
                   </button>
                 ))}
               </div>
