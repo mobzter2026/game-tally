@@ -485,39 +485,49 @@ export default function PublicView() {
         {activeTab === 'individual' && (
           <>
             {selectedGameType === 'Each Game' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {INDIVIDUAL_GAMES.map(gameType => {
-                  const gameStats = getPlayerStatsForGame(gameType).slice(0, 3)
-                  return (
-                    <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                      <div className="p-4 border-b border-slate-700 bg-slate-900">
-                        <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
-                        <p className="text-slate-400 text-xs mt-1">Top 3 Players</p>
-                      </div>
-                      <div className="p-4">
-                        {gameStats.length === 0 ? (
-                          <div className="text-center text-slate-400 py-4">No games played</div>
-                        ) : (
-                          <div className="space-y-2">
-                            {gameStats.map((player, idx) => (
-                              <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-2xl">{getMedal(gameStats, idx, (p) => p.winRate)}</span>
-                                  <span className="font-bold">{player.player}</span>
+              <>
+                <div className="mb-4 flex justify-end">
+                  <button
+                    onClick={() => setSelectedGameType('All Games')}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+                  >
+                    ← Back to Overall Leaderboard
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {INDIVIDUAL_GAMES.map(gameType => {
+                    const gameStats = getPlayerStatsForGame(gameType).slice(0, 3)
+                    return (
+                      <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
+                        <div className="p-4 border-b border-slate-700 bg-slate-900">
+                          <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
+                          <p className="text-slate-400 text-xs mt-1">Top 3 Players</p>
+                        </div>
+                        <div className="p-4">
+                          {gameStats.length === 0 ? (
+                            <div className="text-center text-slate-400 py-4">No games played</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {gameStats.map((player, idx) => (
+                                <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-2xl">{getMedal(gameStats, idx, (p) => p.winRate)}</span>
+                                    <span className="font-bold">{player.player}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
+                                    <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
+                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
-                                  <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              </>
             ) : (
               <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
                 <div className="p-6 border-b border-slate-700">
@@ -533,8 +543,8 @@ export default function PublicView() {
                         onChange={(e) => setSelectedGameType(e.target.value)}
                         className="px-3 py-2 bg-slate-700 rounded text-sm"
                       >
-                        <option value="All Games">All Games</option>
-                        <option value="Each Game">Each Game</option>
+                        <option value="All Games">🌍 All Games</option>
+                        <option value="Each Game">🎯 Each Game</option>
                         {INDIVIDUAL_GAMES.map(game => (
                           <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                         ))}
