@@ -26,6 +26,7 @@ export default function PublicView() {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [showFilter, setShowFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
+  const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const supabase = createClient()
 
   useEffect(() => {
@@ -124,7 +125,7 @@ export default function PublicView() {
       })
     }
 
-    if (selectedGameType !== 'All Games' && selectedGameType !== 'Each Game') {
+    if (selectedGameType !== 'All Games') {
       filtered = filtered.filter(g => g.game_type === selectedGameType)
     }
 
@@ -206,6 +207,17 @@ export default function PublicView() {
   }
 
   const getPlayerStats = () => getPlayerStatsForGame()
+
+  const getWorstShitheadPlayer = () => {
+    const allStats = getPlayerStats()
+    if (allStats.length === 0) return null
+    
+    const maxShitheadLosses = Math.max(...allStats.map(p => p.shitheadLosses))
+    if (maxShitheadLosses === 0) return null
+    
+    const worstPlayer = allStats.find(p => p.shitheadLosses === maxShitheadLosses)
+    return worstPlayer?.player || null
+  }
 
   const getRungTeamStats = () => {
     const teamStats: any = {}
@@ -369,6 +381,8 @@ export default function PublicView() {
   const recentGames = activeTab === 'individual' 
     ? filteredGames.filter(g => g.game_type !== 'Rung').slice(0, 20)
     : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
+  
+  const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
@@ -484,11 +498,11 @@ export default function PublicView() {
 
         {activeTab === 'individual' && (
           <>
-            {selectedGameType === 'Each Game' ? (
+            {hallView !== 'none' ? (
               <>
                 <div className="mb-4 flex justify-end">
                   <button
-                    onClick={() => setSelectedGameType('All Games')}
+                    onClick={() => setHallView('none')}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
                   >
                     ← Back to Overall Leaderboard
@@ -496,30 +510,44 @@ export default function PublicView() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {INDIVIDUAL_GAMES.map(gameType => {
-                    const gameStats = getPlayerStatsForGame(gameType).slice(0, 3)
+                    const gameStats = getPlayerStatsForGame(gameType)
+                    const displayStats = hallView === 'fame' 
+                      ? gameStats.slice(0, 3) 
+                      : gameStats.slice(-3).reverse()
+                    
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
-                        <div className="p-4 border-b border-slate-700 bg-slate-900">
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-yellow-900' : 'bg-slate-900'}`}>
                           <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
-                          <p className="text-slate-400 text-xs mt-1">Top 3 Players</p>
+                          <p className="text-slate-400 text-xs mt-1">
+                            {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
+                          </p>
                         </div>
                         <div className="p-4">
-                          {gameStats.length === 0 ? (
+                          {displayStats.length === 0 ? (
                             <div className="text-center text-slate-400 py-4">No games played</div>
                           ) : (
                             <div className="space-y-2">
-                              {gameStats.map((player, idx) => (
-                                <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-2xl">{getMedal(gameStats, idx, (p) => p.winRate)}</span>
-                                    <span className="font-bold">{player.player}</span>
+                              {displayStats.map((player, idx) => {
+                                const actualIdx = hallView === 'fame' ? idx : gameStats.length - 3 + idx
+                                return (
+                                  <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-2xl">
+                                        {hallView === 'fame' ? getMedal(gameStats, actualIdx, (p) => p.winRate) : `${gameStats.length - idx}`}
+                                      </span>
+                                      <span className="font-bold">
+                                        {player.player}
+                                        {worstShitheadPlayer === player.player && gameType === 'Shithead' && ' 💩'}
+                                      </span>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
+                                      <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
+                                    </div>
                                   </div>
-                                  <div className="text-right">
-                                    <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
-                                    <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
-                                  </div>
-                                </div>
-                              ))}
+                                )
+                              })}
                             </div>
                           )}
                         </div>
@@ -531,20 +559,31 @@ export default function PublicView() {
             ) : (
               <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
                 <div className="p-6 border-b border-slate-700">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-2 flex-wrap gap-4">
                     <div className="flex-1">
                       <h2 className="text-2xl font-bold mb-2">The Friendship Ruiner League</h2>
                       <p className="text-slate-400 text-sm">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
                       <p className="text-slate-400 text-xs mt-1">Runner-ups earn 25%</p>
                     </div>
-                    <div>
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => setHallView('fame')}
+                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm font-bold"
+                      >
+                        ⭐ Hall of Fame
+                      </button>
+                      <button
+                        onClick={() => setHallView('shame')}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
+                      >
+                        🤡 Hall of Shame
+                      </button>
                       <select
                         value={selectedGameType}
                         onChange={(e) => setSelectedGameType(e.target.value)}
                         className="px-3 py-2 bg-slate-700 rounded text-sm"
                       >
                         <option value="All Games">🌍 All Games</option>
-                        <option value="Each Game">🎯 Each Game</option>
                         {INDIVIDUAL_GAMES.map(game => (
                           <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                         ))}
@@ -578,7 +617,10 @@ export default function PublicView() {
                         playerStats.map((player, idx) => (
                           <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
                             <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
-                            <td className="p-4 font-bold text-xl">{player.player}</td>
+                            <td className="p-4 font-bold text-xl">
+                              {player.player}
+                              {worstShitheadPlayer === player.player && ' 💩'}
+                            </td>
                             <td className="text-center p-4">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                             <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
@@ -601,7 +643,7 @@ export default function PublicView() {
               </div>
             )}
 
-            {selectedGameType !== 'Each Game' && (
+            {hallView === 'none' && (
               <div className="bg-slate-800 rounded-xl p-6 mb-8">
                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                   <h2 className="text-2xl font-bold">📜 Recent Games</h2>
@@ -751,7 +793,10 @@ export default function PublicView() {
                     rungPlayerStats.map((player, idx) => (
                       <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
                         <td className="p-4 text-center text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
-                        <td className="p-4 font-bold text-xl">{player.player}</td>
+                        <td className="p-4 font-bold text-xl">
+                          {player.player}
+                          {worstShitheadPlayer === player.player && ' 💩'}
+                        </td>
                         <td className="text-center p-4">{player.gamesPlayed}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                         <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
