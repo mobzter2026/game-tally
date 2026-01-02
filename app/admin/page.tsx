@@ -428,16 +428,28 @@ export default function AdminDashboard() {
                       <div className="text-green-400">Winner: Team {game.winning_team}</div>
                     </div>
                   ) : (
-                    <div className="text-sm">
-                      <div className="mb-1">Players: {game.players_in_game?.join(', ')}</div>
+                    <div className="flex flex-col gap-2">
+                      
                       {game.winners && game.winners.length > 0 && (
-                        <div className="text-green-400">Winners: {game.winners.join(', ')}</div>
+                        <div className="flex gap-1 flex-wrap">
+                        {game.winners?.map(player => (
+                          <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                        ))}
+                      </div>
                       )}
                       {game.runners_up && game.runners_up.length > 0 && (
-                        <div className="text-blue-400">Runners-up: {game.runners_up.join(', ')}</div>
+                        <div className="flex gap-1 flex-wrap">
+                        {game.runners_up?.map(player => (
+                          <span key={player} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                        ))}
+                      </div>
                       )}
                       {game.losers && game.losers.length > 0 && (
-                        <div className="text-red-400">Losers: {game.losers.join(', ')}</div>
+                        <div className="flex gap-1 flex-wrap">
+                        {game.losers?.map(player => (
+                          <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                        ))}
+                      </div>
                       )}
                     </div>
                   )}
