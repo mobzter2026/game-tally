@@ -137,6 +137,9 @@ export default function AdminDashboard() {
   const selectAllPlayers = () => {
     setNewGame({ ...newGame, players: PLAYERS })
   }
+  const clearPlayers = () => {
+    setNewGame({ ...newGame, players: [] })
+  }
 
   const addGame = async () => {
     if (newGame.type === 'Rung') {
