@@ -360,8 +360,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center flex-1">
-                    <label className="block mb-2 text-sm">Winners</label>
+                  <div className="mb-4">
+                    <label className="block mb-2 text-sm font-semibold">Winners</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
@@ -374,9 +374,8 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-
-                  <div className="flex justify-between items-center flex-1">
-                    <label className="block mb-2 text-sm">Runners-up</label>
+                  <div className="mb-4">
+                    <label className="block mb-2 text-sm font-semibold">Runners-up</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
@@ -389,9 +388,8 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-
-                  <div className="flex justify-between items-center flex-1">
-                    <label className="block mb-2 text-sm">Losers</label>
+                  <div className="mb-4">
+                    <label className="block mb-2 text-sm font-semibold">Losers</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
@@ -406,7 +404,6 @@ export default function AdminDashboard() {
                   </div>
                 </>
               )}
-
               <button
                 onClick={addGame}
                 className="w-full bg-green-600 hover:bg-green-700 py-3 rounded font-bold"
