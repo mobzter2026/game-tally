@@ -422,13 +422,18 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   {game.game_type === 'Rung' ? (
-                    <div className="text-sm">
-                      <div className="mb-1">Team 1: {game.team1?.join(', ')}</div>
-                      <div className="mb-1">Team 2: {game.team2?.join(', ')}</div>
-                      <div className="text-green-400">Winner: Team {game.winning_team}</div>
+                    <div className="flex gap-1 flex-wrap">
+                      {game.team1?.map(player => (
+                        <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs font-semibold`}>{player}</span>
+                      ))}
+                      <span className="text-slate-400 px-2 self-center">vs</span>
+                      
+                      {game.team2?.map(player => (
+                        <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs font-semibold`}>{player}</span>
+                      ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex gap-1 flex-wrap">
                       
                       {game.winners && game.winners.length > 0 && (
                         <div className="flex gap-1 flex-wrap">
