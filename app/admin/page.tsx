@@ -409,7 +409,7 @@ export default function AdminDashboard() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-3 flex-1">
                       <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-slate-400 text-center">
                         {new Date(game.game_date).toLocaleDateString()}
                         
                       </div>
