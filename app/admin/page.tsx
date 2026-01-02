@@ -226,12 +226,12 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto mt-4">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-slate-400">Manage game results</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-2 md:gap-3 w-full md:w-auto">
             <a href="/admin/scoring" className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">🎯 Live Scoring</a>
             <a href="/" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">View Leaderboard</a>
             <button onClick={handleSignOut} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Sign Out</button>
