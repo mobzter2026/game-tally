@@ -322,15 +322,28 @@ export default function AdminDashboard() {
                 </>
               ) : (
                 <>
-                  <div className="flex justify-between items-center flex-1">
-                    <label className="block mb-2 text-sm">Players in Game</label>
-                    <button
-                      type="button"
-                      onClick={selectAllPlayers}
-                      className="mb-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
-                    >
-                      Select All
-                    </button>
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-semibold">Players in Game</label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={selectAllPlayers}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                        >
+                          Select All
+                        </button>
+                        {newGame.players.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={clearPlayers}
+                            className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                          >
+                            Clear Selected
+                          </button>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
