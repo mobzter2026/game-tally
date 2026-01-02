@@ -411,7 +411,7 @@ export default function AdminDashboard() {
                       <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
                       <div className="text-sm text-slate-400">
                         {new Date(game.game_date).toLocaleDateString()}
-                        {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        
                       </div>
                     </div>
                     <button
