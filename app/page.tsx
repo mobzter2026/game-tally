@@ -425,52 +425,46 @@ export default function PublicView() {
 
         {/* Sleeker Side by Side Layout */}
         <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Filter Section - Compact */}
           <div className="bg-slate-800 rounded-xl p-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Filter by Players</h3>
-              <div className="flex gap-2">
-                {showFilter && (
+              <button
+                onClick={() => setShowFilter(!showFilter)}
+                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
+              >
+                {showFilter ? 'Hide Filter' : 'Show Filter'}
+              </button>
+            </div>
+            
+            {showFilter && (
+              <div>
+                <div className="flex gap-2 mb-3">
                   <button
                     onClick={selectAllPlayers}
                     className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                   >
                     Select All
                   </button>
-                )}
-                {selectedPlayers.length > 0 && (
-                  <button
-                    onClick={clearFilter}
-                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                  >
-                    Clear ({selectedPlayers.length})
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowFilter(!showFilter)}
-                  className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
-                >
-                  {showFilter ? 'Hide Filter' : 'Show Filter'}
-                </button>
-              </div>
-            </div>
-            
-            {showFilter && (
-              <div className="grid grid-cols-6 gap-2">
-                {PLAYERS.map(player => (
-                  <button
-                    key={player}
-                    onClick={() => togglePlayerFilter(player)}
-                    className={`px-4 py-2 rounded transition ${
-                      selectedPlayers.includes(player)
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    <div className="text-sm">{player}</div>
-                    
-                  </button>
-                ))}
+                  {selectedPlayers.length > 0 && (
+                    <button
+                      onClick={clearFilter}
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                    >
+                      Clear ({selectedPlayers.length})
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-6 gap-2">
+                  {PLAYERS.map(player => (
+                    <button
+                      key={player}
+                      onClick={() => togglePlayerFilter(player)}
+                      className={`px-2 py-1.5 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
+                    >
+                      {player}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             
@@ -480,6 +474,7 @@ export default function PublicView() {
               </div>
             )}
           </div>
+
 
           {/* Tab Buttons - Compact Grid */}
           <div className="bg-slate-800 rounded-xl p-4">
