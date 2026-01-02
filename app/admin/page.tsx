@@ -279,7 +279,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleTeam1(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -294,7 +294,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleTeam2(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => togglePlayer(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -351,7 +351,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleWinner(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleRunnerUp(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -381,7 +381,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleLoser(p)}
-                          className={`px-3 py-1.5 text-sm rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-xs rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
