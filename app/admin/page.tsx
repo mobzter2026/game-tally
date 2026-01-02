@@ -227,7 +227,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto mt-4">
         <div className="text-center mb-8">
-          <div className="mb-4">
+          <div className="flex items-center gap-3 flex-1">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-slate-400">Manage game results</p>
           </div>
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
             <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games (Monopoly, Tai Ti, Shithead), use Live Scoring for better tracking</p>
             
             <div className="space-y-4">
-              <div className="mb-4">
+              <div className="flex items-center gap-3 flex-1">
                 <label className="block mb-2 text-sm">Game Type</label>
                 <select
                   value={newGame.type}
@@ -260,7 +260,7 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
-              <div className="mb-4">
+              <div className="flex items-center gap-3 flex-1">
                 <label className="block mb-2 text-sm">Date</label>
                 <input
                   type="date"
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
 
               {newGame.type === 'Rung' ? (
                 <>
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Team 1 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Team 2 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Winning Team</label>
                     <div className="flex gap-4">
                       <button
@@ -322,7 +322,7 @@ export default function AdminDashboard() {
                 </>
               ) : (
                 <>
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Players in Game</label>
                     <button
                       type="button"
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Winners</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
@@ -359,7 +359,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Runners-up</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <label className="block mb-2 text-sm">Losers</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
@@ -406,8 +406,8 @@ export default function AdminDashboard() {
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {games.slice(0, 20).map(game => (
                 <div key={game.id} className="bg-slate-700 rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-3 flex-1">
                       <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
                       <div className="text-sm text-slate-400">
                         {new Date(game.game_date).toLocaleDateString()}
