@@ -625,14 +625,14 @@ export default function PublicView() {
                       <tr className="border-b border-slate-700 bg-slate-900">
                         <th className="text-center p-4 w-20">Rank</th>
                         <th className="text-left p-4">Player</th>
-                        <th className="text-center p-4">Games</th>
-                        <th className="text-center p-4">Wins</th>
-                        <th className="text-center p-4">2nd</th>
-                        <th className="text-center p-4">Survived</th>
-                        <th className="text-center p-4">Losses</th>
-                        <th className="text-center p-4">💩</th>
-                        <th className="text-center p-4">Win Rate</th>
-                        <th className="text-center p-4">🔥 Best</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Survived</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">💩</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">🔥 Best</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -645,19 +645,19 @@ export default function PublicView() {
                       ) : (
                         playerStats.map((player, idx) => (
                           <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                            <td className="p-4 text-center text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
-                            <td className="p-4 font-bold text-xl">
+                            <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
+                            <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                               {player.player}
                               {worstShitheadPlayer === player.player && ' 💩'}
                             </td>
-                            <td className="text-center p-4">{player.gamesPlayed}</td>
+                            <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                             <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
                             <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
                             <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                             <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
                             <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                            <td className="text-center p-4">
+                            <td className="text-center p-2 md:p-4 text-sm md:text-base">
                               {player.bestStreak > 0 ? (
                                 <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
                               ) : (
@@ -724,10 +724,10 @@ export default function PublicView() {
                     <tr className="border-b border-slate-700 bg-slate-900">
                       <th className="text-center p-4 w-20">Rank</th>
                       <th className="text-left p-4">Team</th>
-                      <th className="text-center p-4">Games</th>
-                      <th className="text-center p-4">Wins</th>
-                      <th className="text-center p-4">Losses</th>
-                      <th className="text-center p-4">Win Rate</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -740,9 +740,9 @@ export default function PublicView() {
                     ) : (
                       rungTeamStats.map((team, idx) => (
                         <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                          <td className="p-4 text-center text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
-                          <td className="p-4 font-bold text-xl">{team.team}</td>
-                          <td className="text-center p-4">{team.gamesPlayed}</td>
+                          <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
+                          <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{team.team}</td>
+                          <td className="text-center p-2 md:p-4 text-sm md:text-base">{team.gamesPlayed}</td>
                           <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
                           <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
                           <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
@@ -806,10 +806,10 @@ export default function PublicView() {
                   <tr className="border-b border-slate-700 bg-slate-900">
                     <th className="text-center p-4 w-20">Rank</th>
                     <th className="text-left p-4">Player</th>
-                    <th className="text-center p-4">Games</th>
-                    <th className="text-center p-4">Wins</th>
-                    <th className="text-center p-4">Losses</th>
-                    <th className="text-center p-4">Win Rate</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -822,12 +822,12 @@ export default function PublicView() {
                   ) : (
                     rungPlayerStats.map((player, idx) => (
                       <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`}>
-                        <td className="p-4 text-center text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
-                        <td className="p-4 font-bold text-xl">
+                        <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
+                        <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                           {player.player}
                           {worstShitheadPlayer === player.player && ' 💩'}
                         </td>
-                        <td className="text-center p-4">{player.gamesPlayed}</td>
+                        <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                         <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
                         <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
