@@ -243,31 +243,31 @@ export default function AdminDashboard() {
           <div className="bg-slate-800 rounded-xl p-6">
             <h2 className="text-2xl font-bold mb-4">Add New Game</h2>
             <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games (Monopoly, Tai Ti, Shithead), use Live Scoring for better tracking</p>
-            
             <div className="space-y-4">
-              <div className="flex justify-between items-center flex-1">
-                <label className="block mb-2 text-sm">Game Type</label>
-                <select
-                  value={newGame.type}
-                  onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
-                  className="w-full p-3 bg-slate-700 rounded-lg"
-                >
-                  <option value="Blackjack">🃏 Blackjack</option>
-                  <option value="Monopoly">🎲 Monopoly</option>
-                  <option value="Tai Ti">🀄 Tai Ti</option>
-                  <option value="Shithead">💩 Shithead</option>
-                  <option value="Rung">🎴 Rung</option>
-                </select>
-              </div>
-
-              <div className="flex justify-between items-center flex-1">
-                <label className="block mb-2 text-sm">Date</label>
-                <input
-                  type="date"
-                  value={newGame.date}
-                  onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
-                  className="w-full p-3 bg-slate-700 rounded-lg"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-sm">Game Type</label>
+                  <select
+                    value={newGame.type}
+                    onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
+                    className="w-full p-3 bg-slate-700 rounded-lg"
+                  >
+                    <option value="Blackjack">🃏 Blackjack</option>
+                    <option value="Monopoly">🎲 Monopoly</option>
+                    <option value="Tai Ti">🀄 Tai Ti</option>
+                    <option value="Shithead">💩 Shithead</option>
+                    <option value="Rung">🎴 Rung</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-2 text-sm">Date</label>
+                  <input
+                    type="date"
+                    value={newGame.date}
+                    onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
+                    className="w-full p-3 bg-slate-700 rounded-lg"
+                  />
+                </div>
               </div>
 
               {newGame.type === 'Rung' ? (
