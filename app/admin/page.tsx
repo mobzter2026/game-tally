@@ -226,15 +226,15 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto mt-4">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
+        <div className="text-center mb-8">
+          <div className="mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-slate-400">Manage game results</p>
           </div>
-          <div className="flex flex-col md:flex-row gap-2 md:gap-3 w-full md:w-auto">
-            <a href="/admin/scoring" className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">🎯 Live Scoring</a>
-            <a href="/" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">View Leaderboard</a>
-            <button onClick={handleSignOut} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Sign Out</button>
+          <div className="flex gap-2 justify-center">
+            <a href="/admin/scoring" className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 rounded">🎯 Live Scoring</a>
+            <a href="/" className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 rounded">View Leaderboard</a>
+            <button onClick={handleSignOut} className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 rounded">Sign Out</button>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
             <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games (Monopoly, Tai Ti, Shithead), use Live Scoring for better tracking</p>
             
             <div className="space-y-4">
-              <div>
+              <div className="mb-4">
                 <label className="block mb-2 text-sm">Game Type</label>
                 <select
                   value={newGame.type}
@@ -260,7 +260,7 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
-              <div>
+              <div className="mb-4">
                 <label className="block mb-2 text-sm">Date</label>
                 <input
                   type="date"
@@ -272,14 +272,14 @@ export default function AdminDashboard() {
 
               {newGame.type === 'Rung' ? (
                 <>
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Team 1 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
                           key={p}
                           onClick={() => toggleTeam1(p)}
-                          className={`px-4 py-2 rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -287,14 +287,14 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Team 2 (Max 2 players)</label>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
                         <button
                           key={p}
                           onClick={() => toggleTeam2(p)}
-                          className={`px-4 py-2 rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Winning Team</label>
                     <div className="flex gap-4">
                       <button
@@ -322,7 +322,7 @@ export default function AdminDashboard() {
                 </>
               ) : (
                 <>
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Players in Game</label>
                     <button
                       type="button"
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => togglePlayer(p)}
-                          className={`px-4 py-2 rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -344,14 +344,14 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Winners</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
                           key={p}
                           onClick={() => toggleWinner(p)}
-                          className={`px-4 py-2 rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -359,14 +359,14 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Runners-up</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
                           key={p}
                           onClick={() => toggleRunnerUp(p)}
-                          className={`px-4 py-2 rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -374,14 +374,14 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-4">
                     <label className="block mb-2 text-sm">Losers</label>
                     <div className="flex gap-2 flex-wrap">
                       {newGame.players.map(p => (
                         <button
                           key={p}
                           onClick={() => toggleLoser(p)}
-                          className={`px-4 py-2 rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-slate-700'}`}
+                          className={`px-3 py-1.5 text-sm rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-slate-700'}`}
                         >
                           {p}
                         </button>
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
               {games.slice(0, 20).map(game => (
                 <div key={game.id} className="bg-slate-700 rounded-lg p-3">
                   <div className="flex justify-between items-start mb-2">
-                    <div>
+                    <div className="mb-4">
                       <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
                       <div className="text-sm text-slate-400">
                         {new Date(game.game_date).toLocaleDateString()}
