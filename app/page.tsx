@@ -697,7 +697,7 @@ export default function PublicView() {
                         </div>
                         <div className="flex gap-1 flex-wrap">
                           {sortPlayersInGame(game).map(player => (
-                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold`}>
                               {player}
                             </span>
                           ))}
@@ -775,13 +775,13 @@ export default function PublicView() {
                       </div>
                       <div className="flex gap-1 flex-wrap">
                         {game.team1?.map(player => (
-                          <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                          <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold`}>
                             {player}
                           </span>
                         ))}
                         <span className="text-slate-400 px-2">vs</span>
                         {game.team2?.map(player => (
-                          <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-3 py-1 rounded text-sm font-semibold`}>
+                          <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold`}>
                             {player}
                           </span>
                         ))}
