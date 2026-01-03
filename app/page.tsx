@@ -481,14 +481,14 @@ export default function PublicView() {
         </div>
 
         <div className="mb-6 flex justify-center">
-          <div className="bg-slate-800 rounded-xl p-4 max-w-md w-full">
+          <div className="bg-violet-900/90 rounded-xl p-4 max-w-md w-full">
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActiveTab('individual')}
                 className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
                   activeTab === 'individual'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
                 }`}
               >
                 Solo Games
@@ -498,7 +498,7 @@ export default function PublicView() {
                 className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
                   activeTab === 'rung-teams'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
                 }`}
               >
                 Rung - Duo
@@ -508,7 +508,7 @@ export default function PublicView() {
                 className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
                   activeTab === 'rung-players'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
                 }`}
               >
                 Rung - Solo
@@ -537,7 +537,7 @@ export default function PublicView() {
                       : gameStats.slice(-3).reverse()
 
                     return (
-                      <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
+                      <div key={gameType} className="bg-violet-900/90 rounded-xl shadow-2xl overflow-hidden">
                         <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-900' : 'bg-gray-800'}`}>
                           <h3 className="text-xl font-bold whitespace-nowrap">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-200 text-xs mt-1">
@@ -578,7 +578,7 @@ export default function PublicView() {
                 </div>
               </>
             ) : (
-              <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
+              <div className="bg-violet-900/90 rounded-xl shadow-2xl overflow-hidden mb-8">
                 <div className="p-4 border-b border-slate-700">
                   <div className="text-center">
                     <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
@@ -666,7 +666,7 @@ export default function PublicView() {
             )}
 
             {hallView === 'none' && (
-              <div className="bg-slate-800 rounded-xl p-6 mb-8">
+              <div className="bg-violet-900/90 rounded-xl p-6 mb-8">
                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                   <h2 className="text-2xl font-bold">📜 Recent Games</h2>
                   <div className="text-sm">
@@ -705,7 +705,7 @@ export default function PublicView() {
 
         {activeTab === 'rung-teams' && (
           <>
-            <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
+            <div className="bg-violet-900/90 rounded-xl shadow-2xl overflow-hidden mb-8">
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
                 <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
@@ -746,7 +746,7 @@ export default function PublicView() {
               </div>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6 mb-8">
+            <div className="bg-violet-900/90 rounded-xl p-6 mb-8">
               <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                 <h2 className="text-2xl font-bold">📜 Recent Games</h2>
                 <div className="text-sm">
@@ -797,7 +797,7 @@ export default function PublicView() {
         )}
 
         {activeTab === 'rung-players' && (
-          <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
+          <div className="bg-violet-900/90 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
               <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">Rung - Solo: Revenge of the Stats</h2>
               <p className="text-slate-400 text-sm mt-1">Your Score? A Tragedy in Digits!</p>
