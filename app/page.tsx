@@ -844,8 +844,11 @@ export default function PublicView() {
 
         <button
   	  onClick={() => setShowFloatingFilter(!showFloatingFilter)}
-  	  className="fixed bottom-32 right-6 w-14 h-14 bg-gradient-to-br from-violet-600 to-fuchsia-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-50 animate-pulse-glow active:shadow-[0_0_30px_rgba(192,38,211,0.8)]"
-  	  style={{boxShadow: '0 0 20px rgba(192,38,211,0.6), 0 0 40px rgba(192,38,211,0.3)'}}
+  	  className="fixed bottom-44 right-6 w-14 h-14 bg-gradient-to-br from-violet-600 to-fuchsia-900 rounded-full flex items-center justify-center hover:scale-110 transition-all z-50 border-2 border-fuchsia-400 active:border-fuchsia-300"
+  	  style={{
+   	    boxShadow: '0 0 15px rgba(217,70,239,0.8), 0 0 30px rgba(217,70,239,0.5), 0 0 45px rgba(217,70,239,0.3), inset 0 0 10px rgba(217,70,239,0.4)',
+    	    animation: 'neonGlow 1.5s ease-in-out infinite alternate'
+	  }}
 	>
           <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
@@ -860,7 +863,7 @@ export default function PublicView() {
         {showFloatingFilter && (
           <>
             <div className="fixed inset-0 bg-black bg-opacity-20 z-40" onClick={() => setShowFloatingFilter(false)} />
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-br from-slate-800 via-purple-900 to-fuchsia-900 rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh]" style={{animation: "slideUp 0.3s ease-out"}}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-br from-black via-purple-950 to-fuchsia-950 rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-fuchsia-500/30" style={{animation: "slideUp 0.3s ease-out"}}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
               </div>
@@ -883,20 +886,21 @@ export default function PublicView() {
                 ))}
               </div>
             </div>
-            <style jsx>{`
-  	      @keyframes slideUp { 
-    		from { transform: translateY(100%); } 
-    		to { transform: translateY(0); } 
-  	      }
-  	      @keyframes pulse-glow {
-    		0%, 100% { box-shadow: 0 0 20px rgba(192,38,211,0.6), 0 0 40px rgba(192,38,211,0.3); }
-    		50% { box-shadow: 0 0 30px rgba(192,38,211,0.8), 0 0 60px rgba(192,38,211,0.5); }
-	      }
-	      .animate-pulse-glow {
-    	      	animation: pulse-glow 2s ease-in-out infinite;
-	      }
-	  `}</style>
-          </>
+	    <style jsx>{`
+              @keyframes slideUp { 
+                from { transform: translateY(100%); } 
+                to { transform: translateY(0); } 
+              }
+              @keyframes neonGlow {
+                0% { 
+                  box-shadow: 0 0 15px rgba(217,70,239,0.8), 0 0 30px rgba(217,70,239,0.5), 0 0 45px rgba(217,70,239,0.3), inset 0 0 10px rgba(217,70,239,0.4);
+                }
+                100% { 
+                  box-shadow: 0 0 25px rgba(217,70,239,1), 0 0 50px rgba(217,70,239,0.7), 0 0 75px rgba(217,70,239,0.5), inset 0 0 15px rgba(217,70,239,0.6);
+                }
+              }
+            `}</style>          
+	  </>
         )}
 
         <div className="text-center mt-8">
