@@ -427,7 +427,7 @@ export default function PublicView() {
         )}
 
         {latestWinner && latestWinner.type === 'shithead' && (
-          <div className="mb-4 bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-700 px-4 py-2 rounded-lg shadow-lg">
+          <div className="mb-4 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 px-4 py-2 rounded-lg shadow-lg">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
               💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
             </p>
@@ -508,38 +508,38 @@ export default function PublicView() {
           </div>
 
 
-          {/* Tab Buttons - Compact Grid */}
+          {/* Tab Buttons - 3 Column Layout */}
           <div className="bg-slate-800 rounded-xl p-4">
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setActiveTab('rung-teams')}
-                className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
-                  activeTab === 'rung-teams'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                }`}
-              >
-                Rung - Teams
-              </button>
-              <button
-                onClick={() => setActiveTab('rung-players')}
-                className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
-                  activeTab === 'rung-players'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                }`}
-              >
-                Rung - Individual
-              </button>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActiveTab('individual')}
-                className={`px-4 py-2 rounded-lg font-semibold transition text-sm col-span-2 ${
+                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
                   activeTab === 'individual'
                     ? 'bg-purple-600 text-white'
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                Individual Games
+                Solo Games
+              </button>
+              <button
+                onClick={() => setActiveTab('rung-teams')}
+                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
+                  activeTab === 'rung-teams'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                Rung - Duo
+              </button>
+              <button
+                onClick={() => setActiveTab('rung-players')}
+                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
+                  activeTab === 'rung-players'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                Rung - Solo
               </button>
             </div>
           </div>
