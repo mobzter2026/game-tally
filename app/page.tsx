@@ -842,13 +842,9 @@ export default function PublicView() {
           </div>
         )}
 
-        <button
+	<button
           onClick={() => setShowFloatingFilter(!showFloatingFilter)}
           className="fixed bottom-44 right-6 w-14 h-14 bg-gradient-to-br from-violet-900 to-fuchsia-950 rounded-full flex items-center justify-center hover:scale-110 transition-all z-50 border-2 border-fuchsia-500"
-          style={{
-            boxShadow: '0 0 20px rgba(217,70,239,0.6), 0 0 40px rgba(217,70,239,0.4)',
-            animation: 'neonGlow 1.5s ease-in-out infinite alternate'
-          }}
         >
           <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
