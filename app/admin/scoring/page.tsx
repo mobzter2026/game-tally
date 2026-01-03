@@ -370,7 +370,7 @@ export default function ScoringPage() {
 
         {viewingSession && viewingScores && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => {setViewingSession(null); setViewingScores(null)}}>
-            <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-2xl font-bold mb-4">{GAME_EMOJIS[viewingSession.game_type]} {viewingSession.game_type} Session Stats</h3>
               <div className="space-y-2 mb-4">
                 {Object.entries(viewingScores).sort((a, b) => {
@@ -379,7 +379,7 @@ export default function ScoringPage() {
                   }
                   return b[1] - a[1]
                 }).map(([player, score]) => (
-                  <div key={player} className="flex justify-between bg-slate-700 p-3 rounded">
+                  <div key={player} className="flex justify-between bg-violet-900/80 p-3 rounded border border-fuchsia-500/40">
                     <span className="font-bold">{player}</span>
                     <span className="text-yellow-400 font-bold text-xl">{score}</span>
                   </div>
@@ -394,7 +394,7 @@ export default function ScoringPage() {
 
         {!activeSession ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-slate-800 rounded-xl p-6">
+            <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
               <h2 className="text-2xl font-bold mb-4">Start New Scoring Session</h2>
               
               <div className="space-y-4">
@@ -403,7 +403,7 @@ export default function ScoringPage() {
                   <select
                     value={newSession.game}
                     onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
-                    className="w-full p-3 bg-slate-700 rounded-lg"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg"
                   >
                     {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
                   </select>
@@ -415,7 +415,7 @@ export default function ScoringPage() {
                     type="date"
                     value={newSession.date}
                     onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
-                    className="w-full p-3 bg-slate-700 rounded-lg"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg"
                   />
                 </div>
 
@@ -427,7 +427,7 @@ export default function ScoringPage() {
                     max="10"
                     value={newSession.threshold}
                     onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                    className="w-full p-3 bg-slate-700 rounded-lg"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg"
                   />
                 </div>
 
@@ -456,7 +456,7 @@ export default function ScoringPage() {
                       <button
                         key={p}
                         onClick={() => togglePlayer(p)}
-                        className={`px-4 py-2 rounded ${newSession.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                        className={`px-4 py-2 rounded ${newSession.players.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
                       >
                         {p}
                       </button>
@@ -473,11 +473,11 @@ export default function ScoringPage() {
               </div>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6">
+            <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
               <h2 className="text-2xl font-bold mb-4">Recent Sessions</h2>
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {sessions.map(session => (
-                  <div key={session.id} className="bg-slate-700 rounded-lg p-3">
+                  <div key={session.id} className="bg-violet-900/80 rounded-lg p-3 border border-fuchsia-500/40">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="font-bold">{GAME_EMOJIS[session.game_type]} {session.game_type}</div>
@@ -517,7 +517,7 @@ export default function ScoringPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-slate-800 rounded-xl p-6">
+            <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">
                   {GAME_EMOJIS[activeSession.game_type]} {activeSession.game_type}
@@ -593,7 +593,7 @@ export default function ScoringPage() {
               </button>
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-6">
+            <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
               <h2 className="text-2xl font-bold mb-4">Round History</h2>
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {rounds.map((round) => (
