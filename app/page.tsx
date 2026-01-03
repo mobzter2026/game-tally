@@ -481,7 +481,7 @@ export default function PublicView() {
         </div>
 
         <div className="mb-6 flex justify-center">
-          <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 p-4 max-w-md w-full">
+          <div className="bg-violet-950/25 rounded-xl border-2 border-white/60 p-4 max-w-md w-full">
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActiveTab('individual')}
