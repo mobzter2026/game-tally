@@ -588,6 +588,10 @@ export default function PublicView() {
                         onClick={() => setHallView('fame')}
                         className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
                       >
+                      <button
+                        onClick={() => setHallView('fame')}
+                        className="px-4 py-2 bg-[#27AE60] hover:bg-[#229954] rounded text-sm font-bold"
+                      >
                         ⭐ Hall of Fame
                       </button>
                       <button
@@ -597,8 +601,12 @@ export default function PublicView() {
                         🤡 Hall of Shame
                       </button>
                     </div>
-                    <p className="text-slate-400 text-xs sm:text-sm mb-2">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                    <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                    <p className="text-slate-400 text-xs sm:text-sm mb-2">
+                      🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead
+                    </p>
+                    <p className="text-slate-400 text-xs mb-3">
+                      Wins: 100% • 2nd: 40% • Survival: 10%
+                    </p>
                     <select
                       value={selectedGameType}
                       onChange={(e) => setSelectedGameType(e.target.value)}
