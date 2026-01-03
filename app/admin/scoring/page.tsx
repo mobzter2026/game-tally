@@ -466,7 +466,7 @@ export default function ScoringPage() {
 
                 <button
                   onClick={createSession}
-                  className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded font-bold"
+                  className="w-full bg-green-700 hover:bg-green-800 py-3 rounded font-bold"
                 >
                   ✍️ Record Scores Now
                 </button>
