@@ -586,17 +586,27 @@ export default function PublicView() {
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-[#27AE60] hover:bg-[#229954] rounded text-sm font-bold"
+                        className={`px-4 py-2 rounded text-sm font-bold
+                                   border-2 border-green-500 text-green-500
+                                   bg-transparent
+                                   hover:bg-green-500/10
+                                   transition-colors duration-150
+                                   ${hallView === 'fame' ? 'bg-green-500/20' : ''}`}
                       >
                         ⭐ Hall of Fame
                       </button>
+
                       <button
                         onClick={() => setHallView('shame')}
-                        className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
+                        className={`px-4 py-2 rounded text-sm font-bold
+                                   border-2 border-red-500 text-red-500
+                                   bg-transparent
+                                   hover:bg-red-500/10
+                                   transition-colors duration-150
+                                   ${hallView === 'shame' ? 'bg-red-500/20' : ''}`}
                       >
                         🤡 Hall of Shame
-                      </button>
-                    </div>
+                      </button>                    </div>
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
                       🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead
                     </p>
