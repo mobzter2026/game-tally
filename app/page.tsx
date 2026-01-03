@@ -636,7 +636,7 @@ export default function PublicView() {
                         </tr>
                       ) : (
                         playerStats.map((player, idx) => (
-                          <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-600/20' : ''}`}>
+                          <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`} style={idx < 3 ? {boxShadow: 'inset 0 0 20px rgba(251,191,36,0.15)'} : {}}>
                             <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                               {player.player}
@@ -731,7 +731,7 @@ export default function PublicView() {
                       </tr>
                     ) : (
                       rungTeamStats.map((team, idx) => (
-                        <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-600/20' : ''}`}>
+                        <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`} style={idx < 3 ? {boxShadow: 'inset 0 0 20px rgba(251,191,36,0.15)'} : {}}>
                           <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungTeamStats, idx, (t) => t.winRate)}</td>
                           <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{team.team}</td>
                           <td className="text-center p-2 md:p-4 text-sm md:text-base">{team.gamesPlayed}</td>
@@ -823,7 +823,7 @@ export default function PublicView() {
                     </tr>
                   ) : (
                     rungPlayerStats.map((player, idx) => (
-                      <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-600/20' : ''}`}>
+                      <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : ''}`} style={idx < 3 ? {boxShadow: 'inset 0 0 20px rgba(251,191,36,0.15)'} : {}}>
                         <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
                         <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                           {player.player}
