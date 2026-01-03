@@ -400,11 +400,11 @@ export default function PublicView() {
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono">
-      <div className="max-w-7xl mx-auto mt-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden">
+      <div className="max-w-7xl mx-auto mt-8 px-2">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 whitespace-nowrap">Ultimate Card Championship Leaderboard 🏆</h1>
-          <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard 🏆</h1>
+          <p className="text-slate-300 text-base sm:text-lg italic">"May the odds be ever in your favour"</p>
           
           {perfectGame && (
             <div className="mt-4 inline-block bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 rounded-full">
