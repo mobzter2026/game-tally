@@ -606,7 +606,8 @@ export default function PublicView() {
                                    ${hallView === 'shame' ? 'bg-red-500/20' : ''}`}
                       >
                         🤡 Hall of Shame
-                      </button>                    </div>
+                      </button>                    
+		    </div>
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
                       🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead
                     </p>
