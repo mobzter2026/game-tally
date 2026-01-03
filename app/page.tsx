@@ -459,7 +459,7 @@ export default function PublicView() {
                     <button
                       key={player}
                       onClick={() => togglePlayerFilter(player)}
-                      className={`px-2 py-1.5 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
+                      className={`px-3 py-1.5 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
                     >
                       {player}
                     </button>
@@ -675,7 +675,7 @@ export default function PublicView() {
                   <div className="text-sm">
                     <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
                     <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
-                    <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survived</span>
+                    <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2">Survivors</span>
                     <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
                   </div>
                 </div>
