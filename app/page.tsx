@@ -7,6 +7,15 @@ import type { Game } from '@/lib/types'
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const MIN_GAMES_FOR_RANKING = 0
 
+const QUOTES = [
+  "May the odds be ever in your favour",
+  "Friendship ends where the game begins",
+  "It's not about winning, it's about making others lose",
+  "Trust no one, especially your teammates",
+  "Every card tells a story of betrayal",
+  "Where loyalty dies and legends are born"
+]
+
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
   'Monopoly': '🎲',
@@ -28,7 +37,16 @@ export default function PublicView() {
   const [showFilter, setShowFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
+  const [currentQuote, setCurrentQuote] = useState(0)
   const supabase = createClient()
+
+  // Rotate quotes every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentQuote((prev) => (prev + 1) % QUOTES.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     fetchGames()
@@ -427,8 +445,8 @@ export default function PublicView() {
         )}
 
         {latestWinner && latestWinner.type === 'shithead' && (
-          <div className="mb-4 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 px-4 py-2 rounded-lg shadow-lg">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="mb-4 bg-gradient-to-r from-slate-100 via-white to-slate-100 px-4 py-2 rounded-lg shadow-lg border-2 border-amber-600">
+            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black">
               💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
             </p>
           </div>
@@ -452,7 +470,7 @@ export default function PublicView() {
 
         <div className="text-center mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard 🏆</h1>
-          <p className="text-slate-300 text-base sm:text-lg italic">"May the odds be ever in your favour"</p>
+          <p className="text-slate-300 text-base sm:text-lg italic transition-opacity duration-500">"{QUOTES[currentQuote]}"</p>
         </div>
 
         {/* Sleeker Side by Side Layout */}
