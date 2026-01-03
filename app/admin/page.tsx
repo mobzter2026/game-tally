@@ -404,7 +404,7 @@ export default function AdminDashboard() {
               )}
               <button
                 onClick={addGame}
-                className="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded font-bold"
+                className="w-full bg-fuchsia-700 hover:bg-fuchsia-800 py-3 rounded font-bold"
               >
                 Add Game
               </button>
