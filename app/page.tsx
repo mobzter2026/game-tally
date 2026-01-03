@@ -46,13 +46,12 @@ export default function PublicView() {
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
   const [latestWinner, setLatestWinner] = useState<{game: Game, type: 'dominated' | 'shithead' | 'normal'} | null>(null)
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
-  const [showFilter, setShowFilter] = useState(false)
+  const [showFloatingFilter, setShowFloatingFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const [currentQuote, setCurrentQuote] = useState(0)
   const supabase = createClient()
 
-  // Rotate quotes every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuote((prev) => (prev + 1) % QUOTES.length)
@@ -92,18 +91,16 @@ export default function PublicView() {
 
   const checkPerfectGameAndStreak = (gamesData: Game[]) => {
     const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
-    
-    // Check for latest winner banner
+
     if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
       const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
       const isPerfect = !hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2
-      
+
       if (isPerfect) {
         setPerfectGame(latestIndividualGame)
         setLatestWinner({ game: latestIndividualGame, type: 'dominated' })
       } else {
         setPerfectGame(null)
-        // Determine banner type for non-perfect wins
         if (latestIndividualGame.game_type === 'Shithead' && latestIndividualGame.losers && latestIndividualGame.losers.length > 0) {
           setLatestWinner({ game: latestIndividualGame, type: 'shithead' })
         } else {
@@ -128,7 +125,7 @@ export default function PublicView() {
           break
         }
       }
-      
+
       if (streak >= 3) {
         setShitheadLosingStreak({ player, streak })
         foundStreak = true
@@ -160,11 +157,11 @@ export default function PublicView() {
       filtered = filtered.filter(game => {
         if (game.game_type === 'Rung') {
           const allPlayers = [...(game.team1 || []), ...(game.team2 || [])]
-          return allPlayers.length === selectedPlayers.length && 
+          return allPlayers.length === selectedPlayers.length &&
                  selectedPlayers.every(p => allPlayers.includes(p))
         } else {
           const gamePlayers = game.players_in_game || []
-          return gamePlayers.length === selectedPlayers.length && 
+          return gamePlayers.length === selectedPlayers.length &&
                  selectedPlayers.every(p => gamePlayers.includes(p))
         }
       })
@@ -182,7 +179,7 @@ export default function PublicView() {
   const getPlayerStatsForGame = (gameType?: string) => {
     const stats: any = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
-    
+
     activePlayers.forEach(p => {
       stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, survivals: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
     })
@@ -194,30 +191,29 @@ export default function PublicView() {
 
     individualGames.forEach(game => {
       if (game.players_in_game) {
-        game.players_in_game.forEach(p => { 
-          if (stats[p]) stats[p].gamesPlayed++ 
+        game.players_in_game.forEach(p => {
+          if (stats[p]) stats[p].gamesPlayed++
         })
       }
-      
-      if (game.winners) game.winners.forEach(w => { 
+
+      if (game.winners) game.winners.forEach(w => {
         if (stats[w]) {
           stats[w].wins++
           stats[w].weightedWins += 1
         }
       })
-      if (game.runners_up) game.runners_up.forEach(r => { 
+      if (game.runners_up) game.runners_up.forEach(r => {
         if (stats[r]) {
           stats[r].runnerUps++
           stats[r].weightedWins += 0.4
         }
       })
-      
-      // Calculate survivals (players who didn't win, get 2nd, or lose)
+
       if (game.players_in_game) {
         const winners = game.winners || []
         const runnersUp = game.runners_up || []
         const losers = game.losers || []
-        
+
         game.players_in_game.forEach(p => {
           if (stats[p] && !winners.includes(p) && !runnersUp.includes(p) && !losers.includes(p)) {
             stats[p].survivals++
@@ -225,9 +221,9 @@ export default function PublicView() {
           }
         })
       }
-      
-      if (game.losers) game.losers.forEach(l => { 
-        if (stats[l]) stats[l].losses++ 
+
+      if (game.losers) game.losers.forEach(l => {
+        if (stats[l]) stats[l].losses++
       })
 
       if (game.game_type === 'Shithead' && game.losers) {
@@ -240,7 +236,7 @@ export default function PublicView() {
     activePlayers.forEach(player => {
       let currentStreak = 0
       let bestStreak = 0
-      
+
       const reversedGames = individualGames.slice().reverse()
       reversedGames.forEach(game => {
         if (game.winners?.includes(player)) {
@@ -252,7 +248,7 @@ export default function PublicView() {
           currentStreak = 0
         }
       })
-      
+
       stats[player].bestStreak = bestStreak
     })
 
@@ -271,29 +267,29 @@ export default function PublicView() {
   const getWorstShitheadPlayer = () => {
     const allStats = getPlayerStats()
     if (allStats.length === 0) return null
-    
+
     const maxShitheadLosses = Math.max(...allStats.map(p => p.shitheadLosses))
     if (maxShitheadLosses === 0) return null
-    
+
     const worstPlayer = allStats.find(p => p.shitheadLosses === maxShitheadLosses)
     return worstPlayer?.player || null
   }
 
   const getRungTeamStats = () => {
     const teamStats: any = {}
-    
+
     const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
         const team1Key = game.team1.slice().sort().join(' + ')
         const team2Key = game.team2.slice().sort().join(' + ')
-        
+
         if (!teamStats[team1Key]) teamStats[team1Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
         if (!teamStats[team2Key]) teamStats[team2Key] = { gamesPlayed: 0, wins: 0, losses: 0 }
-        
+
         teamStats[team1Key].gamesPlayed++
         teamStats[team2Key].gamesPlayed++
-        
+
         if (game.winning_team === 1) {
           teamStats[team1Key].wins++
           teamStats[team2Key].losses++
@@ -317,7 +313,7 @@ export default function PublicView() {
   const getRungPlayerStats = () => {
     const stats: any = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
-    
+
     activePlayers.forEach(p => {
       stats[p] = { gamesPlayed: 0, wins: 0, losses: 0 }
     })
@@ -327,14 +323,14 @@ export default function PublicView() {
       if (game.team1 && game.team2) {
         const winningTeam = game.winning_team === 1 ? game.team1 : game.team2
         const losingTeam = game.winning_team === 1 ? game.team2 : game.team1
-        
+
         winningTeam.forEach(p => {
           if (stats[p]) {
             stats[p].gamesPlayed++
             stats[p].wins++
           }
         })
-        
+
         losingTeam.forEach(p => {
           if (stats[p]) {
             stats[p].gamesPlayed++
@@ -356,27 +352,27 @@ export default function PublicView() {
 
   const getMedal = (sortedList: any[], currentIndex: number, getWinRate: (item: any) => string) => {
     const currentWinRate = getWinRate(sortedList[currentIndex])
-    
+
     let position = 1
     for (let i = 0; i < currentIndex; i++) {
       if (getWinRate(sortedList[i]) !== currentWinRate) {
         position = i + 2
       }
     }
-    
+
     if (currentIndex > 0 && getWinRate(sortedList[currentIndex - 1]) === currentWinRate) {
       position = getMedalPosition(sortedList, currentIndex - 1, getWinRate)
     }
-    
+
     if (position === 1) return '🥇'
     if (position === 2) return '🥈'
     if (position === 3) return '🥉'
-    
+
     const thirdPlaceWinRate = sortedList.find((_, idx) => getMedalPosition(sortedList, idx, getWinRate) === 3)
     if (thirdPlaceWinRate && getWinRate(sortedList[currentIndex]) === getWinRate(thirdPlaceWinRate)) {
       return '🥉'
     }
-    
+
     return `${currentIndex + 1}`
   }
 
@@ -403,7 +399,7 @@ export default function PublicView() {
 
   const sortPlayersInGame = (game: Game) => {
     if (!game.players_in_game) return []
-    
+
     return game.players_in_game.slice().sort((a, b) => {
       const aIsWinner = game.winners?.includes(a)
       const bIsWinner = game.winners?.includes(b)
@@ -413,7 +409,7 @@ export default function PublicView() {
       const bIsSurvived = !bIsWinner && !bIsRunner && !game.losers?.includes(b)
       const aIsLoser = game.losers?.includes(a)
       const bIsLoser = game.losers?.includes(b)
-      
+
       if (aIsWinner && !bIsWinner) return -1
       if (!aIsWinner && bIsWinner) return 1
       if (aIsRunner && !bIsRunner) return -1
@@ -422,7 +418,7 @@ export default function PublicView() {
       if (!aIsSurvived && bIsSurvived) return 1
       if (aIsLoser && !bIsLoser) return 1
       if (!aIsLoser && bIsLoser) return -1
-      
+
       return 0
     })
   }
@@ -438,16 +434,15 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
   const rungPlayerStats = getRungPlayerStats()
-  const recentGames = activeTab === 'individual' 
+  const recentGames = activeTab === 'individual'
     ? filteredGames.filter(g => g.game_type !== 'Rung').slice(0, 20)
     : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
-  
+
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
-        {/* Flash Banners at Top */}
         {latestWinner && latestWinner.type === 'dominated' && (
           <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis animate-pulse">
@@ -485,61 +480,8 @@ export default function PublicView() {
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
         </div>
 
-        {/* Sleeker Side by Side Layout */}
-        <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-slate-800 rounded-xl p-4">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-bold">Filter by Players</h3>
-              <button
-                onClick={() => setShowFilter(!showFilter)}
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
-              >
-                {showFilter ? 'Hide Filter' : 'Show Filter'}
-              </button>
-            </div>
-            
-            {showFilter && (
-              <div>
-                <div className="flex gap-2 mb-3">
-                  <button
-                    onClick={selectAllPlayers}
-                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                  >
-                    Select All
-                  </button>
-                  {selectedPlayers.length > 0 && (
-                    <button
-                      onClick={clearFilter}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                    >
-                      Clear ({selectedPlayers.length})
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {PLAYERS.map(player => (
-                    <button
-                      key={player}
-                      onClick={() => togglePlayerFilter(player)}
-                      className={`px-3 sm:px-4 py-2 rounded transition text-xs sm:text-sm font-medium ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
-                    >
-                      {player}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {selectedPlayers.length > 0 && !showFilter && (
-              <div className="text-sm text-slate-400">
-                {selectedPlayers.join(', ')} • {filteredGames.length} games
-              </div>
-            )}
-          </div>
-
-
-          {/* Tab Buttons - 3 Column Layout */}
-          <div className="bg-slate-800 rounded-xl p-4">
+        <div className="mb-6 flex justify-center">
+          <div className="bg-slate-800 rounded-xl p-4 max-w-md w-full">
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setActiveTab('individual')}
@@ -590,10 +532,10 @@ export default function PublicView() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {INDIVIDUAL_GAMES.map(gameType => {
                     const gameStats = getPlayerStatsForGame(gameType)
-                    const displayStats = hallView === 'fame' 
-                      ? gameStats.slice(0, 3) 
+                    const displayStats = hallView === 'fame'
+                      ? gameStats.slice(0, 3)
                       : gameStats.slice(-3).reverse()
-                    
+
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
                         <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-900' : 'bg-gray-800'}`}>
@@ -824,7 +766,6 @@ export default function PublicView() {
                         {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
                       <div className="flex gap-1 flex-wrap items-center">
-                        {/* Winners on left */}
                         {game.winning_team === 1 && game.team1?.map(player => (
                           <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
                             {player}
@@ -836,7 +777,6 @@ export default function PublicView() {
                           </span>
                         ))}
                         <span className="text-slate-400 px-2">vs</span>
-                        {/* Losers on right */}
                         {game.winning_team === 2 && game.team1?.map(player => (
                           <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
                             {player}
@@ -900,6 +840,50 @@ export default function PublicView() {
               </table>
             </div>
           </div>
+        )}
+
+        <button
+          onClick={() => setShowFloatingFilter(!showFloatingFilter)}
+          className="fixed bottom-32 right-6 w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
+        >
+          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
+          </svg>
+          {selectedPlayers.length > 0 && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">
+              {selectedPlayers.length}
+            </div>
+          )}
+        </button>
+
+        {showFloatingFilter && (
+          <>
+            <div className="fixed inset-0 bg-black bg-opacity-20 z-40" onClick={() => setShowFloatingFilter(false)} />
+            <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh]" style={{animation: "slideUp 0.3s ease-out"}}>
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Filter Players</h3>
+              <div className="flex gap-2 mb-3">
+                <button onClick={selectAllPlayers} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">Select All</button>
+                {selectedPlayers.length > 0 && (
+                  <button onClick={clearFilter} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm">Clear</button>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {PLAYERS.map(player => (
+                  <button
+                    key={player}
+                    onClick={() => togglePlayerFilter(player)}
+                    className={`px-4 py-2 rounded text-sm font-medium transition ${selectedPlayers.includes(player) ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                  >
+                    {player}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <style jsx>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+          </>
         )}
 
         <div className="text-center mt-8">
