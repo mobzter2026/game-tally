@@ -586,10 +586,6 @@ export default function PublicView() {
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
-                      >
-                      <button
-                        onClick={() => setHallView('fame')}
                         className="px-4 py-2 bg-[#27AE60] hover:bg-[#229954] rounded text-sm font-bold"
                       >
                         ⭐ Hall of Fame
