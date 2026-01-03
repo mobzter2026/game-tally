@@ -336,6 +336,19 @@ export default function ScoringPage() {
     }
   }
 
+  const deleteSession = async (sessionId: string) => {
+    if (!confirm('Delete this session? This will remove the session and all its rounds.')) return
+
+    // Delete all rounds for this session
+    await supabase.from('rounds').delete().eq('session_id', sessionId)
+    
+    // Delete the session itself
+    await supabase.from('game_sessions').delete().eq('id', sessionId)
+    
+    // Refresh the sessions list
+    fetchSessions()
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -348,10 +361,8 @@ export default function ScoringPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto mt-4">
         <div className="text-center mb-8">
-          <div className="flex justify-between items-center flex-1 mb-4">
-            <h1 className="text-3xl md:text-4xl font-bold">🎯 Live Scoring</h1>
-            <p className="text-slate-400">Track rounds in real-time</p>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">🎯 Live Scoring</h1>
+          <p className="text-slate-400 mb-4">Track rounds in real-time</p>
           <div className="flex gap-2 justify-center">
             <a href="/admin" className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 rounded">← Back to Admin</a>
           </div>
@@ -490,6 +501,12 @@ export default function ScoringPage() {
                           className="bg-orange-700 hover:bg-orange-800 px-3 py-1 rounded text-sm whitespace-nowrap"
                         >
                           View Stats
+                        </button>
+                        <button
+                          onClick={() => deleteSession(session.id)}
+                          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm whitespace-nowrap"
+                        >
+                          Delete
                         </button>
                       </div>
                     </div>

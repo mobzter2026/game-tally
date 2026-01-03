@@ -400,8 +400,8 @@ export default function PublicView() {
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
-      <div className="max-w-6xl mx-auto mt-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono">
+      <div className="max-w-7xl mx-auto mt-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 whitespace-nowrap">Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
@@ -454,12 +454,12 @@ export default function PublicView() {
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {PLAYERS.map(player => (
                     <button
                       key={player}
                       onClick={() => togglePlayerFilter(player)}
-                      className={`px-4 py-2 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
+                      className={`px-3 sm:px-4 py-2 rounded transition text-xs sm:text-sm font-medium ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
                     >
                       {player}
                     </button>
