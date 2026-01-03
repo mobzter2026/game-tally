@@ -364,7 +364,7 @@ export default function ScoringPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">🎯 Live Scoring</h1>
           <p className="text-slate-400 mb-4">Track rounds in real-time</p>
           <div className="flex gap-2 justify-center">
-            <a href="/admin" className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 rounded">← Back to Admin</a>
+            <a href="/admin" className="px-3 py-1.5 text-sm bg-green-700 hover:bg-green-800 rounded">← Back to Admin</a>
           </div>
         </div>
 
@@ -437,7 +437,7 @@ export default function ScoringPage() {
                     <button
                       type="button"
                       onClick={selectAllPlayers}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                      className="px-3 py-1 bg-green-700 hover:bg-green-800 rounded text-xs"
                     >
                       Select All
                     </button>
@@ -486,7 +486,7 @@ export default function ScoringPage() {
                         {session.status === 'in_progress' && (
                           <button
                             onClick={() => setActiveSession(session)}
-                            className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm w-full"
+                            className="bg-green-700 hover:bg-green-800 px-3 py-1 rounded text-sm w-full"
                           >
                             Resume
                           </button>
