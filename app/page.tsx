@@ -23,6 +23,7 @@ export default function PublicView() {
   const [activeTab, setActiveTab] = useState<'individual' | 'rung-teams' | 'rung-players'>('individual')
   const [perfectGame, setPerfectGame] = useState<Game | null>(null)
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
+  const [latestWinner, setLatestWinner] = useState<{game: Game, type: 'dominated' | 'shithead' | 'normal'} | null>(null)
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [showFilter, setShowFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
@@ -61,13 +62,27 @@ export default function PublicView() {
 
   const checkPerfectGameAndStreak = (gamesData: Game[]) => {
     const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
+    
+    // Check for latest winner banner
     if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
       const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
-      if (!hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2) {
+      const isPerfect = !hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2
+      
+      if (isPerfect) {
         setPerfectGame(latestIndividualGame)
+        setLatestWinner({ game: latestIndividualGame, type: 'dominated' })
       } else {
         setPerfectGame(null)
+        // Determine banner type for non-perfect wins
+        if (latestIndividualGame.game_type === 'Shithead' && latestIndividualGame.losers && latestIndividualGame.losers.length > 0) {
+          setLatestWinner({ game: latestIndividualGame, type: 'shithead' })
+        } else {
+          setLatestWinner({ game: latestIndividualGame, type: 'normal' })
+        }
       }
+    } else {
+      setPerfectGame(null)
+      setLatestWinner(null)
     }
 
     const shitheadGames = gamesData.filter(g => g.game_type === 'Shithead')
@@ -403,10 +418,26 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden">
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {/* Flash Banners at Top */}
-        {perfectGame && (
+        {latestWinner && latestWinner.type === 'dominated' && (
           <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              ⚡ {perfectGame.winners?.[0]} dominated {perfectGame.game_type} on {new Date(perfectGame.game_date).toLocaleDateString()} - Perfect sweep!
+              ⚡ Flawless victory in {latestWinner.game.game_type} by {latestWinner.game.winners?.[0]} ⚡
+            </p>
+          </div>
+        )}
+
+        {latestWinner && latestWinner.type === 'shithead' && (
+          <div className="mb-4 bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-700 px-4 py-2 rounded-lg shadow-lg">
+            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
+            </p>
+          </div>
+        )}
+
+        {latestWinner && latestWinner.type === 'normal' && (
+          <div className="mb-4 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 px-4 py-2 rounded-lg shadow-lg">
+            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              💀 {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 💀
             </p>
           </div>
         )}
@@ -414,7 +445,7 @@ export default function PublicView() {
         {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
           <div className="mb-4 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 px-4 py-2 rounded-lg shadow-lg">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              💩 {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak!
+              {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! 💩
             </p>
           </div>
         )}
