@@ -552,7 +552,7 @@ export default function PublicView() {
                               {displayStats.map((player, idx) => {
                                 const actualIdx = hallView === 'fame' ? idx : gameStats.length - 3 + idx
                                 return (
-                                  <div key={player.player} className="flex items-center justify-between bg-slate-700 p-3 rounded">
+                                  <div key={player.player} className="flex items-center justify-between bg-violet-900/80 p-3 rounded">
                                     <div className="flex items-center gap-3">
                                       <span className="text-2xl">
                                         {hallView === 'fame' ? getMedal(gameStats, actualIdx, (p) => p.winRate) : `${gameStats.length - idx}`}
@@ -602,7 +602,7 @@ export default function PublicView() {
                     <select
                       value={selectedGameType}
                       onChange={(e) => setSelectedGameType(e.target.value)}
-                      className="px-3 py-2 bg-slate-700 rounded text-sm"
+                      className="px-3 py-2 bg-violet-900/80 rounded text-sm"
                     >
                       <option value="All Games">🌍 All Games</option>
                       {INDIVIDUAL_GAMES.map(game => (
@@ -875,7 +875,7 @@ export default function PublicView() {
                   <button
                     key={player}
                     onClick={() => togglePlayerFilter(player)}
-                    className={`px-4 py-2 rounded text-sm font-medium transition ${selectedPlayers.includes(player) ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-200'}`}
+                    className={`px-4 py-2 rounded text-sm font-medium transition ${selectedPlayers.includes(player) ? 'bg-green-600 text-white' : 'bg-violet-900/80 text-slate-200 hover:bg-violet-800'}`}
                   >
                     {player}
                   </button>
