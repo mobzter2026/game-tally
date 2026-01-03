@@ -435,9 +435,9 @@ export default function PublicView() {
         )}
 
         {latestWinner && latestWinner.type === 'normal' && (
-          <div className="mb-4 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 px-4 py-2 rounded-lg shadow-lg">
+          <div className="mb-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 px-4 py-2 rounded-lg shadow-lg">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              💀 {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 💀
+              🏆 {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 🏆
             </p>
           </div>
         )}
