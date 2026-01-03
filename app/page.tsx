@@ -575,43 +575,36 @@ export default function PublicView() {
               </>
             ) : (
               <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
-                <div className="p-6 border-b border-slate-700">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div>
-                      <h2 className="text-2xl font-bold mb-1">The Ultimate Backstab Board 🔪</h2>
-                      <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional, Betrayal Mandatory</p>
-                      <div className="flex gap-2 mb-3">
-                        <button
-                          onClick={() => setHallView('fame')}
-                          className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
-                        >
-                          ⭐ Hall of Fame
-                        </button>
-                        <button
-                          onClick={() => setHallView('shame')}
-                          className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
-                        >
-                          🤡 Hall of Shame
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Right Column */}
-                    <div className="text-right">
-                      <p className="text-slate-400 text-sm mb-4">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
-                      <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
-                      <select
-                        value={selectedGameType}
-                        onChange={(e) => setSelectedGameType(e.target.value)}
-                        className="px-3 py-2 bg-slate-700 rounded text-sm"
+                <div className="p-4 border-b border-slate-700">
+                  <div className="text-center">
+                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
+                    <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
+                    <div className="flex gap-2 mb-3 justify-center flex-wrap">
+                      <button
+                        onClick={() => setHallView('fame')}
+                        className="px-4 py-2 bg-[#0E8C73] hover:bg-[#0B7563] rounded text-sm font-bold"
                       >
-                        <option value="All Games">🌍 All Games</option>
-                        {INDIVIDUAL_GAMES.map(game => (
-                          <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
-                        ))}
-                      </select>
+                        ⭐ Hall of Fame
+                      </button>
+                      <button
+                        onClick={() => setHallView('shame')}
+                        className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
+                      >
+                        🤡 Hall of Shame
+                      </button>
                     </div>
+                    <p className="text-slate-400 text-xs sm:text-sm mb-2">🃏 Blackjack • 🎲 Monopoly • 🀄 Tai Ti • 💩 Shithead</p>
+                    <p className="text-slate-400 text-xs mb-3">Wins: 100% • 2nd: 40% • Survival: 10%</p>
+                    <select
+                      value={selectedGameType}
+                      onChange={(e) => setSelectedGameType(e.target.value)}
+                      className="px-3 py-2 bg-slate-700 rounded text-sm"
+                    >
+                      <option value="All Games">🌍 All Games</option>
+                      {INDIVIDUAL_GAMES.map(game => (
+                        <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
