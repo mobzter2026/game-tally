@@ -241,7 +241,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Add Game Form */}
-          <div className="bg-slate-800 rounded-xl p-6">
+          <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
             <h2 className="text-2xl font-bold mb-4">Add New Game</h2>
             <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games (Monopoly, Tai Ti, Shithead), use Live Scoring for better tracking</p>
             <div className="space-y-4">
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                   <select
                     value={newGame.type}
                     onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
-                    className="w-full p-3 bg-slate-700 rounded-lg"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg"
                   >
                     <option value="Blackjack">🃏 Blackjack</option>
                     <option value="Monopoly">🎲 Monopoly</option>
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                     type="date"
                     value={newGame.date}
                     onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
-                    className="w-full p-3 bg-slate-700 rounded-lg"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg"
                   />
                 </div>
               </div>
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleTeam1(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.team1.includes(p) ? 'bg-blue-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleTeam2(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.team2.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -308,13 +308,13 @@ export default function AdminDashboard() {
                     <div className="flex gap-4">
                       <button
                         onClick={() => setNewGame({ ...newGame, winningTeam: 1 })}
-                        className={`flex-1 py-2 rounded ${newGame.winningTeam === 1 ? 'bg-green-600' : 'bg-slate-700'}`}
+                        className={`flex-1 py-2 rounded ${newGame.winningTeam === 1 ? 'bg-green-600' : 'bg-violet-900/80'}`}
                       >
                         Team 1
                       </button>
                       <button
                         onClick={() => setNewGame({ ...newGame, winningTeam: 2 })}
-                        className={`flex-1 py-2 rounded ${newGame.winningTeam === 2 ? 'bg-green-600' : 'bg-slate-700'}`}
+                        className={`flex-1 py-2 rounded ${newGame.winningTeam === 2 ? 'bg-green-600' : 'bg-violet-900/80'}`}
                       >
                         Team 2
                       </button>
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => togglePlayer(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -365,7 +365,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleWinner(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.winners.includes(p) ? 'bg-green-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleRunnerUp(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.runnersUp.includes(p) ? 'bg-blue-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
                         <button
                           key={p}
                           onClick={() => toggleLoser(p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-slate-700'}`}
+                          className={`px-2 py-1 text-sm rounded ${newGame.losers.includes(p) ? 'bg-red-600' : 'bg-violet-900/80'}`}
                         >
                           {p}
                         </button>
@@ -412,11 +412,11 @@ export default function AdminDashboard() {
           </div>
 
           {/* Recent Games */}
-          <div className="bg-slate-800 rounded-xl p-6">
+          <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
             <h2 className="text-2xl font-bold mb-4">Recent Games</h2>
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {games.slice(0, 20).map(game => (
-                <div key={game.id} className="bg-slate-700 rounded-lg p-3">
+                <div key={game.id} className="bg-violet-900/80 rounded p-3 border border-fuchsia-500/40">
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex justify-between items-center flex-1">
                       <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
