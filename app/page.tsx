@@ -47,6 +47,7 @@ export default function PublicView() {
   const [latestWinner, setLatestWinner] = useState<{game: Game, type: 'dominated' | 'shithead' | 'normal'} | null>(null)
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [showFilter, setShowFilter] = useState(false)
+  const [showFloatingFilter, setShowFloatingFilter] = useState(false)
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const [currentQuote, setCurrentQuote] = useState(0)
@@ -445,7 +446,7 @@ export default function PublicView() {
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {/* Flash Banners at Top */}
         {latestWinner && latestWinner.type === 'dominated' && (
@@ -486,48 +487,10 @@ export default function PublicView() {
         </div>
 
         {/* Sleeker Side by Side Layout */}
-        <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="mb-6 flex justify-center">
           <div className="bg-slate-800 rounded-xl p-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">Filter by Players</h3>
-              <button
-                onClick={() => setShowFilter(!showFilter)}
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
-              >
-                {showFilter ? 'Hide Filter' : 'Show Filter'}
-              </button>
-            </div>
-            
-            {showFilter && (
-              <div>
-                <div className="flex gap-2 mb-3">
-                  <button
-                    onClick={selectAllPlayers}
-                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                  >
-                    Select All
-                  </button>
-                  {selectedPlayers.length > 0 && (
-                    <button
-                      onClick={clearFilter}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                    >
-                      Clear ({selectedPlayers.length})
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {PLAYERS.map(player => (
-                    <button
-                      key={player}
-                      onClick={() => togglePlayerFilter(player)}
-                      className={`px-3 sm:px-4 py-2 rounded transition text-xs sm:text-sm font-medium ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
-                    >
-                      {player}
-                    </button>
-                  ))}
-                </div>
-              </div>
             )}
             
             {selectedPlayers.length > 0 && !showFilter && (
@@ -901,7 +864,51 @@ export default function PublicView() {
             </div>
           </div>
         )}
+        {/* Floating Filter Button */}
+        <button
+          onClick={() => setShowFloatingFilter(!showFloatingFilter)}
+          className="fixed bottom-32 right-6 w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50"
+        >
+          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
+          </svg>
+          {selectedPlayers.length > 0 && (
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">
+              {selectedPlayers.length}
+            </div>
+          )}
+        </button>
 
+        {/* Bottom Sheet */}
+        {showFloatingFilter && (
+          <>
+            <div className="fixed inset-0 bg-black bg-opacity-20 z-40" onClick={() => setShowFloatingFilter(false)} />
+            <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh]" style={{animation: "slideUp 0.3s ease-out"}}>
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Filter Players</h3>
+              <div className="flex gap-2 mb-3">
+                <button onClick={selectAllPlayers} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">Select All</button>
+                {selectedPlayers.length > 0 && (
+                  <button onClick={clearFilter} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm">Clear</button>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {PLAYERS.map(player => (
+                  <button
+                    key={player}
+                    onClick={() => togglePlayerFilter(player)}
+                    className={`px-4 py-2 rounded text-sm font-medium transition ${selectedPlayers.includes(player) ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                  >
+                    {player}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <style jsx>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+          </>
+        )}
         <div className="text-center mt-8">
           <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
         </div>
