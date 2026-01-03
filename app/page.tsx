@@ -766,14 +766,14 @@ export default function PublicView() {
             <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
-                <p className="text-slate-400 text-sm mt-1">Some Partnerships make Legends... Others make Memes</p>
+                <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-700 bg-slate-900">
                       <th className="text-center p-4 w-20">Rank</th>
-                      <th className="text-left p-4">Team</th>
+                      <th className="text-left p-4 w-48">Team</th>
                       <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
                       <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
                       <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
@@ -823,15 +823,27 @@ export default function PublicView() {
                       <div className="text-slate-300 text-base font-bold mb-2">
                         {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {game.team1?.map(player => (
-                          <span key={player} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold`}>
+                      <div className="flex gap-1 flex-wrap items-center">
+                        {/* Winners on left */}
+                        {game.winning_team === 1 && game.team1?.map(player => (
+                          <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
+                            {player}
+                          </span>
+                        ))}
+                        {game.winning_team === 2 && game.team2?.map(player => (
+                          <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
                             {player}
                           </span>
                         ))}
                         <span className="text-slate-400 px-2">vs</span>
-                        {game.team2?.map(player => (
-                          <span key={player} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold`}>
+                        {/* Losers on right */}
+                        {game.winning_team === 2 && game.team1?.map(player => (
+                          <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
+                            {player}
+                          </span>
+                        ))}
+                        {game.winning_team === 1 && game.team2?.map(player => (
+                          <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">
                             {player}
                           </span>
                         ))}
@@ -847,8 +859,8 @@ export default function PublicView() {
         {activeTab === 'rung-players' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden mb-8">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-2xl font-bold">Rung - Solo: Revenge of the Stats</h2>
-              <p className="text-slate-400 text-sm mt-1">The Scoreboard Remembers Everything</p>
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">Rung - Solo: Revenge of the Stats</h2>
+              <p className="text-slate-400 text-sm mt-1">Your Score? A Tragedy in Digits!</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
