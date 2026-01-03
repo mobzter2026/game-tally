@@ -435,26 +435,22 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   {game.game_type === 'Rung' ? (
-                    <div className="flex justify-between items-center gap-4">
-                      <div className="flex gap-1 flex-wrap">
-                        {/* Winners on the left */}
-                        {game.winning_team === 1 && game.team1?.map(player => (
-                          <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
-                        ))}
-                        {game.winning_team === 2 && game.team2?.map(player => (
-                          <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
-                        ))}
-                      </div>
-                      <span className="text-slate-400">vs</span>
-                      <div className="flex gap-1 flex-wrap">
-                        {/* Losers on the right */}
-                        {game.winning_team === 2 && game.team1?.map(player => (
-                          <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
-                        ))}
-                        {game.winning_team === 1 && game.team2?.map(player => (
-                          <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
-                        ))}
-                      </div>
+                    <div className="flex gap-1 flex-wrap items-center">
+                      {/* Winners on the left */}
+                      {game.winning_team === 1 && game.team1?.map(player => (
+                        <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                      ))}
+                      {game.winning_team === 2 && game.team2?.map(player => (
+                        <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                      ))}
+                      <span className="text-slate-400 px-2">vs</span>
+                      {/* Losers on the right */}
+                      {game.winning_team === 2 && game.team1?.map(player => (
+                        <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                      ))}
+                      {game.winning_team === 1 && game.team2?.map(player => (
+                        <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{player}</span>
+                      ))}
                     </div>
                   ) : (
                     <div className="flex gap-1 flex-wrap">

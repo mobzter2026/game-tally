@@ -403,7 +403,7 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-6xl mx-auto mt-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3 whitespace-normal text-center">Ultimate Card Championship Leaderboard 🏆</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 whitespace-nowrap">Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-lg italic">"May the odds be ever in your favour"</p>
           
           {perfectGame && (
@@ -459,7 +459,7 @@ export default function PublicView() {
                     <button
                       key={player}
                       onClick={() => togglePlayerFilter(player)}
-                      className={`px-3 py-1.5 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
+                      className={`px-4 py-2 rounded transition text-sm ${selectedPlayers.includes(player) ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-700 hover:bg-slate-600'}`}
                     >
                       {player}
                     </button>
@@ -535,7 +535,7 @@ export default function PublicView() {
                     return (
                       <div key={gameType} className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden">
                         <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-900' : 'bg-gray-800'}`}>
-                          <h3 className="text-xl font-bold">{GAME_EMOJIS[gameType]} {gameType}</h3>
+                          <h3 className="text-xl font-bold whitespace-nowrap">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-200 text-xs mt-1">
                             {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
                           </p>
