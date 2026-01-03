@@ -8,12 +8,24 @@ const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const MIN_GAMES_FOR_RANKING = 0
 
 const QUOTES = [
-  "May the odds be ever in your favour",
-  "Friendship ends where the game begins",
-  "It's not about winning, it's about making others lose",
-  "Trust no one, especially your teammates",
-  "Every card tells a story of betrayal",
-  "Where loyalty dies and legends are born"
+  "Friendship ends where the game begins.",
+  "It's not about winning, it's about making others lose.",
+  "Every card tells a story of betrayal.",
+  "Where loyalty dies and legends are born.",
+  "Every loss is just character building… and humiliation.",
+  "If at first you don't succeed… shuffle and try again.",
+  "Victory is earned. Humiliation is free.",
+  "Some are born winners. Others are just funny losers.",
+  "The table is a battlefield. Your ego is the weapon.",
+  "You can't control luck… but you can ruin everyone else's day.",
+  "Pain is temporary. Bragging rights are forever.",
+  "Hope your therapy sessions are ready.",
+  "One table. Many casualties.",
+  "Lose today. Regret tomorrow. Cry later.",
+  "Your dignity called… it's filing a complaint.",
+  "Lose today. Learn tomorrow. Dominate next time.",
+  "Winners rise. Everyone else takes notes… or cry.",
+  "Step up or step aside."
 ]
 
 const GAME_EMOJIS: Record<string, string> = {
@@ -40,11 +52,11 @@ export default function PublicView() {
   const [currentQuote, setCurrentQuote] = useState(0)
   const supabase = createClient()
 
-  // Rotate quotes every 5 seconds
+  // Rotate quotes every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuote((prev) => (prev + 1) % QUOTES.length)
-    }, 5000)
+    }, 10000)
     return () => clearInterval(interval)
   }, [])
 
@@ -438,14 +450,14 @@ export default function PublicView() {
         {/* Flash Banners at Top */}
         {latestWinner && latestWinner.type === 'dominated' && (
           <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
+            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis animate-pulse">
               ⚡ Flawless victory in {latestWinner.game.game_type} by {latestWinner.game.winners?.[0]} ⚡
             </p>
           </div>
         )}
 
         {latestWinner && latestWinner.type === 'shithead' && (
-          <div className="mb-4 bg-gradient-to-r from-slate-100 via-white to-slate-100 px-4 py-2 rounded-lg shadow-lg border-2 border-amber-600">
+          <div className="mb-4 bg-gradient-to-r from-slate-100 via-white to-slate-100 px-4 py-2 rounded-lg shadow-lg border-2 border-amber-600 animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black">
               💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
             </p>
@@ -453,7 +465,7 @@ export default function PublicView() {
         )}
 
         {latestWinner && latestWinner.type === 'normal' && (
-          <div className="mb-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 px-4 py-2 rounded-lg shadow-lg">
+          <div className="mb-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
               🏆 {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 🏆
             </p>
@@ -470,7 +482,7 @@ export default function PublicView() {
 
         <div className="text-center mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard 🏆</h1>
-          <p className="text-slate-300 text-base sm:text-lg italic transition-opacity duration-500">"{QUOTES[currentQuote]}"</p>
+          <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
         </div>
 
         {/* Sleeker Side by Side Layout */}
