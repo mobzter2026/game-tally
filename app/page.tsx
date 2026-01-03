@@ -683,7 +683,7 @@ export default function PublicView() {
                     </div>
                   ) : (
                     recentGames.map(game => (
-                      <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                      <div key={game.id} className="bg-violet-900/80 rounded p-3">
                         <div className="text-slate-300 text-base font-bold mb-2">
                           {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
@@ -761,7 +761,7 @@ export default function PublicView() {
                   </div>
                 ) : (
                   recentGames.map(game => (
-                    <div key={game.id} className="bg-slate-700/50 rounded p-3">
+                    <div key={game.id} className="bg-violet-900/80 rounded p-3">
                       <div className="text-slate-300 text-base font-bold mb-2">
                         {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
