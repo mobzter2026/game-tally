@@ -5,13 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
-const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Blackjack', 'Shithead']
+const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Blackjack', 'Shithead', 'Rung']
 
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
   'Monopoly': '🎲',
   'Tai Ti': '🀄',
-  'Shithead': '💩'
+  'Shithead': '💩',
+  'Rung': '🎴'
 }
 
 export default function LiveScoringPage() {
@@ -24,9 +25,11 @@ export default function LiveScoringPage() {
   const supabase = createClient()
 
   const [newSession, setNewSession] = useState({
-    game: 'Monopoly',
+    game: 'Blackjack',
     date: new Date().toISOString().split('T')[0],
     players: [] as string[],
+    team1: [] as string[],
+    team2: [] as string[],
     threshold: 3
   })
 
@@ -361,6 +364,7 @@ export default function LiveScoringPage() {
                     />
                   </div>
                 )}
+
                 <div>
                   <label className="block mb-2 text-sm">Select Players</label>
                   <div className="flex gap-2 mb-2">
@@ -393,6 +397,57 @@ export default function LiveScoringPage() {
                     ))}
                   </div>
                 </div>
+
+                  {newSession.game === 'Rung' && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-slate-400 mb-2">Select 2 players for each team:</p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="font-bold mb-2">Team 1</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {PLAYERS.map(p => (
+                              <button
+                                key={p}
+                                onClick={() => {
+                                  if (newSession.team1.includes(p)) {
+                                    setNewSession({...newSession, team1: newSession.team1.filter(x => x !== p)})
+                                  } else if (newSession.team1.length < 2 && !newSession.team2.includes(p)) {
+                                    setNewSession({...newSession, team1: [...newSession.team1, p]})
+                                  }
+                                }}
+                                className={`px-4 py-2 rounded ${newSession.team1.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-bold mb-2">Team 2</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {PLAYERS.map(p => (
+                              <button
+                                key={p}
+                                onClick={() => {
+                                  if (newSession.team2.includes(p)) {
+                                    setNewSession({...newSession, team2: newSession.team2.filter(x => x !== p)})
+                                  } else if (newSession.team2.length < 2 && !newSession.team1.includes(p)) {
+                                    setNewSession({...newSession, team2: [...newSession.team2, p]})
+                                  }
+                                }}
+                                className={`px-4 py-2 rounded ${newSession.team2.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
 
                 {newSession.game === 'Blackjack' && newSession.players.length > 0 && !blackjackMode && (
                   <button
