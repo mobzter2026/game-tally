@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   const supabase = createClient()
 
   const [newGame, setNewGame] = useState({
-    type: 'Blackjack',
+    type: '',
     date: new Date().toISOString().split('T')[0],
     players: [] as string[],
     winners: [] as string[],
@@ -211,6 +211,7 @@ export default function AdminDashboard() {
                     onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
                     className="w-full p-3 bg-violet-900/80 rounded-lg"
                   >
+ 		    <option value="" disabled>Select a game</option>
                     {Object.entries(GAME_EMOJIS).map(([gameType, emoji]) => (
                       <option key={gameType} value={gameType}>
                         {emoji} {gameType}
