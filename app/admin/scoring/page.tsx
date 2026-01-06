@@ -197,7 +197,7 @@ export default function LiveScoringPage() {
       losers: losers
     }
 
-    const { error } = await supabase.from('games').insert(gameData)
+    const { error } = await supabase.from('games').insert(gameData as any)
 
     if (error) {
       alert('Error saving game: ' + error.message)
@@ -264,7 +264,7 @@ export default function LiveScoringPage() {
       losers: [loser]
     }
 
-    const { error } = await supabase.from('games').insert(gameData)
+    const { error } = await supabase.from('games').insert(gameData as any)
 
     if (error) {
       alert('Error recording tournament: ' + error.message)
