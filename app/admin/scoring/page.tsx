@@ -157,7 +157,7 @@ export default function LiveScoringPage() {
 
     const winners = scoreGroups[0]?.players || []
     const runnersUp = scoreGroups[1]?.players || []
-    const losers = scoreGroups.slice(2).flatMap(g => g.players)
+    const losers = scoreGroups.length > 2 ? scoreGroups[scoreGroups.length - 1].players : []
 
     const gameData = {
       game_type: activeSession.game_type,
