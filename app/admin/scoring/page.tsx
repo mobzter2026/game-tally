@@ -74,22 +74,33 @@ export default function LiveScoringPage() {
       return
     }
 
+    let playersForSession = newSession.players
+    if (newSession.game === 'Rung') {
+      playersForSession = [...newSession.team1, ...newSession.team2]
+      if (playersForSession.length < 4) {
+        alert('Select 2 players for each team')
+        return
+      }
+    }
+
     setActiveSession({
       game_type: newSession.game,
       game_date: newSession.date,
-      players: newSession.players,
+      players: playersForSession,
       win_threshold: newSession.game === 'Blackjack' ? 1 : newSession.threshold
     })
 
     const initialScores: Record<string, number> = {}
-    newSession.players.forEach(p => initialScores[p] = 0)
+    playersForSession.forEach(p => initialScores[p] = 0)
     setScores(initialScores)
     setScoreHistory([])
-    
+
     setNewSession({
       game: 'Monopoly',
       date: new Date().toISOString().split('T')[0],
       players: [],
+      team1: [],
+      team2: [],
       threshold: 3
     })
   }
@@ -101,9 +112,9 @@ export default function LiveScoringPage() {
     newScores[player] = Math.max(0, (newScores[player] || 0) + amount)
     setScores(newScores)
     setScoreHistory([...scoreHistory, {player, amount}])
-    
+
     const threshold = activeSession.win_threshold || 3
-    
+
     if (activeSession.game_type === 'Shithead') {
       const maxScore = Math.max(...Object.values(newScores))
       if (maxScore >= threshold) {
@@ -122,7 +133,7 @@ export default function LiveScoringPage() {
 
   const undoLastScore = () => {
     if (scoreHistory.length === 0) return
-    
+
     const last = scoreHistory[scoreHistory.length - 1]
     const newScores = { ...scores }
     newScores[last.player] = Math.max(0, (newScores[last.player] || 0) - last.amount)
@@ -149,7 +160,7 @@ export default function LiveScoringPage() {
 
     // Group by same scores
     const scoreGroups: {score: number, players: string[]}[] = []
-    const uniqueScores = [...new Set(Object.values(finalScores))].sort((a, b) => 
+    const uniqueScores = [...new Set(Object.values(finalScores))].sort((a, b) =>
       activeSession.game_type === 'Shithead' ? a - b : b - a
     )
 
@@ -215,13 +226,13 @@ export default function LiveScoringPage() {
     const remaining = blackjackPlayers.filter(p => p !== player)
     setKnockedOut(newKnockedOut)
     setBlackjackPlayers(remaining)
-    
+
     if (remaining.length === 1) {
       const winner = remaining[0]
       const runnerUp = newKnockedOut[newKnockedOut.length - 1]
       const loser = newKnockedOut[0]
       const survivors = newKnockedOut.slice(1, -1)
-      
+
       finishBlackjackTournament(winner, runnerUp, loser, survivors)
     } else {
       setBlackjackRound(blackjackRound + 1)
@@ -246,7 +257,7 @@ export default function LiveScoringPage() {
     }
 
     alert(`🃏 Blackjack Tournament Complete!\n\n🏆 Winner: ${winner}\n🥈 Runner-up: ${runnerUp}\n💩 Loser: ${loser}${survivors.length > 0 ? `\n\nSurvivors: ${survivors.join(', ')}` : ''}`)
-    
+
     setBlackjackMode(false)
     setBlackjackRound(1)
     setBlackjackPlayers([])
@@ -261,6 +272,12 @@ export default function LiveScoringPage() {
       </div>
     )
   }
+
+  // Calculate Rung wins
+  const rungWins: Record<string, number> = {}
+  PLAYERS.forEach(p => {
+    rungWins[p] = recentGames.filter(g => g.game_type === 'Rung' && g.winners?.includes(p)).length
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
@@ -342,6 +359,7 @@ export default function LiveScoringPage() {
                     {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
                   </select>
                 </div>
+
                 <div>
                   <label className="block mb-2 text-sm">Date</label>
                   <input
@@ -351,6 +369,7 @@ export default function LiveScoringPage() {
                     className="w-full p-3 bg-violet-900/80 rounded-lg"
                   />
                 </div>
+
                 {newSession.game !== 'Blackjack' && (
                   <div>
                     <label className="block mb-2 text-sm">Win Threshold</label>
@@ -398,56 +417,66 @@ export default function LiveScoringPage() {
                   </div>
                 </div>
 
-                  {newSession.game === 'Rung' && (
-                    <div className="space-y-4">
-                      <p className="text-sm text-slate-400 mb-2">Select 2 players for each team:</p>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <h3 className="font-bold mb-2">Team 1</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            {PLAYERS.map(p => (
-                              <button
-                                key={p}
-                                onClick={() => {
-                                  if (newSession.team1.includes(p)) {
-                                    setNewSession({...newSession, team1: newSession.team1.filter(x => x !== p)})
-                                  } else if (newSession.team1.length < 2 && !newSession.team2.includes(p)) {
-                                    setNewSession({...newSession, team1: [...newSession.team1, p]})
-                                  }
-                                }}
-                                className={`px-4 py-2 rounded ${newSession.team1.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
-                              >
-                                {p}
-                              </button>
-                            ))}
-                          </div>
+                {/* === RUNG TEAM SELECTION === */}
+                {newSession.game === 'Rung' && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-slate-400 mb-2">Select 2 players for each team:</p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-bold mb-2">Team 1</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PLAYERS.map(p => (
+                            <button
+                              key={p}
+                              onClick={() => {
+                                if (newSession.team1.includes(p)) {
+                                  setNewSession({ ...newSession, team1: newSession.team1.filter(x => x !== p) })
+                                } else if (newSession.team1.length < 2 && !newSession.team2.includes(p)) {
+                                  setNewSession({ ...newSession, team1: [...newSession.team1, p] })
+                                }
+                              }}
+                              className={`px-4 py-2 rounded flex justify-between items-center ${newSession.team1.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                            >
+                              <span>{p}</span>
+                              {rungWins[p] > 0 && (
+                                <span className="ml-2 text-xs bg-yellow-400 text-black rounded-full w-5 h-5 flex items-center justify-center">
+                                  {rungWins[p]}
+                                </span>
+                              )}
+                            </button>
+                          ))}
                         </div>
-                        
-                        <div>
-                          <h3 className="font-bold mb-2">Team 2</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            {PLAYERS.map(p => (
-                              <button
-                                key={p}
-                                onClick={() => {
-                                  if (newSession.team2.includes(p)) {
-                                    setNewSession({...newSession, team2: newSession.team2.filter(x => x !== p)})
-                                  } else if (newSession.team2.length < 2 && !newSession.team1.includes(p)) {
-                                    setNewSession({...newSession, team2: [...newSession.team2, p]})
-                                  }
-                                }}
-                                className={`px-4 py-2 rounded ${newSession.team2.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
-                              >
-                                {p}
-                              </button>
-                            ))}
-                          </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold mb-2">Team 2</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PLAYERS.map(p => (
+                            <button
+                              key={p}
+                              onClick={() => {
+                                if (newSession.team2.includes(p)) {
+                                  setNewSession({ ...newSession, team2: newSession.team2.filter(x => x !== p) })
+                                } else if (newSession.team2.length < 2 && !newSession.team1.includes(p)) {
+                                  setNewSession({ ...newSession, team2: [...newSession.team2, p] })
+                                }
+                              }}
+                              className={`px-4 py-2 rounded flex justify-between items-center ${newSession.team2.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                            >
+                              <span>{p}</span>
+                              {rungWins[p] > 0 && (
+                                <span className="ml-2 text-xs bg-yellow-400 text-black rounded-full w-5 h-5 flex items-center justify-center">
+                                  {rungWins[p]}
+                                </span>
+                              )}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     </div>
-                  )}
-
+                  </div>
+                )}
 
                 {newSession.game === 'Blackjack' && newSession.players.length > 0 && !blackjackMode && (
                   <button
@@ -515,7 +544,7 @@ export default function LiveScoringPage() {
                     onClick={createSession}
                     className="w-full bg-fuchsia-700 hover:bg-fuchsia-800 py-3 rounded font-bold"
                   >
-                    ✍️ Start Scoring
+                   ✍️ Start Scoring
                   </button>
                 )}
               </div>
