@@ -78,9 +78,15 @@ export default function AdminDashboard() {
     router.push('/admin/login')
   }
 
-  // Generic toggle function
-  const toggleArrayItem = (key: keyof typeof newGame, player: string, max?: number) => {
+  // Fixed TypeScript-safe toggle function
+  const toggleArrayItem = (
+    key: 'players' | 'winners' | 'runnersUp' | 'losers' | 'team1' | 'team2',
+    player: string,
+    max?: number
+  ) => {
     const arr = newGame[key]
+    if (!Array.isArray(arr)) return // safety check
+
     if (arr.includes(player)) {
       setNewGame({ ...newGame, [key]: arr.filter(p => p !== player) })
     } else {
@@ -198,7 +204,6 @@ export default function AdminDashboard() {
             <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games, use Live Scoring for better tracking</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {/* Game Type */}
                 <div>
                   <label className="block mb-2 text-sm">Game Type</label>
                   <select
@@ -213,7 +218,6 @@ export default function AdminDashboard() {
                     ))}
                   </select>
                 </div>
-                {/* Date */}
                 <div>
                   <label className="block mb-2 text-sm">Date</label>
                   <input
