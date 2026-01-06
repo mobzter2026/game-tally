@@ -20,7 +20,6 @@ export default function LiveScoringPage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [recentGames, setRecentGames] = useState<any[]>([])
-  const [viewingGame, setViewingGame] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -31,13 +30,11 @@ export default function LiveScoringPage() {
     threshold: 3
   })
 
-  // Blackjack tournament mode states
   const [blackjackMode, setBlackjackMode] = useState(false)
   const [blackjackRound, setBlackjackRound] = useState(1)
   const [blackjackPlayers, setBlackjackPlayers] = useState<string[]>([])
   const [knockedOut, setKnockedOut] = useState<string[]>([])
 
-  // Scoring improvements
   const [confirmDialog, setConfirmDialog] = useState<{show: boolean, winner: string, scores: Record<string,number>}>({show: false, winner: '', scores: {}})
   const [scoreHistory, setScoreHistory] = useState<{player: string, amount: number}[]>([])
 
@@ -104,18 +101,14 @@ export default function LiveScoringPage() {
     
     const threshold = activeSession.win_threshold || 3
     
-    // Check if threshold met
     if (activeSession.game_type === 'Shithead') {
-      // For Shithead, someone losing means getting high score
       const maxScore = Math.max(...Object.values(newScores))
       if (maxScore >= threshold) {
-        // Find player(s) with LOWEST score (winners)
         const minScore = Math.min(...Object.values(newScores))
         const winners = Object.entries(newScores).filter(([,score]) => score === minScore).map(([p]) => p)
         setConfirmDialog({show: true, winner: winners.join(', '), scores: newScores})
       }
     } else {
-      // For other games, highest score wins
       const maxScore = Math.max(...Object.values(newScores))
       if (maxScore >= threshold) {
         const winner = Object.entries(newScores).find(([, score]) => score === maxScore)?.[0] || ''
@@ -142,51 +135,29 @@ export default function LiveScoringPage() {
   const endSession = async (finalScores: Record<string, number>) => {
     if (!activeSession) return
 
-    // Sort players based on game type
     const sortedPlayers = Object.entries(finalScores)
       .sort(([, a], [, b]) => {
         if (activeSession.game_type === 'Shithead') {
-          return a - b // Lowest score wins for Shithead
+          return a - b
         }
-        return b - a // Highest score wins for others
+        return b - a
       })
       .map(([player]) => player)
 
-    // Assign positions
-    const winners: string[] = []
-    const runnersUp: string[] = []
-    const losers: string[] = []
+    // Group by same scores
+    const scoreGroups: {score: number, players: string[]}[] = []
+    const uniqueScores = [...new Set(Object.values(finalScores))].sort((a, b) => 
+      activeSession.game_type === 'Shithead' ? a - b : b - a
+    )
 
-    if (activeSession.game_type === 'Shithead') {
-      // All players with lowest score are winners
-      const lowestScore = Math.min(...Object.values(finalScores))
-      sortedPlayers.forEach(player => {
-        if (finalScores[player] === lowestScore) {
-          winners.push(player)
-        }
-      })
-      
-      // Runner-up is next lowest score
-      const remainingPlayers = sortedPlayers.filter(p => !winners.includes(p))
-      if (remainingPlayers.length > 0) {
-        const secondLowestScore = finalScores[remainingPlayers[0]]
-        remainingPlayers.forEach(player => {
-          if (finalScores[player] === secondLowestScore) {
-            runnersUp.push(player)
-          }
-        })
-      }
-      
-      // Loser is highest score
-      if (sortedPlayers.length > winners.length + runnersUp.length) {
-        losers.push(sortedPlayers[sortedPlayers.length - 1])
-      }
-    } else {
-      // Normal games: highest wins
-      winners.push(sortedPlayers[0])
-      if (sortedPlayers.length > 1) runnersUp.push(sortedPlayers[1])
-      if (sortedPlayers.length > 2) losers.push(sortedPlayers[sortedPlayers.length - 1])
-    }
+    uniqueScores.forEach(score => {
+      const playersWithScore = sortedPlayers.filter(p => finalScores[p] === score)
+      scoreGroups.push({score, players: playersWithScore})
+    })
+
+    const winners = scoreGroups[0]?.players || []
+    const runnersUp = scoreGroups[1]?.players || []
+    const losers = scoreGroups.slice(2).flatMap(g => g.players)
 
     const gameData = {
       game_type: activeSession.game_type,
@@ -439,7 +410,6 @@ export default function LiveScoringPage() {
                 )}
 
                 {blackjackMode && (
-                {blackjackMode && (
                   <div className="bg-black/40 rounded-xl border-2 border-amber-500/60 p-4">
                     <h3 className="font-bold text-lg mb-3">Blackjack Tournament - Round {blackjackRound}</h3>
                     <p className="text-sm text-slate-400 mb-3">
@@ -484,7 +454,6 @@ export default function LiveScoringPage() {
                     </div>
                   </div>
                 )}
-                )}
 
                 {newSession.game !== 'Blackjack' && (
                   <button
@@ -518,7 +487,6 @@ export default function LiveScoringPage() {
           </div>
         )}
 
-        {/* Confirmation Dialog */}
         {confirmDialog.show && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
             <div className="bg-violet-950/95 rounded-xl border-2 border-yellow-500 p-6 max-w-md w-full">
