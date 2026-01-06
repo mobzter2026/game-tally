@@ -262,8 +262,11 @@ export default function LiveScoringPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">🎮 Live Scoring</h1>
+        <div className="flex flex-col items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold text-center">
+            🎮 Live Scoring
+          </h1>
+
           <button
             onClick={() => router.push('/admin')}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
