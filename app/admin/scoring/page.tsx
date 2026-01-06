@@ -439,41 +439,51 @@ export default function LiveScoringPage() {
                 )}
 
                 {blackjackMode && (
+                {blackjackMode && (
                   <div className="bg-black/40 rounded-xl border-2 border-amber-500/60 p-4">
-                    <h3 className="font-bold text-lg mb-3">Round {blackjackRound}</h3>
-                    <div className="grid grid-cols-2 gap-2 mb-3">
-                      {blackjackPlayers.map(player => (
-                        <div key={player} className="px-4 py-3 bg-blue-600 rounded font-semibold text-center">
-                          {player}
-                        </div>
-                      ))}
-                    </div>
+                    <h3 className="font-bold text-lg mb-3">Blackjack Tournament - Round {blackjackRound}</h3>
                     <p className="text-sm text-slate-400 mb-3">
-                      {blackjackPlayers.length === 2 ? 'Finals! Select 2nd place:' : 'Select knockout:'}
+                      {blackjackPlayers.length === 2 ? 'Finals! Click for 2nd place:' : 'Click to knockout:'}
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2 mb-3">
                       {blackjackPlayers.map(player => (
                         <button
                           key={player}
                           onClick={() => handleBlackjackKnockout(player)}
-                          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold"
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold"
                         >
                           {player}
                         </button>
                       ))}
                     </div>
-                    <button
-                      onClick={() => {
-                        setBlackjackMode(false)
-                        setBlackjackRound(1)
-                        setBlackjackPlayers([])
-                        setKnockedOut([])
-                      }}
-                      className="w-full mt-3 px-4 py-2 bg-slate-600 hover:bg-slate-700 rounded text-sm"
-                    >
-                      Cancel
-                    </button>
+                    <div className="flex gap-2">
+                      {knockedOut.length > 0 && (
+                        <button
+                          onClick={() => {
+                            const lastKnockedOut = knockedOut[knockedOut.length - 1]
+                            setBlackjackPlayers([...blackjackPlayers, lastKnockedOut])
+                            setKnockedOut(knockedOut.slice(0, -1))
+                            setBlackjackRound(Math.max(1, blackjackRound - 1))
+                          }}
+                          className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
+                        >
+                          ↶ Undo
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setBlackjackMode(false)
+                          setBlackjackRound(1)
+                          setBlackjackPlayers([])
+                          setKnockedOut([])
+                        }}
+                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+                )}
                 )}
 
                 {newSession.game !== 'Blackjack' && (
