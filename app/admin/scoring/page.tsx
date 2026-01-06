@@ -285,10 +285,10 @@ export default function LiveScoringPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">🎮 Live Scoring</h1>
           <button
-            onClick={() => router.push('/admin')}
+            onClick={() => router.push('/')}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
           >
-            ← Back to Admin
+            ← Back to Leaderboard
           </button>
         </div>
 
