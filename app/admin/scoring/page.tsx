@@ -78,7 +78,7 @@ export default function LiveScoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fuchsia-900 to-purple-900 text-white p-4 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-purple-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-6">
           ⚔️ Points Royale ⚔️
@@ -88,7 +88,7 @@ export default function LiveScoringPage() {
           <div className="bg-purple-950/95 rounded-xl border-2 border-white/20 p-6 space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
 
             {/* NEW ROUND TITLE */}
-            <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round</h2>
+            <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round ♠️</h2>
 
             {/* DATE + GAME */}
             <div className="flex gap-3 mb-4">
@@ -131,7 +131,7 @@ export default function LiveScoringPage() {
                 {newSession.players.length === 0 ? (
                   <button
                     onClick={selectAllPlayers}
-                    className="w-full py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg border border-white/30 font-semibold text-sm"
+                    className="w-full py-2 bg-emerald-800 hover:bg-emerald-800 rounded-lg border border-white/30 font-semibold text-sm"
                   >
                     Select All
                   </button>
@@ -151,7 +151,7 @@ export default function LiveScoringPage() {
                   <label className="block text-sm font-bold text-center mb-1">
                     Win Threshold
                   </label>
-                  <div className="flex gap-3 bg-purple-900/50 rounded-full p-1 border border-white/20">
+                  <div className="flex gap-3 bg-purple-900/70 rounded-full p-1 border border-white/20">
                     {[3, 5].map(num => (
                       <button
                         key={num}
@@ -160,7 +160,7 @@ export default function LiveScoringPage() {
                         }
                         className={`px-3 py-1 rounded-full font-bold transition-all ${
                           newSession.threshold === num
-                            ? 'bg-fuchsia-600 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
+                            ? 'bg-fuchsia-700 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
                             : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
                         }`}
                       >
