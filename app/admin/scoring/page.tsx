@@ -477,7 +477,7 @@ export default function LiveScoringPage() {
                   <button
                     type="button"
                     onClick={selectAllPlayers}
-                    className="w-full px-3 py-2 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-lg border-2 border-white/30 text-sm font-semibold"
+                    className="w-full px-3 py-1.5 bg-blue-900 hover:bg-blue-700 rounded-lg border-2 border-white/30 text-xs font-semibold"
                   >
                     Select All
                   </button>
@@ -492,7 +492,7 @@ export default function LiveScoringPage() {
                       max="10"
                       value={newSession.game === 'Rung' ? 5 : newSession.threshold}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 bg-violet-900/80 rounded-lg border-2 border-white/20 text-center font-bold"
+                      className="w-full px-3 py-1.5 bg-violet-900/80 rounded-lg border-2 border-white/20 text-center font-bold text-xs"
                     />
                   </div>
                 )}
