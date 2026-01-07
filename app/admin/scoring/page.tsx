@@ -512,7 +512,7 @@ export default function LiveScoringPage() {
                 </div>
 
                 {newSession.game !== 'Blackjack' && newSession.game !== 'Rung' && (
-                  <div className="w-[200px]">
+                  <div className="w-[120px]">
                     <label className="block mb-2 text-sm font-bold">Win Threshold</label>
                     <input
                       type="number"
@@ -525,7 +525,7 @@ export default function LiveScoringPage() {
                   </div>
                 )}
                 {newSession.game === 'Rung' && (
-                  <div className="w-[200px]">
+                  <div className="w-[120px]">
                     <label className="block mb-2 text-sm font-bold">Win Threshold</label>
                     <input
                       type="number"
