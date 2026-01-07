@@ -30,15 +30,10 @@ export default function LiveScoringPage() {
   })
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (!data.user) {
-        router.push('/admin/login')
-        return
-      }
-      setLoading(false)
-    }
-    checkAuth()
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) router.push('/admin/login')
+      else setLoading(false)
+    })
   }, [])
 
   const createSession = () => {
@@ -52,11 +47,7 @@ export default function LiveScoringPage() {
       game_date: newSession.date,
       players: newSession.players,
       win_threshold:
-        newSession.game === 'Rung'
-          ? 5
-          : newSession.game === 'Blackjack'
-          ? 1
-          : newSession.threshold
+        newSession.game === 'Rung' ? 5 : newSession.threshold
     })
 
     const initialScores: Record<string, number> = {}
@@ -64,40 +55,61 @@ export default function LiveScoringPage() {
     setScores(initialScores)
   }
 
+  const togglePlayer = (player: string) => {
+    setNewSession(s => ({
+      ...s,
+      players: s.players.includes(player)
+        ? s.players.filter(p => p !== player)
+        : [...s.players, player]
+    }))
+  }
+
+  const selectAllPlayers = () =>
+    setNewSession(s => ({ ...s, players: [...PLAYERS] }))
+
+  const clearPlayers = () =>
+    setNewSession(s => ({ ...s, players: [] }))
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black flex items-center justify-center">
-        <div className="text-white text-2xl font-mono">Loading…</div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-950 to-purple-950 flex items-center justify-center text-white font-mono">
+        Loading…
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black text-white p-4 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-900 to-purple-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center">♠️ Points Royale ♠️</h1>
+        <h1 className="text-3xl font-bold text-center mb-6">
+          ⚔️ Points Royale ⚔️
+        </h1>
 
         {!activeSession && (
-          <div className="bg-gradient-to-br from-slate-900/80 to-black/80 rounded-xl border border-emerald-700/30 backdrop-blur-sm shadow-[0_0_30px_rgba(0,0,0,0.8)] p-6">
-            <h2 className="text-2xl font-bold mb-6 text-center">New Round</h2>
+          <div className="bg-purple-950/40 rounded-xl border-2 border-white/30 p-6 space-y-6">
 
-            {/* Date & Game */}
-            <div className="flex gap-4 mb-6">
+            {/* DATE + GAME */}
+            <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block mb-1 text-sm font-bold text-center">Date</label>
+                <label className="block text-sm font-bold text-center mb-1">Date</label>
                 <input
                   type="date"
                   value={newSession.date}
-                  onChange={e => setNewSession({ ...newSession, date: e.target.value })}
-                  className="w-full p-3 bg-black/80 rounded-lg border border-white/20 shadow-inner text-center"
+                  onChange={e =>
+                    setNewSession({ ...newSession, date: e.target.value })
+                  }
+                  className="w-full p-3 bg-purple-900/80 rounded-lg border border-white/30 text-center"
                 />
               </div>
+
               <div className="flex-1">
-                <label className="block mb-1 text-sm font-bold text-center">Game</label>
+                <label className="block text-sm font-bold text-center mb-1">Game</label>
                 <select
                   value={newSession.game}
-                  onChange={e => setNewSession({ ...newSession, game: e.target.value })}
-                  className="w-full p-3 bg-black/80 rounded-lg border border-white/20 shadow-inner text-center"
+                  onChange={e =>
+                    setNewSession({ ...newSession, game: e.target.value })
+                  }
+                  className="w-full p-3 bg-purple-900/80 rounded-lg border border-white/30 text-center"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -108,31 +120,39 @@ export default function LiveScoringPage() {
               </div>
             </div>
 
-            {/* Select / Threshold Row */}
-            <div className="flex flex-wrap items-end gap-3 mb-4">
-              <button
-                onClick={() => setNewSession({ ...newSession, players: PLAYERS })}
-                className="px-4 py-2 bg-gradient-to-br from-emerald-800 to-emerald-900 hover:from-emerald-700 hover:to-emerald-800 rounded-lg border border-white/20 shadow-inner font-bold"
-              >
-                Select All
-              </button>
+            {/* SELECT / CLEAR + THRESHOLD */}
+            {newSession.game !== 'Blackjack' && (
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-center mb-1">
+                    Players
+                  </label>
+                  {newSession.players.length === 0 ? (
+                    <button
+                      onClick={selectAllPlayers}
+                      className="w-full py-2 bg-emerald-900/80 hover:bg-emerald-800 rounded-lg border border-white/30 font-semibold text-sm"
+                    >
+                      Select All
+                    </button>
+                  ) : (
+                    <button
+                      onClick={clearPlayers}
+                      className="w-full py-2 bg-red-700 hover:bg-red-600 rounded-lg border border-white/30 font-semibold text-sm"
+                    >
+                      Clear Selection
+                    </button>
+                  )}
+                </div>
 
-              <button
-                onClick={() => setNewSession({ ...newSession, players: [] })}
-                className="px-4 py-2 bg-gradient-to-br from-red-900 to-red-950 hover:from-red-800 hover:to-red-900 rounded-lg border border-white/20 shadow-inner font-bold"
-              >
-                Clear
-              </button>
-
-              {newSession.game !== 'Blackjack' && (
-                <div className="ml-auto w-48">
-                  <label className="block mb-1 text-sm font-bold text-center">
+                <div className="w-40">
+                  <label className="block text-sm font-bold text-center mb-1">
                     Win Threshold
                   </label>
                   <input
-                    type="number"
-                    min={1}
-                    max={10}
+                    type="range"
+                    min={3}
+                    max={5}
+                    step={2}
                     value={newSession.threshold}
                     onChange={e =>
                       setNewSession({
@@ -140,42 +160,46 @@ export default function LiveScoringPage() {
                         threshold: Number(e.target.value)
                       })
                     }
-                    className="w-full p-2 bg-black/80 rounded-lg border border-white/20 shadow-inner text-center font-bold"
+                    className="w-full accent-fuchsia-500"
                   />
+                  <div className="text-center text-yellow-400 font-bold text-sm">
+                    {newSession.threshold} Points
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Players */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            {/* PLAYER BUTTONS */}
+            <div className="grid grid-cols-3 gap-3">
               {PLAYERS.map(p => (
                 <button
                   key={p}
-                  onClick={() =>
-                    setNewSession(s =>
-                      s.players.includes(p)
-                        ? { ...s, players: s.players.filter(x => x !== p) }
-                        : { ...s, players: [...s.players, p] }
-                    )
-                  }
-                  className={`px-4 py-3 rounded-lg border-2 transition-all font-bold ${
-                    newSession.players.includes(p)
-                      ? 'bg-gradient-to-br from-emerald-700 to-emerald-900 border-yellow-500/60 shadow-[0_0_10px_rgba(234,179,8,0.35)]'
-                      : 'bg-gradient-to-br from-slate-800 to-slate-900 border-white/20 hover:border-white/40'
-                  }`}
+                  onClick={() => togglePlayer(p)}
+                  className={`py-3 rounded-lg border font-semibold transition-all
+                    ${
+                      newSession.players.includes(p)
+                        ? 'bg-emerald-900/80 border-emerald-400/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                        : 'bg-purple-900/70 border-white/20 hover:border-white/40'
+                    }`}
                 >
                   {p}
                 </button>
               ))}
             </div>
 
-            {/* Bottom Button – DARK & HEAVY */}
-            <button
-              onClick={createSession}
-              className="w-full bg-gradient-to-br from-neutral-950 to-black hover:from-neutral-900 hover:to-neutral-950 py-3 rounded-lg font-bold tracking-wide border-2 border-orange-500/80 shadow-[0_0_25px_rgba(249,115,22,0.45)] transition-all"
-            >
-              👊 Let the Madness Begin 🎯
-            </button>
+            {/* MADNESS BUTTON (UNCHANGED) */}
+            {newSession.game !== 'Blackjack' && (
+              <button
+                onClick={createSession}
+                className={`w-full bg-gradient-to-br from-fuchsia-950 to-purple-950 shadow-inner shadow-black/40 hover:from-fuchsia-900 hover:to-purple-900 py-3 rounded-lg font-bold transition-all ${
+                  newSession.players.length > 0
+                    ? 'border-2 border-orange-500/80 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
+                    : 'border-2 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
+                }`}
+              >
+                👊 Let the Madness Begin 🎯
+              </button>
+            )}
           </div>
         )}
       </div>
