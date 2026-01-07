@@ -46,8 +46,7 @@ export default function LiveScoringPage() {
       game_type: newSession.game,
       game_date: newSession.date,
       players: newSession.players,
-      win_threshold:
-        newSession.game === 'Rung' ? 5 : newSession.threshold
+      win_threshold: newSession.game === 'Rung' ? 5 : newSession.threshold
     })
 
     const initialScores: Record<string, number> = {}
@@ -79,17 +78,20 @@ export default function LiveScoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-900 to-purple-950 text-white p-4 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-purple-900 to-purple-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-6">
           ⚔️ Points Royale ⚔️
         </h1>
 
         {!activeSession && (
-          <div className="bg-purple-950/40 rounded-xl border-2 border-white/30 p-6 space-y-6">
+          <div className="bg-purple-950/90 rounded-xl border-2 border-white/20 p-6 space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+
+            {/* NEW ROUND TITLE */}
+            <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round</h2>
 
             {/* DATE + GAME */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-4">
               <div className="flex-1">
                 <label className="block text-sm font-bold text-center mb-1">Date</label>
                 <input
@@ -98,7 +100,7 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className="w-full p-3 bg-purple-900/80 rounded-lg border border-white/30 text-center"
+                  className="w-full p-3 bg-purple-900/70 rounded-lg border border-white/20 text-center"
                 />
               </div>
 
@@ -109,7 +111,7 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, game: e.target.value })
                   }
-                  className="w-full p-3 bg-purple-900/80 rounded-lg border border-white/30 text-center"
+                  className="w-full p-3 bg-purple-900/70 rounded-lg border border-white/20 text-center"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -120,54 +122,55 @@ export default function LiveScoringPage() {
               </div>
             </div>
 
-            {/* SELECT / CLEAR + THRESHOLD */}
-            {newSession.game !== 'Blackjack' && (
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold text-center mb-1">
-                    Players
-                  </label>
-                  {newSession.players.length === 0 ? (
-                    <button
-                      onClick={selectAllPlayers}
-                      className="w-full py-2 bg-emerald-900/80 hover:bg-emerald-800 rounded-lg border border-white/30 font-semibold text-sm"
-                    >
-                      Select All
-                    </button>
-                  ) : (
-                    <button
-                      onClick={clearPlayers}
-                      className="w-full py-2 bg-red-700 hover:bg-red-600 rounded-lg border border-white/30 font-semibold text-sm"
-                    >
-                      Clear Selection
-                    </button>
-                  )}
-                </div>
+            {/* SELECT / CLEAR + THRESHOLD TOGGLE */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <div className="flex-1">
+                <label className="block text-sm font-bold text-center mb-1">
+                  Players
+                </label>
+                {newSession.players.length === 0 ? (
+                  <button
+                    onClick={selectAllPlayers}
+                    className="w-full py-2 bg-emerald-800 hover:bg-emerald-700 rounded-lg border border-white/30 font-semibold text-sm"
+                  >
+                    Select All
+                  </button>
+                ) : (
+                  <button
+                    onClick={clearPlayers}
+                    className="w-full py-2 bg-red-800 hover:bg-red-700 rounded-lg border border-white/30 font-semibold text-sm"
+                  >
+                    Clear Selection
+                  </button>
+                )}
+              </div>
 
-                <div className="w-40">
+              {/* Win Threshold Toggle */}
+              {newSession.game !== 'Blackjack' && (
+                <div className="flex flex-col items-center">
                   <label className="block text-sm font-bold text-center mb-1">
                     Win Threshold
                   </label>
-                  <input
-                    type="range"
-                    min={3}
-                    max={5}
-                    step={2}
-                    value={newSession.threshold}
-                    onChange={e =>
-                      setNewSession({
-                        ...newSession,
-                        threshold: Number(e.target.value)
-                      })
-                    }
-                    className="w-full accent-fuchsia-500"
-                  />
-                  <div className="text-center text-yellow-400 font-bold text-sm">
-                    {newSession.threshold} Points
+                  <div className="flex gap-3 bg-purple-900/50 rounded-full p-1 border border-white/20">
+                    {[3, 5].map(num => (
+                      <button
+                        key={num}
+                        onClick={() =>
+                          setNewSession({ ...newSession, threshold: num })
+                        }
+                        className={`px-3 py-1 rounded-full font-bold transition-all ${
+                          newSession.threshold === num
+                            ? 'bg-fuchsia-600 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
+                            : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* PLAYER BUTTONS */}
             <div className="grid grid-cols-3 gap-3">
@@ -175,11 +178,11 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`py-3 rounded-lg border font-semibold transition-all
+                  className={`py-3 rounded-lg border font-semibold transition-all text-center
                     ${
                       newSession.players.includes(p)
-                        ? 'bg-emerald-900/80 border-emerald-400/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
-                        : 'bg-purple-900/70 border-white/20 hover:border-white/40'
+                        ? 'bg-emerald-700 border-emerald-400/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                        : 'bg-purple-800 border-white/20 hover:border-white/40'
                     }`}
                 >
                   {p}
@@ -187,7 +190,7 @@ export default function LiveScoringPage() {
               ))}
             </div>
 
-            {/* MADNESS BUTTON (UNCHANGED) */}
+            {/* MADNESS BUTTON */}
             {newSession.game !== 'Blackjack' && (
               <button
                 onClick={createSession}
