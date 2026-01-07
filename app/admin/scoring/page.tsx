@@ -447,24 +447,24 @@ export default function LiveScoringPage() {
           </div>
         ) : (
           <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
-            <h2 className="text-2xl font-bold mb-6">Let the Madness Begin 🎯</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">♠️ New Round</h2>
             <div className="space-y-4">
               <div className="flex gap-3">
                 <div className="flex-[4]">
-                  <label className="block mb-2 text-sm font-bold">Date</label>
+                  <label className="block mb-2 text-sm font-bold text-center">Date</label>
                   <input
                     type="date"
                     value={newSession.date}
                     onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center"
                   />
                 </div>
                 <div className="flex-[6]">
-                  <label className="block mb-2 text-sm font-bold">Game</label>
+                  <label className="block mb-2 text-sm font-bold text-center">Game</label>
                   <select
                     value={newSession.game}
                     onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center"
                   >
                     {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
                   </select>
@@ -473,7 +473,7 @@ export default function LiveScoringPage() {
 
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <label className="block mb-2 text-sm font-bold">Select Players</label>
+                  <label className="block mb-2 text-sm font-bold text-center">Select Players</label>
                   <button
                     type="button"
                     onClick={selectAllPlayers}
@@ -485,14 +485,14 @@ export default function LiveScoringPage() {
 
                 {newSession.game !== 'Blackjack' && (
                   <div className="flex-1">
-                    <label className="block mb-2 text-sm font-bold">Win Threshold</label>
+                    <label className="block mb-2 text-sm font-bold text-center">Win Threshold</label>
                     <input
                       type="number"
                       min="1"
                       max="10"
                       value={newSession.game === 'Rung' ? 5 : newSession.threshold}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full px-3 py-1.5 bg-violet-900/80 rounded-lg border-2 border-white/20 text-center font-bold text-xs"
+                      className="w-full px-3 py-1.5 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center font-bold text-xs"
                     />
                   </div>
                 )}
@@ -503,7 +503,7 @@ export default function LiveScoringPage() {
                   <button
                     key={p}
                     onClick={() => togglePlayer(p)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all font-semibold ${
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-semibold text-center ${
                       newSession.players.includes(p) 
                         ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 border-white/50' 
                         : 'bg-violet-900/80 border-white/20 hover:border-white/40'
@@ -588,9 +588,13 @@ export default function LiveScoringPage() {
               {newSession.game !== 'Blackjack' && (
                 <button
                   onClick={createSession}
-                  className="w-full bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 py-3 rounded-lg border-2 border-yellow-500/50 font-bold shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                  className={`w-full py-3 rounded-lg border-2 font-bold transition-all ${
+                    newSession.players.length > 0 
+                      ? 'bg-gradient-to-br from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 border-orange-500/50 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
+                      : 'bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
+                  }`}
                 >
-                  👊 Game On!
+                  👊 Let the Madness Begin 🎯
                 </button>
               )}
             </div>
