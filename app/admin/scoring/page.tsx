@@ -456,7 +456,7 @@ export default function LiveScoringPage() {
                     type="date"
                     value={newSession.date}
                     onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/30 text-center"
                   />
                 </div>
                 <div className="flex-[6]">
@@ -464,7 +464,7 @@ export default function LiveScoringPage() {
                   <select
                     value={newSession.game}
                     onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center"
+                    className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/30 text-center"
                   >
                     {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
                   </select>
@@ -474,13 +474,23 @@ export default function LiveScoringPage() {
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
                   <label className="block mb-2 text-sm font-bold text-center">Select Players</label>
-                  <button
-                    type="button"
-                    onClick={selectAllPlayers}
-                    className="w-full px-3 py-1.5 bg-blue-900 hover:bg-blue-700 rounded-lg border-2 border-white/30 text-xs font-semibold"
-                  >
-                    Select All
-                  </button>
+                  {newSession.players.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={selectAllPlayers}
+                      className="w-full px-3 py-1.5 bg-blue-900 hover:bg-blue-700 rounded-lg border-2 border-white/30 text-xs font-semibold"
+                    >
+                      Select All
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={clearPlayers}
+                      className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg border-2 border-white/30 text-xs font-semibold"
+                    >
+                      Clear Selection
+                    </button>
+                  )}
                 </div>
 
                 {newSession.game !== 'Blackjack' && (
@@ -492,7 +502,7 @@ export default function LiveScoringPage() {
                       max="10"
                       value={newSession.game === 'Rung' ? 5 : newSession.threshold}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full px-3 py-1.5 bg-violet-900/80 rounded-lg border-4 border-white/30 text-center font-bold text-xs"
+                      className="w-full px-3 py-1.5 bg-violet-900/80 rounded-lg border-2 border-white/30 text-center font-bold text-xs"
                     />
                   </div>
                 )}
@@ -513,16 +523,6 @@ export default function LiveScoringPage() {
                   </button>
                 ))}
               </div>
-
-              {newSession.players.length > 0 && (
-                <button
-                  type="button"
-                  onClick={clearPlayers}
-                  className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg border-2 border-white/30 text-xs"
-                >
-                  Clear Selection
-                </button>
-              )}
 
               {newSession.game === 'Blackjack' && newSession.players.length > 0 && !blackjackMode && (
                 <button
@@ -588,10 +588,10 @@ export default function LiveScoringPage() {
               {newSession.game !== 'Blackjack' && (
                 <button
                   onClick={createSession}
-                  className={`w-full py-3 rounded-lg border-2 font-bold transition-all ${
+                  className={`w-full bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 py-3 rounded-lg font-bold transition-all ${
                     newSession.players.length > 0 
-                      ? 'bg-gradient-to-br from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 border-orange-500/50 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
-                      : 'bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
+                      ? 'border-2 border-orange-500/80 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
+                      : 'border-2 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
                   }`}
                 >
                   👊 Let the Madness Begin 🎯
