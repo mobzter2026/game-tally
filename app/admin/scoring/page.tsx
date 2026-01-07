@@ -499,7 +499,7 @@ export default function LiveScoringPage() {
                       <button
                         key={p}
                         onClick={() => togglePlayer(p)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all font-semibold ${
+                        className={`px-4 py-1.5 rounded-lg border-2 transition-all font-semibold ${
                           newSession.players.includes(p) 
                             ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 border-white/50' 
                             : 'bg-violet-900/80 border-white/20 hover:border-white/40'
