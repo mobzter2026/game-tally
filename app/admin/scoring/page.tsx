@@ -27,7 +27,7 @@ export default function LiveScoringPage() {
     game: 'Monopoly',
     date: new Date().toISOString().split('T')[0],
     players: [] as string[],
-    threshold: 5
+    threshold: 3
   })
 
   const [blackjackMode, setBlackjackMode] = useState(false)
@@ -82,7 +82,7 @@ export default function LiveScoringPage() {
       game: 'Monopoly',
       date: new Date().toISOString().split('T')[0],
       players: [],
-      threshold: 5
+      threshold: 3
     })
   }
 
@@ -471,73 +471,58 @@ export default function LiveScoringPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-bold">Select Players</label>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={selectAllPlayers}
-                        className="px-3 py-1 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded border border-white/30 text-xs"
-                      >
-                        Select All
-                      </button>
-                      {newSession.players.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={clearPlayers}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded border border-white/30 text-xs"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {PLAYERS.map(p => (
-                      <button
-                        key={p}
-                        onClick={() => togglePlayer(p)}
-                        className={`px-4 py-1.5 rounded-lg border-2 transition-all font-semibold ${
-                          newSession.players.includes(p) 
-                            ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 border-white/50' 
-                            : 'bg-violet-900/80 border-white/20 hover:border-white/40'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
+                  <label className="block mb-2 text-sm font-bold">Select Players</label>
+                  <button
+                    type="button"
+                    onClick={selectAllPlayers}
+                    className="w-full px-3 py-2 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-lg border-2 border-white/30 text-sm font-semibold"
+                  >
+                    Select All
+                  </button>
                 </div>
 
-                {newSession.game !== 'Blackjack' && newSession.game !== 'Rung' && (
-                  <div className="w-[120px]">
+                {newSession.game !== 'Blackjack' && (
+                  <div className="flex-1">
                     <label className="block mb-2 text-sm font-bold">Win Threshold</label>
                     <input
                       type="number"
                       min="1"
                       max="10"
-                      value={newSession.threshold}
+                      value={newSession.game === 'Rung' ? 5 : newSession.threshold}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
-                    />
-                  </div>
-                )}
-                {newSession.game === 'Rung' && (
-                  <div className="w-[120px]">
-                    <label className="block mb-2 text-sm font-bold">Win Threshold</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={5}
-                      onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
+                      className="w-full px-3 py-2 bg-violet-900/80 rounded-lg border-2 border-white/20 text-center font-bold"
                     />
                   </div>
                 )}
               </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                {PLAYERS.map(p => (
+                  <button
+                    key={p}
+                    onClick={() => togglePlayer(p)}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-semibold ${
+                      newSession.players.includes(p) 
+                        ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 border-white/50' 
+                        : 'bg-violet-900/80 border-white/20 hover:border-white/40'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+
+              {newSession.players.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearPlayers}
+                  className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg border-2 border-white/30 text-xs"
+                >
+                  Clear Selection
+                </button>
+              )}
 
               {newSession.game === 'Blackjack' && newSession.players.length > 0 && !blackjackMode && (
                 <button
@@ -603,7 +588,7 @@ export default function LiveScoringPage() {
               {newSession.game !== 'Blackjack' && (
                 <button
                   onClick={createSession}
-                  className="w-full bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 py-3 rounded-lg border-2 border-white/30 font-bold"
+                  className="w-full bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 py-3 rounded-lg border-2 border-yellow-500/50 font-bold shadow-[0_0_15px_rgba(234,179,8,0.3)]"
                 >
                   👊 Game On!
                 </button>
