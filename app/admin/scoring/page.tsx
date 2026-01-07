@@ -78,7 +78,7 @@ export default function LiveScoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-purple-950 text-white p-4 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-fuchsia-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-6">
           ⚔️ Points Royale ⚔️
@@ -181,7 +181,7 @@ export default function LiveScoringPage() {
                   className={`py-3 rounded-lg border font-semibold transition-all text-center
                     ${
                       newSession.players.includes(p)
-                        ? 'bg-emerald-700 border-emerald-400/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
                         : 'bg-purple-800 border-white/20 hover:border-white/40'
                     }`}
                 >
