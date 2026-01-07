@@ -31,13 +31,11 @@ export default function LiveScoringPage() {
     threshold: 5
   })
 
-  // Blackjack states
   const [blackjackMode, setBlackjackMode] = useState(false)
   const [blackjackRound, setBlackjackRound] = useState(1)
   const [blackjackPlayers, setBlackjackPlayers] = useState<string[]>([])
   const [knockedOut, setKnockedOut] = useState<string[]>([])
 
-  // Rung states
   const [rungTeam1, setRungTeam1] = useState<string[]>([])
   const [rungTeam2, setRungTeam2] = useState<string[]>([])
   const [rungTeamScores, setRungTeamScores] = useState<{[key: string]: number}>({})
@@ -90,7 +88,6 @@ export default function LiveScoringPage() {
     setScores(initialScores)
     setScoreHistory([])
     
-    // Reset for Rung
     setRungTeam1([])
     setRungTeam2([])
     setRungTeamScores({})
@@ -142,7 +139,6 @@ export default function LiveScoringPage() {
   }
 
   const finishRungGame = async (winningTeam: number, teamScores: {[key: string]: number}) => {
-    // Determine positions
     const team1Players = rungTeam1
     const team2Players = rungTeam2
     
@@ -321,17 +317,18 @@ export default function LiveScoringPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 font-mono">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">🎮 Live Scoring</h1>
-        <button
-          onClick={() => router.push('/')}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded mb-8"
-        >
-          ← Back to Leaderboard
-        </button>
+        <h1 className="text-3xl font-bold mb-4 text-center">⚔️ Points Royale ⚔️</h1>
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={() => router.push('/')}
+            className="px-6 py-3 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-lg border-2 border-white/30 hover:border-white/50 transition-all font-bold"
+          >
+            ← Back to Leaderboard
+          </button>
+        </div>
 
         {activeSession ? (
           <div className="space-y-6">
-            {/* RUNG ACTIVE SESSION */}
             {activeSession.game_type === 'Rung' ? (
               <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -414,7 +411,6 @@ export default function LiveScoringPage() {
                 </div>
               </div>
             ) : (
-              /* REGULAR GAMES ACTIVE SESSION */
               <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
                 <div className="flex justify-between items-center mb-6">
                   <div>
@@ -469,79 +465,89 @@ export default function LiveScoringPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
-              <h2 className="text-2xl font-bold mb-6">📝 Create New Session</h2>
+              <h2 className="text-2xl font-bold mb-6">🔥 Let the Madness Begin 🎯</h2>
               <div className="space-y-4">
-                <div>
-                  <label className="block mb-2 text-sm">Game Type</label>
-                  <select
-                    value={newSession.game}
-                    onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg"
-                  >
-                    {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
-                  </select>
+                <div className="flex gap-3">
+                  <div className="flex-[4]">
+                    <label className="block mb-2 text-sm font-bold">Date</label>
+                    <input
+                      type="date"
+                      value={newSession.date}
+                      onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
+                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
+                    />
+                  </div>
+                  <div className="flex-[6]">
+                    <label className="block mb-2 text-sm font-bold">Game</label>
+                    <select
+                      value={newSession.game}
+                      onChange={(e) => setNewSession({ ...newSession, game: e.target.value })}
+                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
+                    >
+                      {SCORE_GAMES.map(g => <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block mb-2 text-sm">Date</label>
-                  <input
-                    type="date"
-                    value={newSession.date}
-                    onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg"
-                  />
-                </div>
+
                 {newSession.game !== 'Blackjack' && newSession.game !== 'Rung' && (
-                  <div>
-                    <label className="block mb-2 text-sm">Win Threshold</label>
+                  <div className="w-[40%]">
+                    <label className="block mb-2 text-sm font-bold">Win Threshold</label>
                     <input
                       type="number"
                       min="1"
                       max="10"
                       value={newSession.threshold}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full p-3 bg-violet-900/80 rounded-lg"
+                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
                     />
                   </div>
                 )}
                 {newSession.game === 'Rung' && (
-                  <div>
-                    <label className="block mb-2 text-sm">Win Threshold</label>
+                  <div className="w-[40%]">
+                    <label className="block mb-2 text-sm font-bold">Win Threshold</label>
                     <input
                       type="number"
                       min="1"
                       max="10"
                       value={5}
                       onChange={(e) => setNewSession({ ...newSession, threshold: parseInt(e.target.value) })}
-                      className="w-full p-3 bg-violet-900/80 rounded-lg"
+                      className="w-full p-3 bg-violet-900/80 rounded-lg border-2 border-white/20"
                     />
                   </div>
                 )}
+
                 <div>
-                  <label className="block mb-2 text-sm">Select Players</label>
-                  <div className="flex gap-2 mb-2">
-                    <button
-                      type="button"
-                      onClick={selectAllPlayers}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
-                    >
-                      Select All
-                    </button>
-                    {newSession.players.length > 0 && (
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-bold">Select Players</label>
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={clearPlayers}
-                        className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                        onClick={selectAllPlayers}
+                        className="px-3 py-1 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded border border-white/30 text-xs"
                       >
-                        Clear
+                        Select All
                       </button>
-                    )}
+                      {newSession.players.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={clearPlayers}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded border border-white/30 text-xs"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {PLAYERS.map(p => (
                       <button
                         key={p}
                         onClick={() => togglePlayer(p)}
-                        className={`px-4 py-2 rounded ${newSession.players.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                        className={`px-4 py-3 rounded-lg border-2 transition-all font-semibold ${
+                          newSession.players.includes(p) 
+                            ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 border-white/50' 
+                            : 'bg-violet-900/80 border-white/20 hover:border-white/40'
+                        }`}
                       >
                         {p}
                       </button>
@@ -558,7 +564,7 @@ export default function LiveScoringPage() {
                       setBlackjackRound(1)
                       setKnockedOut([])
                     }}
-                    className="w-full bg-amber-600 hover:bg-amber-700 py-3 rounded font-bold"
+                    className="w-full bg-gradient-to-br from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 py-3 rounded-lg border-2 border-white/30 font-bold"
                   >
                     🃏 Start Blackjack Tournament
                   </button>
@@ -575,7 +581,7 @@ export default function LiveScoringPage() {
                         <button
                           key={player}
                           onClick={() => handleBlackjackKnockout(player)}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold"
+                          className="px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg border-2 border-white/30 font-semibold"
                         >
                           {player}
                         </button>
@@ -590,7 +596,7 @@ export default function LiveScoringPage() {
                             setKnockedOut(knockedOut.slice(0, -1))
                             setBlackjackRound(Math.max(1, blackjackRound - 1))
                           }}
-                          className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
+                          className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg border-2 border-white/30 text-sm"
                         >
                           ↶ Undo
                         </button>
@@ -602,7 +608,7 @@ export default function LiveScoringPage() {
                           setBlackjackPlayers([])
                           setKnockedOut([])
                         }}
-                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm"
+                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg border-2 border-white/30 text-sm"
                       >
                         Cancel
                       </button>
@@ -613,7 +619,7 @@ export default function LiveScoringPage() {
                 {newSession.game !== 'Blackjack' && (
                   <button
                     onClick={createSession}
-                    className="w-full bg-fuchsia-700 hover:bg-fuchsia-800 py-3 rounded font-bold"
+                    className="w-full bg-gradient-to-br from-fuchsia-700 to-purple-700 hover:from-fuchsia-600 hover:to-purple-600 py-3 rounded-lg border-2 border-white/30 font-bold"
                   >
                     ✍️ Start Scoring
                   </button>
