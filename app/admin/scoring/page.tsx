@@ -185,8 +185,8 @@ export default function LiveScoringPage() {
                   onClick={() => togglePlayer(p)}
                   className={`py-3 rounded-lg border-2 font-semibold transition-all text-center shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4),0_8px_16px_rgba(0,0,0,0.7)] active:translate-y-[2px] active:shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
                     newSession.players.includes(p)
-                      ? 'bg-purple-800 border-white/20 hover:border-white/40'
-                      : 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                      ? 'bg-purple-800 border-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.6)]'
+                      : 'bg-purple-900 border-purple-700/50 shadow-[0_0_8px_rgba(88,28,135,0.3)]'
                   }`}
                 >
                   {p}
