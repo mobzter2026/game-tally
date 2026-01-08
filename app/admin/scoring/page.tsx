@@ -198,9 +198,9 @@ export default function LiveScoringPage() {
             {newSession.game !== 'Blackjack' && (
               <button
                 onClick={createSession}
-                className={`w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-slate-900 via-black to-slate-950 text-white shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),0_8px_16px_rgba(0,0,0,0.7)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,0.15),0_10px_20px_rgba(0,0,0,0.8)] active:translate-y-[1px] transition-all ${
+                className={`w-full py-4 rounded-xl font-bold text-lg bg-orange-500/15 backdrop-blur-md text-white shadow-[0_8px_16px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.2)] hover:bg-orange-500/25 hover:shadow-[0_10px_20px_rgba(0,0,0,0.6),inset_0_1px_2px_rgba(255,255,255,0.3)] active:translate-y-[1px] transition-all ${
                   newSession.players.length > 0
-                    ? 'border-2 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.8),inset_0_0_20px_rgba(249,115,22,0.15)]'
+                    ? 'border-2 border-orange-400 shadow-[0_0_35px_rgba(251,146,60,0.9)] bg-orange-500/30'
                     : 'border-2 border-orange-600/40 shadow-[0_0_15px_rgba(217,119,6,0.4)]'
                 }`}
               >
