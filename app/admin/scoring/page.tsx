@@ -131,14 +131,22 @@ export default function LiveScoringPage() {
                 {newSession.players.length === 0 ? (
                   <button
                     onClick={selectAllPlayers}
-                    className="w-full py-2 bg-emerald-800 hover:bg-emerald-800 rounded-lg border border-white/30 font-semibold text-sm"
+                    className="w-full py-2 rounded-lg border border-blue-400/40
+                               bg-blue-700 hover:bg-blue-600
+                               text-white font-semibold text-sm
+                               shadow-[0_0_15px_rgba(59,130,246,0.45)]
+                               transition-all"
                   >
                     Select All
                   </button>
                 ) : (
                   <button
                     onClick={clearPlayers}
-                    className="w-full py-2 bg-red-800 hover:bg-red-700 rounded-lg border border-white/30 font-semibold text-sm"
+                    className="w-full py-2 rounded-lg border border-red-400/40
+                               bg-red-700 hover:bg-red-600
+                               text-white font-semibold text-sm
+                               shadow-[0_0_15px_rgba(239,68,68,0.45)]
+                               transition-all"
                   >
                     Clear Selection
                   </button>
@@ -179,9 +187,10 @@ export default function LiveScoringPage() {
                   key={p}
                   onClick={() => togglePlayer(p)}
                   className={`py-3 rounded-lg border font-semibold transition-all text-center
+			      active:scale-95
                     ${
                       newSession.players.includes(p)
-                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)] scale-103'
                         : 'bg-purple-800 border-white/20 hover:border-white/40'
                     }`}
                 >
@@ -196,8 +205,8 @@ export default function LiveScoringPage() {
                 onClick={createSession}
                 className={`w-full bg-gradient-to-br from-fuchsia-950 to-purple-950 shadow-inner shadow-black/40 hover:from-fuchsia-900 hover:to-purple-900 py-3 rounded-lg font-bold transition-all ${
                   newSession.players.length > 0
-                    ? 'border-2 border-orange-500/80 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
-                    : 'border-2 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
+                    ? 'border-2 border-orange-500/90 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
+                    : 'border-2 border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
                 }`}
               >
                 👊 Let the Madness Begin 🎯
