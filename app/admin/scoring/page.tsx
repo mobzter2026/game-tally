@@ -80,7 +80,7 @@ export default function LiveScoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple via-fuchsia-950 to-slate-950 text-white font-mono overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-fuchsia-950 to-slate-950 text-white font-mono overflow-x-hidden">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8">
           <span className="opacity-80">⚔️</span>{' '}
