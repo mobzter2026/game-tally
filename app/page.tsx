@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react' import { createClient } from '@/lib/supabase/client' import type { Game } from '@/lib/types'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import type { Game } from '@/lib/types'
 
-const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf'] const MIN_GAMES_FOR_RANKING = 0
+const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
+const MIN_GAMES_FOR_RANKING = 0
 
 const QUOTES = [ "Friendship ends where the game begins.", "It's not about winning, it's about making others lose.", "Every card tells a story of betrayal.", "Where loyalty dies and legends are born.", "Every loss is just character building… and humiliation.", "If at first you don't succeed… shuffle and try again.", "Victory is earned. Humiliation is free.", "Some are born winners. Others are just funny losers.", "The table is a battlefield. Your ego is the weapon.", "You can't control luck… but you can ruin everyone else's day.", "Pain is temporary. Bragging rights are forever.", "Hope your therapy sessions are ready.", "One table. Many casualties.", "Lose today. Regret tomorrow. Cry later.", "Your dignity called… it's filing a complaint.", "Lose today. Learn tomorrow. Dominate next time.", "Winners rise. Everyone else takes notes… or cry.", "Step up or step aside." ]
 
