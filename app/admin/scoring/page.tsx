@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Game } from '@/lib/types'
+import { useRouter } from 'next/navigation'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
-const MIN_GAMES_FOR_RANKING = 0
-
 const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Blackjack', 'Shithead', 'Rung']
 
 const GAME_EMOJIS: Record<string, string> = {
@@ -80,31 +78,22 @@ export default function LiveScoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-fuchsia-950 to-slate-950 text-white font-mono overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-fuchsia-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8">
-          <span className="opacity-80">⚔️</span>{' '}
-          <span className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 
-                 bg-clip-text text-transparent 
-                 drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]
-                 dark:text-amber-300
-                 [@supports_not_(background-clip:text)]:text-amber-300">
-  Points Royale
-</span>{' '}
-          <span className="opacity-80">⚔️</span>
+          <span className="opacity-60">⚔️</span>{' '}
+          <span className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)] [@supports_not_(background-clip:text)]:text-amber-300">
+            Points Royale
+          </span>{' '}
+          <span className="opacity-60">⚔️</span>
         </h1>
 
         {!activeSession && (
-          <div className="bg-gradient-to-br from-purple-950/80 to-black/80 backdrop-blur-md rounded-xl border-2 border-purple-400/40 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(168,85,247,0.3)] p-6 space-y-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.7)]">
+          <div className="bg-gradient-to-br from-purple-950/80 to-black/80 backdrop-blur-md rounded-xl border-2 border-purple-400/40 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(168,85,247,0.3)] p-6 space-y-6">
             {/* NEW ROUND TITLE */}
-            <h2 className="text-3xl font-bold text-center mb-4 
-               bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400
-               bg-clip-text text-transparent 
-               drop-shadow-[0_1px_8px_rgba(148,163,184,0.4)] tracking-wide
-               dark:text-slate-200
-               [@supports_not_(background-clip:text)]:text-slate-300">
-  New Round
-</h2>
+            <h2 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400 bg-clip-text text-transparent drop-shadow-[0_1px_8px_rgba(148,163,184,0.4)] tracking-wide [@supports_not_(background-clip:text)]:text-slate-300">
+              New Round
+            </h2>
 
             {/* DATE + GAME */}
             <div className="flex gap-3 mb-4">
@@ -194,7 +183,7 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`py-3 rounded-lg border-2 font-semibold transition-all text-center shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4),0_8px_16px_rgba(0,0,0,0.7)] active:translate-y-[2px] active:shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+                  className={`p-3 rounded-lg border font-semibold transition-all text-center shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_8px_16px_rgba(0,0,0,0.7)] active:translate-y-[2px] active:shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
                     newSession.players.includes(p)
                       ? 'bg-gradient-to-br from-purple-800 to-purple-900 border-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.6)]'
                       : 'bg-gradient-to-br from-purple-900 to-purple-950 border-purple-400/30 shadow-[0_0_8px_rgba(88,28,135,0.3)]'
@@ -209,13 +198,13 @@ export default function LiveScoringPage() {
             {newSession.game !== 'Blackjack' && (
               <button
                 onClick={createSession}
-                className={`w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-black-900 via-blue-950 to-black-900 text-white shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.2)] active:translate-y-[1px] transition-all ${
+                className={`w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-blue-900 via-fuchsia-900 to-blue-950 text-white shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.2)] active:translate-y-[1px] transition-all ${
                   newSession.players.length > 0
                     ? 'border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.8)]'
                     : 'border-2 border-white/40 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
                 }`}
               >
-                👊 Let the Madness Begin!
+                👊 Let the Madness Begin
               </button>
             )}
           </div>
