@@ -131,7 +131,7 @@ export default function LiveScoringPage() {
                 {newSession.players.length === 0 ? (
                   <button
                     onClick={selectAllPlayers}
-                    className="w-full py-2 rounded-lg border border-blue-400/50
+                    className="w-full py-2 rounded-lg border border-blue-400/50 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
                                bg-gradient-to-br from-blue-700 to-blue-900
                                text-white font-semibold text-sm
                                shadow-[0_0_20px_rgba(59,130,246,0.45)]
@@ -143,7 +143,7 @@ export default function LiveScoringPage() {
                 ) : (
                   <button
                     onClick={clearPlayers}
-                    className="w-full py-2 rounded-lg border border-red-400/50
+                    className="w-full py-2 rounded-lg border border-red-400/50 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
                                bg-gradient-to-br from-red-700 to-red-900
                                text-white font-semibold text-sm
                                shadow-[0_0_20px_rgba(239,68,68,0.45)]
@@ -168,7 +168,7 @@ export default function LiveScoringPage() {
                         onClick={() =>
                           setNewSession({ ...newSession, threshold: num })
                         }
-                        className={`px-3 py-1 rounded-full font-bold transition-all ${
+                        className={`px-3 py-1 rounded-full font-bold transition-all shadow-[0_3px_6px_rgba(0,0,0,0.3)] active:translate-y-[1px] ${
                           newSession.threshold === num
                             ? 'bg-purple-800 text-purple-200 hover:bg-purple-700'
                             : 'bg-purple-800/40 text-purple-300/60 hover:bg-purple-700/50'
@@ -188,7 +188,7 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`py-3 rounded-lg border font-semibold transition-all text-center hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]
+                  className={`py-3 rounded-lg border font-semibold transition-all text-center shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(168,85,247,0.3),0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
                     ${
                       newSession.players.includes(p)
                         ? 'bg-purple-800 border-white/20 hover:border-white/40'
