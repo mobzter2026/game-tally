@@ -88,7 +88,7 @@ export default function LiveScoringPage() {
 	  <div className="bg-gradient-to-br from-purple-950/70 to-purple-900/80 backdrop-blur-md rounded-xl border border-amber-400/30 p-6 space-y-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.7)]">
 
             {/* NEW ROUND TITLE */}
-            <h2 className="text-2xl font-bold text-center mb-4">New Round</h2>
+            <h2 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400 bg-clip-text text-transparent drop-shadow-[0_1px_8px_rgba(148,163,184,0.4)] tracking-wide">New Round</h2>
 
             {/* DATE + GAME */}
             <div className="flex gap-3 mb-4">
@@ -188,7 +188,7 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`py-3 rounded-lg border font-semibold transition-all text-center
+                  className={`py-3 rounded-lg border font-semibold transition-all text-center hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]
                     ${
                       newSession.players.includes(p)
                         ? 'bg-purple-800 border-white/20 hover:border-white/40'
