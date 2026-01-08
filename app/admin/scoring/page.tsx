@@ -82,7 +82,7 @@ export default function LiveScoringPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8">
           <span className="opacity-60">⚔️</span>{' '}
-          <span className="text-amber-400 dark:text-amber-200">
+          <span className="text-amber-300 dark:text-amber-200 drop-shadow-lg font-bold text-4xl">
   Points Royale
 </span>{' '}
           <span className="opacity-60">⚔️</span>
@@ -91,7 +91,7 @@ export default function LiveScoringPage() {
         {!activeSession && (
           <div className="bg-gradient-to-br from-purple-950/80 to-black/80 backdrop-blur-md rounded-xl border-2 border-purple-400/40 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(168,85,247,0.3)] p-6 space-y-6">
             {/* NEW ROUND TITLE */}
-            <h2 className="text-slate-200 dark:text-slate-100">
+            <h2 className="text-orange-400 dark:text-orange-300 text-5xl font-extrabold text-center mb-6 drop-shadow-md">
   New Round
 </h2>
 
