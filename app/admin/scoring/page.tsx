@@ -85,7 +85,7 @@ export default function LiveScoringPage() {
         </h1>
 
         {!activeSession && (
-          <div className="bg-purple-950/95 rounded-xl border-2 border-white/20 p-6 space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+	  <div className="bg-white/5 backdrop-blur-md rounded-xl border-2 border-white/20 p-6 space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
 
             {/* NEW ROUND TITLE */}
             <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round ♠️</h2>
