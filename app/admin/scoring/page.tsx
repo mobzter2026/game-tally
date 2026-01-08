@@ -153,8 +153,6 @@ export default function LiveScoringPage() {
                     ✖ Clear Table
                   </button>
                 )}
-                  </button>
-                )}
               </div>
 
               {/* Win Threshold Toggle */}
