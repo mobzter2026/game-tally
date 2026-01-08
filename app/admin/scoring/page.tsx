@@ -80,12 +80,12 @@ export default function LiveScoringPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-fuchsia-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6">
+        <h1 className="text-3xl font-bold text-center mb-6 mt-8">
           ⚔️ Points Royale ⚔️
         </h1>
 
         {!activeSession && (
-	  <div className="bg-gradient-to-br from-purple-950/80 to-black/80 backdrop-blur-md rounded-xl border border-amber-400/30 p-6 space-y-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.7)]">
+	  <div className="bg-gradient-to-br from-purple-950/70 to-purple-900/80 backdrop-blur-md rounded-xl border border-amber-400/30 p-6 space-y-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.7)]">
 
             {/* NEW ROUND TITLE */}
             <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round ♠️</h2>
@@ -183,7 +183,7 @@ export default function LiveScoringPage() {
             </div>
 
             {/* PLAYER BUTTONS */}
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {PLAYERS.map(p => (
                 <button
                   key={p}
