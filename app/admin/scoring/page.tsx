@@ -80,7 +80,7 @@ export default function LiveScoringPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-fuchsia-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6 mt-8">
+        <h1 className="text-4xl font-bold text-center mb-6 mt-8 bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
           ⚔️ Points Royale ⚔️
         </h1>
 
@@ -88,7 +88,7 @@ export default function LiveScoringPage() {
 	  <div className="bg-gradient-to-br from-purple-950/70 to-purple-900/80 backdrop-blur-md rounded-xl border border-amber-400/30 p-6 space-y-6 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(0,0,0,0.7)]">
 
             {/* NEW ROUND TITLE */}
-            <h2 className="text-2xl font-bold text-center mb-4">♠️ New Round ♠️</h2>
+            <h2 className="text-2xl font-bold text-center mb-4">New Round</h2>
 
             {/* DATE + GAME */}
             <div className="flex gap-3 mb-4">
@@ -171,7 +171,7 @@ export default function LiveScoringPage() {
                         className={`px-3 py-1 rounded-full font-bold transition-all ${
                           newSession.threshold === num
                             ? 'bg-purple-800 text-purple-200 hover:bg-purple-700'
-                            : 'bg-fuchsia-800 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
+                            : 'bg-purple-800/40 text-purple-300/60 hover:bg-purple-700/50'
                         }`}
                       >
                         {num}
@@ -191,8 +191,8 @@ export default function LiveScoringPage() {
                   className={`py-3 rounded-lg border font-semibold transition-all text-center
                     ${
                       newSession.players.includes(p)
-                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
-                        : 'bg-purple-800 border-white/20 hover:border-white/40'
+                        ? 'bg-purple-800 border-white/20 hover:border-white/40'
+                        : 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
                     }`}
                 >
                   {p}
