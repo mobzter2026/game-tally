@@ -82,11 +82,10 @@ export default function LiveScoringPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8">
           <span className="opacity-80">⚔️</span>{' '}
-          <span className="bg-gradient-to-r 
-                 from-amber-200 via-yellow-400 to-amber-200 
-                 dark:from-yellow-300 dark:via-amber-300 dark:to-yellow-400
+          <span className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 
                  bg-clip-text text-transparent 
                  drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]
+                 dark:text-amber-300
                  [@supports_not_(background-clip:text)]:text-amber-300">
   Points Royale
 </span>{' '}
