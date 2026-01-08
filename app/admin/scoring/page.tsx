@@ -81,7 +81,7 @@ export default function LiveScoringPage() {
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-950 via-purple-950 to-fuchsia-950 text-white p-4 font-mono">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8 bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
-          <span className="opacity-70">⚔️</span> Points Royale <span className="opacity-70">⚔️</span>
+          <span style={{opacity: 0.6}}>⚔️</span> Points Royale <span style={{opacity: 0.6}}>⚔️</span>
         </h1>
 
         {!activeSession && (
@@ -131,7 +131,7 @@ export default function LiveScoringPage() {
                 {newSession.players.length === 0 ? (
                   <button
                     onClick={selectAllPlayers}
-                    className="w-full py-2 rounded-lg border border-blue-400/50 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
+                    className="w-full py-2 rounded-lg border border-red-400/20 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
                                bg-gradient-to-br from-blue-700 to-blue-900
                                text-white font-semibold text-sm
                                shadow-[0_0_20px_rgba(59,130,246,0.45)]
@@ -143,7 +143,7 @@ export default function LiveScoringPage() {
                 ) : (
                   <button
                     onClick={clearPlayers}
-                    className="w-full py-2 rounded-lg border border-red-400/50 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
+                    className="w-full py-2 rounded-lg border border-red-400/70 shadow-[0_4px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px]
                                bg-gradient-to-br from-red-700 to-red-900
                                text-white font-semibold text-sm
                                shadow-[0_0_20px_rgba(239,68,68,0.45)]
