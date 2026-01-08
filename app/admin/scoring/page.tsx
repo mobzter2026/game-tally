@@ -82,7 +82,7 @@ export default function LiveScoringPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-6 mt-8">
           <span className="opacity-60">⚔️</span>{' '}
-          <span className="text-amber-300 dark:text-amber-200 drop-shadow-lg font-bold text-4xl">
+          <span className="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">
             Points Royale
           </span>{' '}
           <span className="opacity-60">⚔️</span>
@@ -91,7 +91,7 @@ export default function LiveScoringPage() {
         {!activeSession && (
           <div className="bg-gradient-to-br from-purple-950/80 to-black/80 backdrop-blur-md rounded-xl border-2 border-purple-400/40 shadow-[inset_0_0_40px_rgba(0,0,0,0.8),0_0_30px_rgba(168,85,247,0.3)] p-6 space-y-6">
             {/* NEW ROUND TITLE */}
-            <h2 className="text-orange-400 dark:text-orange-300 text-3xl font-extrabold text-center mb-6 drop-shadow-md">
+            <h2 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400 bg-clip-text text-transparent drop-shadow-[0_1px_8px_rgba(148,163,184,0.4)] tracking-wide">
               New Round
             </h2>
 
@@ -200,8 +200,8 @@ export default function LiveScoringPage() {
                 onClick={createSession}
                 className={`w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-blue-900 via-fuchsia-900 to-blue-950 text-white shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.2)] active:translate-y-[1px] transition-all ${
                   newSession.players.length > 0
-                    ? 'border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.8)]'
-                    : 'border-2 border-white/40 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
+                    ? 'border-2 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.9)]'
+                    : 'border-2 border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
                 }`}
               >
                 👊 Let the Madness Begin
