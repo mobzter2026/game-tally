@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
+const MIN_GAMES_FOR_RANKING = 0
+
 const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Blackjack', 'Shithead', 'Rung']
 
 const GAME_EMOJIS: Record<string, string> = {
