@@ -168,8 +168,8 @@ export default function LiveScoringPage() {
                         }
                         className={`px-3 py-1 rounded-full font-bold transition-all ${
                           newSession.threshold === num
-                            ? 'bg-fuchsia-700 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
-                            : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
+                            ? 'bg-purple-800 text-purple-200 hover:bg-purple-700'
+                            : 'bg-fuchsia-800 text-white shadow-[0_0_10px_rgba(255,0,150,0.5)]'
                         }`}
                       >
                         {num}
@@ -187,10 +187,9 @@ export default function LiveScoringPage() {
                   key={p}
                   onClick={() => togglePlayer(p)}
                   className={`py-3 rounded-lg border font-semibold transition-all text-center
-			      active:scale-95
                     ${
                       newSession.players.includes(p)
-                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)] scale-103'
+                        ? 'bg-purple-900 border-emerald-600/40 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
                         : 'bg-purple-800 border-white/20 hover:border-white/40'
                     }`}
                 >
@@ -205,7 +204,7 @@ export default function LiveScoringPage() {
                 onClick={createSession}
                 className={`w-full bg-gradient-to-br from-fuchsia-950 to-purple-950 shadow-inner shadow-black/40 hover:from-fuchsia-900 hover:to-purple-900 py-3 rounded-lg font-bold transition-all ${
                   newSession.players.length > 0
-                    ? 'border-2 border-orange-500/90 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
+                    ? 'border-2 border-orange-500/85 shadow-[0_0_25px_rgba(249,115,22,0.5)]'
                     : 'border-2 border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
                 }`}
               >
