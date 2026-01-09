@@ -60,10 +60,10 @@ export default function LiveScoringPage() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
-      <div className="max-w-3xl mx-auto h-full flex flex-col justify-center space-y-6">
+      <div className="max-w-3xl mx-auto h-full flex flex-col justify-center space-y-5">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-10 mb-2">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-16 mb-1">
           ⚔️ Points Royale ⚔️
         </h1>
 
@@ -95,10 +95,10 @@ export default function LiveScoringPage() {
                     setNewSession({ ...newSession, date: e.target.value })
                   }
                   className="
-                    w-full p-2 text-center rounded-lg
+                    w-full p-2 rounded-lg text-center
                     bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_4px_6px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_6px_10px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
+                    shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    hover:shadow-[0_8px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
                     transition-all
                   "
                 />
@@ -115,10 +115,10 @@ export default function LiveScoringPage() {
                     setNewSession({ ...newSession, game: e.target.value })
                   }
                   className="
-                    w-full p-2 text-center rounded-lg
+                    w-full p-2 rounded-lg text-center
                     bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_4px_6px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_6px_10px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
+                    shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    hover:shadow-[0_8px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
                     transition-all
                   "
                 >
@@ -139,7 +139,7 @@ export default function LiveScoringPage() {
                   w-full py-2 rounded-lg font-semibold
                   bg-gradient-to-br from-blue-600 to-blue-800
                   border-2 border-white/70
-                  shadow-[0_6px_14px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                  shadow-[0_7px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)]
                   active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
                   transition-all
                 "
@@ -153,7 +153,7 @@ export default function LiveScoringPage() {
                   w-full py-2 rounded-lg font-semibold
                   bg-gradient-to-br from-red-600 to-red-800
                   border-2 border-white/70
-                  shadow-[0_6px_14px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                  shadow-[0_7px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)]
                   active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
                   transition-all
                 "
