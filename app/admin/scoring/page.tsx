@@ -81,12 +81,24 @@ export default function LiveScoringPage() {
     <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
       <div className="max-w-3xl mx-auto h-full flex flex-col justify-center space-y-6">
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(251,191,36,0.6)] select-none">
+        <h1 className="text-4xl font-bold text-center select-none
+          bg-clip-text text-transparent
+          bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200
+          dark:text-amber-400 dark:bg-none">
           ⚔️ Points Royale ⚔️
         </h1>
 
         {!activeSession && (
           <div className="bg-gradient-to-br from-purple-900/50 to-slate-900/60 backdrop-blur-lg border-2 border-purple-500/40 rounded-xl p-4 space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)]">
+
+            {/* NEW ROUND TITLE */}
+            <h2 className="text-center text-3xl font-bold tracking-[3px] select-none
+              text-white
+              bg-clip-text text-transparent
+              bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300
+              dark:text-white dark:bg-none mb-4">
+              New Round
+            </h2>
             
             {/* DATE + GAME */}
             <div className="flex gap-3">
@@ -145,11 +157,11 @@ export default function LiveScoringPage() {
                   key={p}
                   onClick={() => togglePlayer(p)}
                   className={`h-10 w-full rounded-md font-semibold text-sm text-white transition-all border-2 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_3px_rgba(255,255,255,0.05)]
-                    bg-gradient-to-br from-purple-900 to-blue-900
+                    bg-gradient-to-br from-purple-950 to-blue-950
                     ${
                       newSession.players.includes(p)
-                        ? 'border-blue-300'
-                        : 'border-blue-400/30 hover:border-blue-400'
+                        ? 'border-blue-400/70'
+                        : 'border-blue-400/30 hover:border-blue-400/50'
                     }`}
                 >
                   {p}
