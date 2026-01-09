@@ -98,7 +98,7 @@ export default function LiveScoringPage() {
                   w-full h-11 rounded-lg
                   flex items-center justify-center text-center leading-none
                   bg-purple-900/80 border-2 border-fuchsia-600/30
-                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.18)]
                   transition-all
                 "
               />
