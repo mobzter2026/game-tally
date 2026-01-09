@@ -99,7 +99,7 @@ export default function LiveScoringPage() {
               dark:text-white dark:bg-none mb-4">
               New Round
             </h2>
-            
+
             {/* DATE + GAME */}
             <div className="flex gap-3">
               <div className="flex-1">
@@ -110,7 +110,11 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] text-white transition-all"
+                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80
+                    shadow-[0_4px_6px_rgba(255,255,255,0.2),inset_0_2px_4px_rgba(255,255,255,0.1)]
+                    dark:shadow-[0_4px_6px_rgba(255,255,255,0.2),inset_0_2px_4px_rgba(255,255,255,0.1)]
+                    hover:shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    text-white transition-all"
                 />
               </div>
               <div className="flex-1">
@@ -120,7 +124,11 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, game: e.target.value })
                   }
-                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] text-white transition-all"
+                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80
+                    shadow-[0_4px_6px_rgba(255,255,255,0.2),inset_0_2px_4px_rgba(255,255,255,0.1)]
+                    dark:shadow-[0_4px_6px_rgba(255,255,255,0.2),inset_0_2px_4px_rgba(255,255,255,0.1)]
+                    hover:shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    text-white transition-all"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -136,14 +144,14 @@ export default function LiveScoringPage() {
               {newSession.players.length === 0 ? (
                 <button
                   onClick={selectAllPlayers}
-                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold text-white transition-all"
+                  className="flex-1 py-2 rounded-lg border-2 border-white/70 bg-blue-700 hover:bg-blue-800 shadow-[0_0_8px_rgba(255,255,255,0.3)] font-semibold text-white transition-all"
                 >
                   ♠ Deal All
                 </button>
               ) : (
                 <button
                   onClick={clearPlayers}
-                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold text-white transition-all"
+                  className="flex-1 py-2 rounded-lg border-2 border-white/70 bg-red-700 hover:bg-red-800 shadow-[0_0_8px_rgba(255,255,255,0.3)] font-semibold text-white transition-all"
                 >
                   ✖ Clear Table
                 </button>
@@ -160,7 +168,7 @@ export default function LiveScoringPage() {
                     bg-gradient-to-br from-purple-950 to-blue-950
                     ${
                       newSession.players.includes(p)
-                        ? 'border-blue-400/70'
+                        ? 'border-blue-400/70 bg-purple-900/70 hover:bg-purple-900/65'
                         : 'border-blue-400/30 hover:border-blue-400/50'
                     }`}
                 >
