@@ -16,7 +16,6 @@ const GAME_EMOJIS: Record<string, string> = {
 }
 
 export default function LiveScoringPage() {
-  const [activeSession, setActiveSession] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -63,152 +62,149 @@ export default function LiveScoringPage() {
       <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-20 mb-6">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-24 mb-4">
           ⚔️ Points Royale ⚔️
         </h1>
 
-        {/* spacer row */}
-        <div className="h-4" />
+        {/* spacer */}
+        <div className="h-6" />
 
-        {!activeSession && (
-          <div
-            className="
-              bg-gradient-to-br from-purple-900/50 to-slate-900/60
-              backdrop-blur-lg border-2 border-purple-500/40 rounded-xl
-              p-4 space-y-6
-              shadow-[0_20px_50px_rgba(0,0,0,0.55),inset_0_1px_2px_rgba(255,255,255,0.12)]
-            "
-          >
-            {/* NEW ROUND */}
-            <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white">
-              New Round
-            </h2>
+        <div className="
+          bg-gradient-to-br from-purple-900/50 to-slate-900/60
+          backdrop-blur-lg border-2 border-purple-500/40 rounded-xl
+          p-4 space-y-6
+          shadow-[0_14px_30px_rgba(0,0,0,0.45),inset_0_1px_2px_rgba(255,255,255,0.12)]
+        ">
 
-            {/* DATE + GAME */}
-            <div className="flex gap-3">
-              {/* DATE */}
-              <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={newSession.date}
-                  onChange={e =>
-                    setNewSession({ ...newSession, date: e.target.value })
-                  }
-                  className="
-                    w-full p-2 rounded-lg text-center appearance-none
-                    bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_8px_16px_rgba(0,0,0,0.7)]
-                    transition-all
-                  "
-                />
-              </div>
+          {/* NEW ROUND */}
+          <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white">
+            New Round
+          </h2>
 
-              {/* GAME */}
-              <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">
-                  Game
-                </label>
-                <select
-                  value={newSession.game}
-                  onChange={e =>
-                    setNewSession({ ...newSession, game: e.target.value })
-                  }
-                  className="
-                    w-full p-2 rounded-lg text-center
-                    bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_8px_16px_rgba(0,0,0,0.7)]
-                    transition-all
-                  "
-                >
-                  {SCORE_GAMES.map(g => (
-                    <option key={g} value={g}>
-                      {GAME_EMOJIS[g]} {g}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* DEAL / CLEAR */}
-            {newSession.players.length === 0 ? (
-              <button
-                onClick={selectAllPlayers}
-                className="
-                  w-full py-2 rounded-lg font-semibold
-                  bg-gradient-to-br from-blue-600 to-blue-800
-                  border-2 border-white/70
-                  shadow-[0_8px_16px_rgba(0,0,0,0.65),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)]
-                  transition-all
-                "
-              >
-                ♠ Deal All
-              </button>
-            ) : (
-              <button
-                onClick={clearPlayers}
-                className="
-                  w-full py-2 rounded-lg font-semibold
-                  bg-gradient-to-br from-red-600 to-red-800
-                  border-2 border-white/70
-                  shadow-[0_8px_16px_rgba(0,0,0,0.65),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)]
-                  transition-all
-                "
-              >
-                ✖ Clear Table
-              </button>
-            )}
-
-            {/* PLAYERS */}
-            <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-              {PLAYERS.map(p => {
-                const selected = newSession.players.includes(p)
-                return (
-                  <button
-                    key={p}
-                    onClick={() => togglePlayer(p)}
-                    className={`
-                      h-10 rounded-md font-semibold text-sm
-                      border-2 transition-all
-                      shadow-[0_4px_8px_rgba(0,0,0,0.6),inset_0_1px_2px_rgba(255,255,255,0.08)]
-                      ${
-                        selected
-                          ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
-                          : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
-                      }
-                    `}
-                  >
-                    {p}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* MADNESS */}
-            <button
-              disabled={newSession.players.length === 0}
-              className={`
-                w-full py-3 rounded-xl font-bold text-lg
-                bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
-                border-2 transition-all
-                shadow-[0_6px_18px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                ${
-                  newSession.players.length
-                    ? 'border-orange-400 hover:border-orange-300'
-                    : 'border-orange-900 opacity-60 cursor-not-allowed'
+          {/* DATE + GAME */}
+          <div className="flex gap-3">
+            {/* DATE */}
+            <div className="flex-1">
+              <label className="block text-sm font-bold text-center mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={newSession.date}
+                onChange={e =>
+                  setNewSession({ ...newSession, date: e.target.value })
                 }
-              `}
-            >
-              👊 Let the Madness Begin
-            </button>
+                className="
+                  w-full h-11 rounded-lg
+                  flex items-center justify-center text-center leading-none
+                  bg-purple-900/80 border-2 border-fuchsia-600/30
+                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                  transition-all
+                "
+              />
+            </div>
+
+            {/* GAME */}
+            <div className="flex-1">
+              <label className="block text-sm font-bold text-center mb-1">
+                Game
+              </label>
+              <select
+                value={newSession.game}
+                onChange={e =>
+                  setNewSession({ ...newSession, game: e.target.value })
+                }
+                className="
+                  w-full h-11 rounded-lg text-center
+                  bg-purple-900/80 border-2 border-fuchsia-600/30
+                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                  transition-all
+                "
+              >
+                {SCORE_GAMES.map(g => (
+                  <option key={g} value={g}>
+                    {GAME_EMOJIS[g]} {g}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        )}
+
+          {/* DEAL / CLEAR */}
+          {newSession.players.length === 0 ? (
+            <button
+              onClick={selectAllPlayers}
+              className="
+                w-full h-11 rounded-lg font-semibold
+                bg-gradient-to-br from-blue-600 to-blue-800
+                border-2 border-white/70
+                shadow-[0_5px_12px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
+                transition-all
+              "
+            >
+              ♠ Deal All
+            </button>
+          ) : (
+            <button
+              onClick={clearPlayers}
+              className="
+                w-full h-11 rounded-lg font-semibold
+                bg-gradient-to-br from-red-600 to-red-800
+                border-2 border-white/70
+                shadow-[0_5px_12px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
+                transition-all
+              "
+            >
+              ✖ Clear Table
+            </button>
+          )}
+
+          {/* PLAYERS */}
+          <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+            {PLAYERS.map(p => {
+              const selected = newSession.players.includes(p)
+              return (
+                <button
+                  key={p}
+                  onClick={() => togglePlayer(p)}
+                  className={`
+                    h-10 rounded-md font-semibold text-sm
+                    border-2 transition-all
+                    shadow-[0_3px_6px_rgba(0,0,0,0.45),inset_0_1px_2px_rgba(255,255,255,0.08)]
+                    ${
+                      selected
+                        ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
+                        : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
+                    }
+                  `}
+                >
+                  {p}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* MADNESS */}
+          <button
+            disabled={newSession.players.length === 0}
+            className={`
+              w-full py-3 rounded-xl font-bold text-lg
+              bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
+              border-2 transition-all
+              shadow-[0_6px_14px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)]
+              ${
+                newSession.players.length
+                  ? 'border-orange-400'
+                  : 'border-orange-900 opacity-60 cursor-not-allowed'
+              }
+            `}
+          >
+            👊 Let the Madness Begin
+          </button>
+
+        </div>
       </div>
     </div>
   )
