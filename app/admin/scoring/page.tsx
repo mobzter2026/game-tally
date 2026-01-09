@@ -59,18 +59,24 @@ export default function LiveScoringPage() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
-      <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">
+      <div className="max-w-3xl mx-auto h-full flex flex-col justify-start">
 
         {/* TITLE */}
         <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-28 mb-4">
           ⚔️ Points Royale ⚔️
         </h1>
 
-        {/* spacer */}
+        {/* Spacer below title */}
         <div className="h-6" />
 
         {/* SECTION BOX */}
-        <div className="casino-control bg-gradient-to-br from-purple-900/50 to-slate-900/60 rounded-xl p-4 space-y-6">
+        <div className="
+          rounded-xl p-6 space-y-6
+          bg-gradient-to-br from-purple-900/50 to-slate-900/60
+          border-2 border-purple-500/40
+          shadow-[0_14px_30px_rgba(0,0,0,0.45)]
+          [box-shadow:inset_0_2px_4px_rgba(255,255,255,0.08)]
+        ">
 
           {/* NEW ROUND */}
           <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white">
@@ -90,7 +96,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
-                className="casino-control bg-purple-900/80 border-fuchsia-600/30"
+                className="casino-control h-11 bg-purple-900/80 border-fuchsia-600/30 text-center"
               />
             </div>
 
@@ -104,7 +110,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className="casino-control bg-purple-900/80 border-fuchsia-600/30"
+                className="casino-control h-11 bg-purple-900/80 border-fuchsia-600/30 text-center"
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -145,11 +151,10 @@ export default function LiveScoringPage() {
                     onClick={() =>
                       setNewSession({ ...newSession, threshold: num })
                     }
-                    className={`casino-control px-3 py-1 font-bold h-10
-                      ${
-                        newSession.threshold === num
-                          ? 'bg-purple-900/80 border-blue-300/90'
-                          : 'bg-purple-950/70 border-blue-400/30'
+                    className={`casino-control px-3 py-1 font-bold h-10 text-center
+                      ${newSession.threshold === num
+                        ? 'bg-purple-900/80 border-blue-300/90'
+                        : 'bg-purple-950/70 border-blue-400/30'
                       }`}
                   >
                     {num}
@@ -168,10 +173,9 @@ export default function LiveScoringPage() {
                   key={p}
                   onClick={() => togglePlayer(p)}
                   className={`casino-control h-10 text-sm font-semibold
-                    ${
-                      selected
-                        ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
-                        : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
+                    ${selected
+                      ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
+                      : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
                     }`}
                 >
                   {p}
