@@ -62,19 +62,15 @@ export default function LiveScoringPage() {
       <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-24 mb-4">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-28 mb-4">
           ⚔️ Points Royale ⚔️
         </h1>
 
         {/* spacer */}
         <div className="h-6" />
 
-        <div className="
-          bg-gradient-to-br from-purple-900/50 to-slate-900/60
-          backdrop-blur-lg border-2 border-purple-500/40 rounded-xl
-          p-4 space-y-6
-          shadow-[0_14px_30px_rgba(0,0,0,0.45),inset_0_1px_2px_rgba(255,255,255,0.12)]
-        ">
+        {/* SECTION BOX */}
+        <div className="casino-control bg-gradient-to-br from-purple-900/50 to-slate-900/60 rounded-xl p-4 space-y-6">
 
           {/* NEW ROUND */}
           <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white">
@@ -94,13 +90,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
-                className="
-                  w-full h-11 rounded-lg
-                  flex items-center justify-center text-center leading-none
-                  bg-purple-900/80 border-2 border-fuchsia-600/30
-                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.18)]
-                  transition-all
-                "
+                className="casino-control bg-purple-900/80 border-fuchsia-600/30"
               />
             </div>
 
@@ -114,12 +104,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className="
-                  w-full h-11 rounded-lg text-center
-                  bg-purple-900/80 border-2 border-fuchsia-600/30
-                  shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                  transition-all
-                "
+                className="casino-control bg-purple-900/80 border-fuchsia-600/30"
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -134,34 +119,47 @@ export default function LiveScoringPage() {
           {newSession.players.length === 0 ? (
             <button
               onClick={selectAllPlayers}
-              className="
-                w-full h-11 rounded-lg font-semibold
-                bg-gradient-to-br from-blue-600 to-blue-800
-                border-2 border-white/70
-                shadow-[0_5px_12px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
-                transition-all
-              "
+              className="casino-control bg-blue-600 border-white/70 font-semibold h-11"
             >
               ♠ Deal All
             </button>
           ) : (
             <button
               onClick={clearPlayers}
-              className="
-                w-full h-11 rounded-lg font-semibold
-                bg-gradient-to-br from-red-600 to-red-800
-                border-2 border-white/70
-                shadow-[0_5px_12px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
-                transition-all
-              "
+              className="casino-control bg-red-600 border-white/70 font-semibold h-11"
             >
               ✖ Clear Table
             </button>
           )}
 
-          {/* PLAYERS */}
+          {/* WIN THRESHOLD */}
+          {newSession.game !== 'Blackjack' && (
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="block text-sm font-bold text-center w-full mb-1">
+                Win Threshold
+              </label>
+              <div className="flex gap-3">
+                {[3, 5].map(num => (
+                  <button
+                    key={num}
+                    onClick={() =>
+                      setNewSession({ ...newSession, threshold: num })
+                    }
+                    className={`casino-control px-3 py-1 font-bold h-10
+                      ${
+                        newSession.threshold === num
+                          ? 'bg-purple-900/80 border-blue-300/90'
+                          : 'bg-purple-950/70 border-blue-400/30'
+                      }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PLAYER SELECTION */}
           <div className="grid grid-cols-3 gap-x-4 gap-y-6">
             {PLAYERS.map(p => {
               const selected = newSession.players.includes(p)
@@ -169,16 +167,12 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`
-                    h-10 rounded-md font-semibold text-sm
-                    border-2 transition-all
-                    shadow-[0_3px_6px_rgba(0,0,0,0.45),inset_0_1px_2px_rgba(255,255,255,0.08)]
+                  className={`casino-control h-10 text-sm font-semibold
                     ${
                       selected
                         ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
                         : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
-                    }
-                  `}
+                    }`}
                 >
                   {p}
                 </button>
@@ -186,20 +180,12 @@ export default function LiveScoringPage() {
             })}
           </div>
 
-          {/* MADNESS */}
+          {/* MADNESS BUTTON */}
           <button
             disabled={newSession.players.length === 0}
-            className={`
-              w-full py-3 rounded-xl font-bold text-lg
+            className={`casino-control w-full py-3 rounded-xl font-bold text-lg
               bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
-              border-2 transition-all
-              shadow-[0_6px_14px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)]
-              ${
-                newSession.players.length
-                  ? 'border-orange-400'
-                  : 'border-orange-900 opacity-60 cursor-not-allowed'
-              }
-            `}
+              ${newSession.players.length ? 'border-orange-400' : 'border-orange-900 opacity-60 cursor-not-allowed'}`}
           >
             👊 Let the Madness Begin
           </button>
