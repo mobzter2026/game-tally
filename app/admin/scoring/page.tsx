@@ -81,7 +81,7 @@ export default function LiveScoringPage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
       <div className="max-w-4xl mx-auto">
         {/* TITLE */}
-        <h1 className="text-5xl font-bold text-center mb-6 mt-8 bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(251,191,36,0.6)]">
+        <h1 className="text-4xl font-bold text-center mb-6 mt-8 bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(251,191,36,0.6)]">
           ⚔️ Points Royale ⚔️
         </h1>
 
@@ -183,7 +183,7 @@ export default function LiveScoringPage() {
                   className={`p-3 rounded-lg border font-semibold text-center ${
                     newSession.players.includes(p)
                       ? 'bg-gradient-to-br from-purple-600 to-purple-800 text-white shadow-[0_3px_8px_rgba(147,51,234,0.5),inset_0_1px_2px_rgba(255,255,255,0.3)] border border-purple-300 border-white'
-                      : 'bg-gradient-to-br from-slate-800 to-slate-900 text-white border-2 border-purple-500/40 shadow-[0_4px_10px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:shadow-[0_6px_15px_rgba(168,85,247,0.4),0_5px_12px_rgba(0,0,0,0.6)] hover:border-purple-400/60 active:translate-y-[2px]'
+                      : 'bg-gradient-to-b from-purple-800/80 to-purple-950/90 text-white border-2 border-purple-400/50 shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 active:translate-y-[2px]'
                   }`}
                 >
                   {p}
