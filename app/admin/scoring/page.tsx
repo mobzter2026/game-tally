@@ -55,6 +55,8 @@ export default function LiveScoringPage() {
   const startNewRound = async () => {
     if (newSession.players.length === 0) return
 
+    console.log('Starting new round with data:', newSession)
+
     try {
       // Insert new game session into database
       const { data, error } = await supabase
@@ -69,13 +71,29 @@ export default function LiveScoringPage() {
         .select()
         .single()
 
-      if (error) throw error
+      console.log('Supabase response:', { data, error })
 
+      if (error) {
+        console.error('Supabase error:', error)
+        alert(`Database error: ${error.message}`)
+        return
+      }
+
+      if (!data) {
+        console.error('No data returned from insert')
+        alert('No data returned from database')
+        return
+      }
+
+      console.log('Session created successfully:', data)
+      
       // Navigate to live scoring page with session ID
-      router.push(`/admin/scoring/${(data as any).id}`)
+      const sessionId = (data as any).id
+      console.log('Navigating to:', `/admin/scoring/${sessionId}`)
+      router.push(`/admin/scoring/${sessionId}`)
     } catch (error) {
-      console.error('Error creating session:', error)
-      alert('Failed to start new round. Please try again.')
+      console.error('Unexpected error:', error)
+      alert(`Failed to start new round: ${error}`)
     }
   }
 
