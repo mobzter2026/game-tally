@@ -98,25 +98,25 @@ export default function LiveScoringPage() {
             {/* DATE + GAME */}
             <div className="flex gap-3 mb-4">
               <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Date</label>
+                <label className="block text-sm font-bold text-center mb-1 text-white">Date</label>
                 <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className="w-full p-3 bg-gradient-to-br from-purple-900/80 to-purple-950/90 rounded-lg border-2 border-purple-400/30 text-center shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:border-purple-400/50 transition-all"
+                  className="w-full p-3 bg-gradient-to-br from-purple-900/80 to-purple-950/90 rounded-lg border-2 border-purple-400/30 text-center text-white shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:border-purple-400/50 transition-all"
                 />
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Game</label>
+                <label className="block text-sm font-bold text-center mb-1 text-white">Game</label>
                 <select
                   value={newSession.game}
                   onChange={e =>
                     setNewSession({ ...newSession, game: e.target.value })
                   }
-                  className="w-full p-3 bg-gradient-to-br from-purple-900/80 to-purple-950/90 rounded-lg border-2 border-purple-400/30 text-center shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:border-purple-400/50 transition-all"
+                  className="w-full p-3 bg-gradient-to-br from-purple-900/80 to-purple-950/90 rounded-lg border-2 border-purple-400/30 text-center text-white shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:border-purple-400/50 transition-all"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -130,7 +130,7 @@ export default function LiveScoringPage() {
             {/* SELECT / CLEAR + THRESHOLD TOGGLE */}
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">
+                <label className="block text-sm font-bold text-center mb-1 text-white">
                   Players
                 </label>
                 {newSession.players.length === 0 ? (
@@ -153,7 +153,7 @@ export default function LiveScoringPage() {
               {/* Win Threshold Toggle */}
               {newSession.game !== 'Blackjack' && (
                 <div className="flex flex-col items-center">
-                  <label className="block text-sm font-bold text-center mb-1">
+                  <label className="block text-sm font-bold text-center mb-1 text-white">
                     Win Threshold
                   </label>
                   <div className="flex gap-3 bg-purple-900/70 rounded-full p-1 border border-white/20">
@@ -183,10 +183,10 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`p-3 rounded-lg border-2 font-semibold transition-all text-center shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px] ${
+                  className={`p-3 rounded-lg border-2 font-semibold transition-all text-center text-white shadow-[0_4px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.1)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.5)] active:translate-y-[1px] ${
                     newSession.players.includes(p)
-                      ? 'bg-gradient-to-br from-purple-900/80 to-purple-950/90 border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.8)]'
-                      : 'bg-gradient-to-br from-purple-900/80 to-purple-950/90 border-orange-600/40 shadow-[0_0_8px_rgba(0,0,0,0.3)]'
+                      ? 'bg-gradient-to-br from-purple-900/80 to-purple-950/90 border-purple-400 shadow-[0_0_25px_rgba(168,85,247,0.8)]'
+                      : 'bg-gradient-to-br from-purple-900/80 to-purple-950/90 border-purple-600/40 shadow-[0_0_8px_rgba(0,0,0,0.3)]'
                   }`}
                 >
                   {p}
@@ -198,9 +198,9 @@ export default function LiveScoringPage() {
             {newSession.game !== 'Blackjack' && (
               <button
                 onClick={createSession}
-                className={`w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-blue-900 via-fuchsia-900 to-blue-950 text-white shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.2)] active:translate-y-[1px] transition-all ${
+                className={`w-full py-4 rounded-xl font-bold text-lg text-white bg-gradient-to-br from-blue-900 via-fuchsia-900 to-blue-950 shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.2)] active:translate-y-[1px] transition-all ${
                   newSession.players.length > 0
-                    ? 'border-2 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.9)]'
+                    ? 'border-2 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.9)] hover:border-orange-500'
                     : 'border-2 border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
                 }`}
               >
