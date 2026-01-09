@@ -72,7 +72,7 @@ export default function LiveScoringPage() {
       if (error) throw error
 
       // Navigate to live scoring page with session ID
-      router.push(`/admin/scoring/${data.id}`)
+      router.push(`/admin/scoring/${(data as any).id}`)
     } catch (error) {
       console.error('Error creating session:', error)
       alert('Failed to start new round. Please try again.')
