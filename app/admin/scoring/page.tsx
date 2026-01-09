@@ -32,6 +32,9 @@ export default function LiveScoringPage() {
       if (!data.user) router.push('/admin/login')
       else setLoading(false)
     })
+    
+    // Force light color scheme for form elements
+    document.documentElement.style.colorScheme = 'light'
   }, [])
 
   const togglePlayer = (player: string) => {
@@ -99,7 +102,7 @@ export default function LiveScoringPage() {
 
   if (loading) {
     return (
-      <div className="light h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
+      <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
         Loading…
       </div>
     )
@@ -114,18 +117,7 @@ export default function LiveScoringPage() {
     "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all"
 
   return (
-    <div className="light h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
-      <style jsx global>{`
-        @media (prefers-color-scheme: dark) {
-          .light {
-            color-scheme: light !important;
-          }
-          .light * {
-            color-scheme: light !important;
-          }
-        }
-      `}</style>
-      
+    <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
 
         {/* TITLE */}
@@ -209,7 +201,7 @@ export default function LiveScoringPage() {
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
                         ? 'bg-gradient-to-br from-lime-500 to-lime-700 border-2 border-amber-500/70'
-                        : 'bg-gradient-to-br from-lime-800 to-lime-950 border-2 border-transparent'
+                        : 'bg-gradient-to-br from-lime-800 to-lime-950'
                     } ${frostedClass}`}
                   >
                     {num}
