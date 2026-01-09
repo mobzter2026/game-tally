@@ -81,7 +81,7 @@ export default function LiveScoringPage() {
     <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
       <div className="max-w-3xl mx-auto h-full flex flex-col justify-center space-y-6">
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(251,191,36,0.6)]">
+        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_4px_12px_rgba(251,191,36,0.6)] select-none">
           ⚔️ Points Royale ⚔️
         </h1>
 
@@ -91,24 +91,24 @@ export default function LiveScoringPage() {
             {/* DATE + GAME */}
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Date</label>
+                <label className="block text-sm font-bold text-center mb-1 text-white select-none">Date</label>
                 <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all"
+                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] text-white transition-all"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Game</label>
+                <label className="block text-sm font-bold text-center mb-1 text-white select-none">Game</label>
                 <select
                   value={newSession.game}
                   onChange={e =>
                     setNewSession({ ...newSession, game: e.target.value })
                   }
-                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all"
+                  className="w-full p-2 text-center rounded-lg border-2 border-fuchsia-600/30 bg-purple-900/80 shadow-[0_4px_6px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_10px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.25)] text-white transition-all"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -124,14 +124,14 @@ export default function LiveScoringPage() {
               {newSession.players.length === 0 ? (
                 <button
                   onClick={selectAllPlayers}
-                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold transition-all"
+                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold text-white transition-all"
                 >
                   ♠ Deal All
                 </button>
               ) : (
                 <button
                   onClick={clearPlayers}
-                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold transition-all"
+                  className="flex-1 py-2 rounded-lg border-2 border-fuchsia-400 bg-blue-700 hover:bg-blue-800 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.15)] font-semibold text-white transition-all"
                 >
                   ✖ Clear Table
                 </button>
@@ -139,17 +139,17 @@ export default function LiveScoringPage() {
             </div>
 
             {/* PLAYER BUTTONS */}
-            <div className="grid grid-cols-3 gap-4 mt-2">
+            <div className="grid grid-cols-3 gap-5 mt-2">
               {PLAYERS.map(p => (
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`h-10 w-full rounded-md font-semibold text-sm text-white transition-all border-2 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_3px_rgba(255,255,255,0.1)]
-                    bg-gradient-to-br from-purple-700 to-blue-700
+                  className={`h-10 w-full rounded-md font-semibold text-sm text-white transition-all border-2 shadow-[0_4px_6px_rgba(0,0,0,0.5),inset_0_2px_3px_rgba(255,255,255,0.05)]
+                    bg-gradient-to-br from-purple-900 to-blue-900
                     ${
                       newSession.players.includes(p)
-                        ? 'border-blue-400'
-                        : 'border-blue-400/50 hover:border-blue-300'
+                        ? 'border-blue-300'
+                        : 'border-blue-400/30 hover:border-blue-400'
                     }`}
                 >
                   {p}
@@ -160,13 +160,13 @@ export default function LiveScoringPage() {
             {/* MADNESS BUTTON */}
             <button
               onClick={createSession}
-              className={`w-full py-3 rounded-xl font-bold text-lg border-2 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.1)]
+              className={`w-full py-3 rounded-xl font-bold text-lg border-2 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.05)]
                 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
                 ${
                   newSession.players.length > 0
                     ? 'border-orange-400 hover:border-orange-300'
                     : 'border-orange-900 opacity-70 cursor-not-allowed'
-                }`}
+                } text-white`}
               disabled={newSession.players.length === 0}
             >
               👊 Let the Madness Begin
