@@ -60,12 +60,15 @@ export default function LiveScoringPage() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4">
-      <div className="max-w-3xl mx-auto h-full flex flex-col justify-center space-y-5">
+      <div className="max-w-3xl mx-auto h-full flex flex-col justify-center">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-16 mb-1">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 -mt-20 mb-6">
           ⚔️ Points Royale ⚔️
         </h1>
+
+        {/* spacer row */}
+        <div className="h-4" />
 
         {!activeSession && (
           <div
@@ -95,10 +98,10 @@ export default function LiveScoringPage() {
                     setNewSession({ ...newSession, date: e.target.value })
                   }
                   className="
-                    w-full p-2 rounded-lg text-center
+                    w-full p-2 rounded-lg text-center appearance-none
                     bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_8px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
+                    shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    hover:shadow-[0_8px_16px_rgba(0,0,0,0.7)]
                     transition-all
                   "
                 />
@@ -117,8 +120,8 @@ export default function LiveScoringPage() {
                   className="
                     w-full p-2 rounded-lg text-center
                     bg-purple-900/80 border-2 border-fuchsia-600/30
-                    shadow-[0_6px_10px_rgba(255,255,255,0.25),inset_0_2px_4px_rgba(255,255,255,0.15)]
-                    hover:shadow-[0_8px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)]
+                    shadow-[0_6px_12px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                    hover:shadow-[0_8px_16px_rgba(0,0,0,0.7)]
                     transition-all
                   "
                 >
@@ -139,8 +142,8 @@ export default function LiveScoringPage() {
                   w-full py-2 rounded-lg font-semibold
                   bg-gradient-to-br from-blue-600 to-blue-800
                   border-2 border-white/70
-                  shadow-[0_7px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
+                  shadow-[0_8px_16px_rgba(0,0,0,0.65),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)]
                   transition-all
                 "
               >
@@ -153,8 +156,8 @@ export default function LiveScoringPage() {
                   w-full py-2 rounded-lg font-semibold
                   bg-gradient-to-br from-red-600 to-red-800
                   border-2 border-white/70
-                  shadow-[0_7px_14px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)]
-                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)]
+                  shadow-[0_8px_16px_rgba(0,0,0,0.65),inset_0_2px_4px_rgba(255,255,255,0.25)]
+                  active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)]
                   transition-all
                 "
               >
@@ -173,10 +176,10 @@ export default function LiveScoringPage() {
                     className={`
                       h-10 rounded-md font-semibold text-sm
                       border-2 transition-all
-                      shadow-[0_4px_6px_rgba(0,0,0,0.55),inset_0_1px_2px_rgba(255,255,255,0.08)]
+                      shadow-[0_4px_8px_rgba(0,0,0,0.6),inset_0_1px_2px_rgba(255,255,255,0.08)]
                       ${
                         selected
-                          ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/80'
+                          ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
                           : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
                       }
                     `}
@@ -194,7 +197,7 @@ export default function LiveScoringPage() {
                 w-full py-3 rounded-xl font-bold text-lg
                 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
                 border-2 transition-all
-                shadow-[0_6px_16px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.15)]
+                shadow-[0_6px_18px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.15)]
                 ${
                   newSession.players.length
                     ? 'border-orange-400 hover:border-orange-300'
