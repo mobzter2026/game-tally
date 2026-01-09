@@ -143,13 +143,13 @@ export default function LiveScoringPage() {
                 Date
               </label>
               <div className="relative">
-                <input
+              <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${frostedClass}`}
+                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-datetime-edit]:text-center [&::-webkit-datetime-edit]:w-full [&::-webkit-datetime-edit-fields-wrapper]:justify-center ${frostedClass}`}
                 />
               </div>
             </div>
