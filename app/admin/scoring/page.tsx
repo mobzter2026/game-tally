@@ -145,23 +145,29 @@ export default function LiveScoringPage() {
                 Date
               </label>
               <div className="relative">
+                <style jsx>{`
+                  input[type="date"]::-webkit-calendar-picker-indicator {
+                    opacity: 0;
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    cursor: pointer;
+                  }
+                  input[type="date"]::-webkit-datetime-edit {
+                    text-align: center;
+                  }
+                  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+                    justify-content: center;
+                  }
+                `}</style>
                 <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] 
-                    [&::-webkit-calendar-picker-indicator]:opacity-0 
-                    [&::-webkit-calendar-picker-indicator]:absolute 
-                    [&::-webkit-calendar-picker-indicator]:inset-0 
-                    [&::-webkit-calendar-picker-indicator]:w-full 
-                    [&::-webkit-calendar-picker-indicator]:h-full 
-                    [&::-webkit-calendar-picker-indicator]:cursor-pointer
-                    [&::-webkit-datetime-edit]:text-center
-                    [&::-webkit-datetime-edit]:w-full
-                    [&::-webkit-datetime-edit-fields-wrapper]:justify-center
-                    ${frostedClass}`}
+                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] ${frostedClass}`}
                 />
               </div>
             </div>
@@ -212,8 +218,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-gradient-to-br from-amber-600 to-amber-800'
-                        : 'bg-gradient-to-br from-slate-800 to-slate-950'
+                        ? 'bg-gradient-to-br from-blue-600 to-blue-900 border-2 border-amber-500/70'
+                        : 'bg-gradient-to-br from-blue-900 to-slate-950 border-2 border-transparent'
                     } ${frostedClass}`}
                   >
                     {num}
