@@ -140,6 +140,9 @@ export default function LiveScoringPage() {
                     [&::-webkit-calendar-picker-indicator]:w-full 
                     [&::-webkit-calendar-picker-indicator]:h-full 
                     [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                    [&::-webkit-datetime-edit]:text-center
+                    [&::-webkit-datetime-edit]:w-full
+                    [&::-webkit-datetime-edit-fields-wrapper]:justify-center
                     ${frostedClass}`}
                 />
               </div>
@@ -191,8 +194,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-gradient-to-br from-fuchsia-600 to-fuchsia-800'
-                        : 'bg-gradient-to-br from-fuchsia-900 to-fuchsia-950'
+                        ? 'bg-gradient-to-br from-fuchsia-700 to-fuchsia-900'
+                        : 'bg-gradient-to-br from-fuchsia-950 to-slate-950'
                     } ${frostedClass}`}
                   >
                     {num}
@@ -228,9 +231,9 @@ export default function LiveScoringPage() {
             disabled={newSession.players.length === 0}
             className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${
               newSession.players.length
-                ? 'opacity-100 cursor-pointer shadow-[0_4px_8px_rgba(0,0,0,0.35),0_0_20px_rgba(249,115,22,0.4),inset_0_2px_6px_rgba(255,255,255,0.2)]'
-                : 'opacity-60 cursor-not-allowed shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]'
-            } transition-all`}
+                ? 'opacity-100 cursor-pointer border-2 border-amber-500/70'
+                : 'opacity-60 cursor-not-allowed border-2 border-transparent'
+            } ${frostedClass}`}
           >
             👊 Let the Madness Begin
           </button>
