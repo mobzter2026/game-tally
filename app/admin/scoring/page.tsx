@@ -212,8 +212,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-gradient-to-br from-fuchsia-700 to-fuchsia-900'
-                        : 'bg-gradient-to-br from-fuchsia-950 to-slate-950'
+                        ? 'bg-gradient-to-br from-amber-600 to-amber-800'
+                        : 'bg-gradient-to-br from-slate-800 to-slate-950'
                     } ${frostedClass}`}
                   >
                     {num}
@@ -245,12 +245,18 @@ export default function LiveScoringPage() {
 
           {/* MADNESS BUTTON */}
           <button
-            onClick={startNewRound}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              console.log('Button clicked!')
+              startNewRound()
+            }}
             disabled={newSession.players.length === 0}
-            className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${
+            className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 touch-manipulation ${
               newSession.players.length
-                ? 'opacity-100 cursor-pointer border-2 border-amber-500/70'
-                : 'opacity-60 cursor-not-allowed border-2 border-transparent'
+                ? 'opacity-100 cursor-pointer border-2 border-amber-500/70 pointer-events-auto'
+                : 'opacity-60 cursor-not-allowed border-2 border-transparent pointer-events-none'
             } ${frostedClass}`}
           >
             👊 Let the Madness Begin
