@@ -99,26 +99,26 @@ export default function LiveScoringPage() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 text-gray-900">
+      <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 color-scheme-light">
         Loading…
       </div>
     )
   }
 
-  // Frosted inner shadow + subtle outer shadow for light mode
+  // Frosted inner shadow + subtle black outer shadow for buttons and inputs
   const frostedClass =
-    "shadow-[0_4px_8px_rgba(0,0,0,0.1),inset_0_2px_6px_rgba(255,255,255,0.8)] transition-all"
+    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
 
-  // Enhanced shadow for Deal/Clear buttons
+  // Enhanced shadow for Deal/Clear buttons to pop more
   const popButtonClass =
-    "shadow-[0_4px_8px_rgba(0,0,0,0.15),inset_0_2px_8px_rgba(255,255,255,0.9)] transition-all"
+    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all"
 
   return (
-    <div className="h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 text-gray-900 p-4 overflow-auto">
+    <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto" style={{ colorScheme: 'light' }}>
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mt-8 mb-2 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 mt-8 mb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
           ⚔️ Points Royale ⚔️
         </h1>
 
@@ -128,39 +128,40 @@ export default function LiveScoringPage() {
         {/* SECTION BOX */}
         <div className="
           rounded-xl p-6 space-y-6
-          bg-white/80 backdrop-blur-sm
-          [box-shadow:inset_0_2px_4px_rgba(255,255,255,0.5)]
-          shadow-[0_12px_25px_rgba(0,0,0,0.1)]
+          bg-gradient-to-br from-purple-900/50 to-slate-900/60
+          [box-shadow:inset_0_2px_4px_rgba(255,255,255,0.08)]
+          shadow-[0_12px_25px_rgba(0,0,0,0.45)]
         ">
 
           {/* NEW ROUND */}
-          <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-gray-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+          <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
             New Round
           </h2>
 
           {/* DATE + GAME */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-sm font-bold text-center mb-1 text-gray-700">
+              <label className="block text-sm font-bold text-center mb-1">
                 Date
               </label>
-              <div className="relative flex items-center justify-center">
+              <div className="relative grid place-items-center">
                 <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
+                  className={`h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 grid place-items-center ${frostedClass}`}
                   style={{
                     textAlign: 'center',
-                    colorScheme: 'light'
+                    display: 'grid',
+                    placeItems: 'center'
                   }}
-                  className={`h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 text-gray-800 ${frostedClass}`}
                 />
               </div>
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-bold text-center mb-1 text-gray-700">
+              <label className="block text-sm font-bold text-center mb-1">
                 Game
               </label>
               <select
@@ -168,7 +169,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 text-gray-800 appearance-none px-4 ${frostedClass}`}
+                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 ${frostedClass}`}
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -184,14 +185,14 @@ export default function LiveScoringPage() {
             {newSession.players.length === 0 ? (
               <button
                 onClick={selectAllPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 text-white ${popButtonClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 ${popButtonClass}`}
               >
                 ♠ Deal All
               </button>
             ) : (
               <button
                 onClick={clearPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-red-400 to-red-600 text-white ${popButtonClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-red-700 to-red-900 ${popButtonClass}`}
               >
                 ✖ Clear Table
               </button>
@@ -206,8 +207,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-gradient-to-br from-blue-300 to-blue-500 text-white border-2 border-amber-400'
-                        : 'bg-gradient-to-br from-gray-200 to-gray-400 text-gray-700 border-2 border-transparent'
+                        ? 'bg-gradient-to-br from-blue-600 to-blue-900 border-2 border-amber-500/70'
+                        : 'bg-gradient-to-br from-blue-900 to-slate-950 border-2 border-transparent'
                     } ${frostedClass}`}
                   >
                     {num}
@@ -227,8 +228,8 @@ export default function LiveScoringPage() {
                   onClick={() => togglePlayer(p)}
                   className={`h-10 text-sm font-semibold rounded-lg ${
                     selected
-                      ? 'bg-gradient-to-br from-purple-400 to-blue-500 text-white'
-                      : 'bg-gradient-to-br from-gray-100 to-gray-300 text-gray-700'
+                      ? 'bg-gradient-to-br from-purple-700 to-blue-800'
+                      : 'bg-gradient-to-br from-purple-900 to-blue-950'
                   } ${frostedClass}`}
                 >
                   {p}
@@ -247,9 +248,9 @@ export default function LiveScoringPage() {
               startNewRound()
             }}
             disabled={newSession.players.length === 0}
-            className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 text-white touch-manipulation ${
+            className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 touch-manipulation ${
               newSession.players.length
-                ? 'opacity-100 cursor-pointer border-2 border-amber-400 pointer-events-auto'
+                ? 'opacity-100 cursor-pointer border-2 border-amber-500/70 pointer-events-auto'
                 : 'opacity-60 cursor-not-allowed border-2 border-transparent pointer-events-none'
             } ${frostedClass}`}
           >
