@@ -60,9 +60,9 @@ export default function LiveScoringPage() {
     )
   }
 
-  // Frosted 3D shadow class for all buttons & inputs
+  // Frosted inner shadow + subtle black outer shadow for buttons and inputs
   const frostedClass =
-    "shadow-[0_4px_10px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.15)] transition-all"
+    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
 
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4 overflow-auto">
@@ -80,9 +80,8 @@ export default function LiveScoringPage() {
         <div className="
           rounded-xl p-6 space-y-6
           bg-gradient-to-br from-purple-900/50 to-slate-900/60
-          border-2 border-purple-500/40
-          shadow-[0_12px_25px_rgba(0,0,0,0.45)]
           [box-shadow:inset_0_2px_4px_rgba(255,255,255,0.08)]
+          shadow-[0_12px_25px_rgba(0,0,0,0.45)]
         ">
 
           {/* NEW ROUND */}
@@ -102,7 +101,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
-                className={`h-11 w-full text-center font-bold rounded-lg bg-purple-900/80 border border-white ${frostedClass}`}
+                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${frostedClass}`}
               />
             </div>
             <div className="flex-1">
@@ -114,7 +113,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className={`h-11 w-full text-center font-bold rounded-lg bg-purple-900/80 border border-white ${frostedClass}`}
+                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${frostedClass}`}
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -130,14 +129,14 @@ export default function LiveScoringPage() {
             {newSession.players.length === 0 ? (
               <button
                 onClick={selectAllPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-blue-600 border-white ${frostedClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-blue-600 ${frostedClass}`}
               >
                 ♠ Deal All
               </button>
             ) : (
               <button
                 onClick={clearPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-red-600 border-white ${frostedClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-red-600 ${frostedClass}`}
               >
                 ✖ Clear Table
               </button>
@@ -152,8 +151,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-purple-900/80 border-blue-300/90'
-                        : 'bg-purple-950/70 border-blue-400/30'
+                        ? 'bg-purple-800/90 border-maroon-400'
+                        : 'bg-purple-950/70 border-maroon-200/40'
                     } ${frostedClass}`}
                   >
                     {num}
@@ -173,7 +172,7 @@ export default function LiveScoringPage() {
                   onClick={() => togglePlayer(p)}
                   className={`h-10 text-sm font-semibold rounded-lg ${
                     selected
-                      ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
+                      ? 'bg-gradient-to-br from-purple-800/80 to-blue-800/80 border-blue-300/90'
                       : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
                   } ${frostedClass}`}
                 >
@@ -189,7 +188,7 @@ export default function LiveScoringPage() {
             className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${
               newSession.players.length
                 ? 'border-orange-400'
-                : 'border-orange-900 opacity-60 cursor-not-allowed'
+                : 'opacity-60 cursor-not-allowed'
             } ${frostedClass}`}
           >
             👊 Let the Madness Begin
