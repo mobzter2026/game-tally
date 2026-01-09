@@ -54,11 +54,7 @@ export default function LiveScoringPage() {
 
   if (loading) {
     return (
-<<<<<<< HEAD
       <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
-=======
-      <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950">
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
         Loading…
       </div>
     )
@@ -69,11 +65,7 @@ export default function LiveScoringPage() {
     "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
 
   return (
-<<<<<<< HEAD
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
-=======
-    <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4 overflow-auto">
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
 
         {/* TITLE */}
@@ -109,11 +101,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
-<<<<<<< HEAD
                 className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] ${frostedClass}`}
-=======
-                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${frostedClass}`}
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
               />
             </div>
             <div className="flex-1">
@@ -125,11 +113,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-<<<<<<< HEAD
                 className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 ${frostedClass}`}
-=======
-                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${frostedClass}`}
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -145,22 +129,14 @@ export default function LiveScoringPage() {
             {newSession.players.length === 0 ? (
               <button
                 onClick={selectAllPlayers}
-<<<<<<< HEAD
                 className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 ${frostedClass}`}
-=======
-                className={`flex-1 h-11 font-semibold rounded-lg bg-blue-600 ${frostedClass}`}
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
               >
                 ♠ Deal All
               </button>
             ) : (
               <button
                 onClick={clearPlayers}
-<<<<<<< HEAD
                 className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-red-700 to-red-900 ${frostedClass}`}
-=======
-                className={`flex-1 h-11 font-semibold rounded-lg bg-red-600 ${frostedClass}`}
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
               >
                 ✖ Clear Table
               </button>
@@ -175,13 +151,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-<<<<<<< HEAD
                         ? 'bg-gradient-to-br from-purple-700 to-purple-900'
                         : 'bg-gradient-to-br from-purple-900 to-slate-950'
-=======
-                        ? 'bg-purple-800/90 border-maroon-400'
-                        : 'bg-purple-950/70 border-maroon-200/40'
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
                     } ${frostedClass}`}
                   >
                     {num}
@@ -201,13 +172,8 @@ export default function LiveScoringPage() {
                   onClick={() => togglePlayer(p)}
                   className={`h-10 text-sm font-semibold rounded-lg ${
                     selected
-<<<<<<< HEAD
                       ? 'bg-gradient-to-br from-purple-700 to-blue-800'
                       : 'bg-gradient-to-br from-purple-900 to-blue-950'
-=======
-                      ? 'bg-gradient-to-br from-purple-800/80 to-blue-800/80 border-blue-300/90'
-                      : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
                   } ${frostedClass}`}
                 >
                   {p}
@@ -221,11 +187,7 @@ export default function LiveScoringPage() {
             disabled={newSession.players.length === 0}
             className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${
               newSession.players.length
-<<<<<<< HEAD
                 ? 'opacity-100'
-=======
-                ? 'border-orange-400'
->>>>>>> 86a743c0d044e2b03495ef74df70e63001bae674
                 : 'opacity-60 cursor-not-allowed'
             } ${frostedClass}`}
           >
