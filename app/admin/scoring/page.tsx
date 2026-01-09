@@ -60,6 +60,15 @@ export default function LiveScoringPage() {
     )
   }
 
+  const inputClass =
+    "h-11 w-full text-center rounded-lg bg-purple-900/80 border border-white shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.15)] transition-all"
+
+  const buttonClass =
+    "h-11 rounded-lg font-semibold shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.15)] transition-all"
+
+  const smallCircleClass =
+    "w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.15)] transition-all"
+
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-fuchsia-950 text-white p-4 overflow-auto">
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
@@ -98,7 +107,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
-                className="casino-control h-11 text-center bg-purple-900/80 border-white"
+                className={inputClass}
               />
             </div>
             <div className="flex-1">
@@ -110,7 +119,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className="casino-control h-11 text-center bg-purple-900/80 border-white"
+                className={inputClass}
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -126,31 +135,31 @@ export default function LiveScoringPage() {
             {newSession.players.length === 0 ? (
               <button
                 onClick={selectAllPlayers}
-                className="casino-control flex-1 bg-blue-600 border-white/70 font-semibold h-11"
+                className={`${buttonClass} flex-1 bg-blue-600 border-white/70`}
               >
                 ♠ Deal All
               </button>
             ) : (
               <button
                 onClick={clearPlayers}
-                className="casino-control flex-1 bg-red-600 border-white/70 font-semibold h-11"
+                className={`${buttonClass} flex-1 bg-red-600 border-white/70`}
               >
                 ✖ Clear Table
               </button>
             )}
 
-            {/* Win Threshold switch */}
+            {/* Win Threshold switch (3/5) */}
             {newSession.game !== 'Blackjack' && (
               <div className="flex gap-2 items-center">
                 {[3, 5].map(num => (
                   <button
                     key={num}
                     onClick={() => toggleThreshold(num)}
-                    className={`casino-control w-10 h-10 rounded-full flex items-center justify-center font-bold
-                      ${newSession.threshold === num
+                    className={`${smallCircleClass} ${
+                      newSession.threshold === num
                         ? 'bg-purple-900/80 border-blue-300/90'
                         : 'bg-purple-950/70 border-blue-400/30'
-                      }`}
+                    }`}
                   >
                     {num}
                   </button>
@@ -167,10 +176,11 @@ export default function LiveScoringPage() {
                 <button
                   key={p}
                   onClick={() => togglePlayer(p)}
-                  className={`casino-control h-10 text-sm font-semibold
-                    ${selected
-                      ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
-                      : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
+                  className={`h-10 text-sm font-semibold rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.15)] transition-all
+                    ${
+                      selected
+                        ? 'bg-gradient-to-br from-purple-900/80 to-blue-900/80 border-blue-300/90'
+                        : 'bg-gradient-to-br from-purple-950 to-blue-950 border-blue-400/30'
                     }`}
                 >
                   {p}
@@ -182,7 +192,7 @@ export default function LiveScoringPage() {
           {/* MADNESS BUTTON */}
           <button
             disabled={newSession.players.length === 0}
-            className={`casino-control w-full py-3 rounded-xl font-bold text-lg
+            className={`w-full py-3 rounded-xl font-bold text-lg shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.15)]
               bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900
               ${newSession.players.length
                 ? 'border-orange-400'
