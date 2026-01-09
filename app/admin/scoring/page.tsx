@@ -52,6 +52,33 @@ export default function LiveScoringPage() {
   const toggleThreshold = (num: number) =>
     setNewSession(s => ({ ...s, threshold: num }))
 
+  const startNewRound = async () => {
+    if (newSession.players.length === 0) return
+
+    try {
+      // Insert new game session into database
+      const { data, error } = await supabase
+        .from('game_sessions')
+        .insert({
+          game: newSession.game,
+          date: newSession.date,
+          players: newSession.players,
+          threshold: newSession.threshold,
+          status: 'active'
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Navigate to live scoring page with session ID
+      router.push(`/admin/scoring/${data.id}`)
+    } catch (error) {
+      console.error('Error creating session:', error)
+      alert('Failed to start new round. Please try again.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
@@ -99,19 +126,23 @@ export default function LiveScoringPage() {
               <label className="block text-sm font-bold text-center mb-1">
                 Date
               </label>
-              <input
-                type="date"
-                value={newSession.date}
-                onChange={e =>
-                  setNewSession({ ...newSession, date: e.target.value })
-                }
-                style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  appearance: 'none'
-                }}
-                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] ${frostedClass}`}
-              />
+              <div className="relative">
+                <input
+                  type="date"
+                  value={newSession.date}
+                  onChange={e =>
+                    setNewSession({ ...newSession, date: e.target.value })
+                  }
+                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] 
+                    [&::-webkit-calendar-picker-indicator]:opacity-0 
+                    [&::-webkit-calendar-picker-indicator]:absolute 
+                    [&::-webkit-calendar-picker-indicator]:inset-0 
+                    [&::-webkit-calendar-picker-indicator]:w-full 
+                    [&::-webkit-calendar-picker-indicator]:h-full 
+                    [&::-webkit-calendar-picker-indicator]:cursor-pointer
+                    ${frostedClass}`}
+                />
+              </div>
             </div>
             <div className="flex-1">
               <label className="block text-sm font-bold text-center mb-1">
@@ -193,10 +224,11 @@ export default function LiveScoringPage() {
 
           {/* MADNESS BUTTON */}
           <button
+            onClick={startNewRound}
             disabled={newSession.players.length === 0}
             className={`w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 ${
               newSession.players.length
-                ? 'opacity-100'
+                ? 'opacity-100 cursor-pointer'
                 : 'opacity-60 cursor-not-allowed'
             } ${frostedClass}`}
           >
