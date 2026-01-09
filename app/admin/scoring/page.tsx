@@ -64,6 +64,10 @@ export default function LiveScoringPage() {
   const frostedClass =
     "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
 
+  // Enhanced shadow for Deal/Clear buttons to pop more
+  const popButtonClass =
+    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all"
+
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
@@ -101,6 +105,11 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, date: e.target.value })
                 }
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none'
+                }}
                 className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] ${frostedClass}`}
               />
             </div>
@@ -129,14 +138,14 @@ export default function LiveScoringPage() {
             {newSession.players.length === 0 ? (
               <button
                 onClick={selectAllPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 ${frostedClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 ${popButtonClass}`}
               >
                 ♠ Deal All
               </button>
             ) : (
               <button
                 onClick={clearPlayers}
-                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-red-700 to-red-900 ${frostedClass}`}
+                className={`flex-1 h-11 font-semibold rounded-lg bg-gradient-to-br from-red-700 to-red-900 ${popButtonClass}`}
               >
                 ✖ Clear Table
               </button>
@@ -151,8 +160,8 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                       newSession.threshold === num
-                        ? 'bg-gradient-to-br from-purple-700 to-purple-900'
-                        : 'bg-gradient-to-br from-purple-900 to-slate-950'
+                        ? 'bg-gradient-to-br from-indigo-600 to-indigo-800'
+                        : 'bg-gradient-to-br from-slate-800 to-slate-950'
                     } ${frostedClass}`}
                   >
                     {num}
