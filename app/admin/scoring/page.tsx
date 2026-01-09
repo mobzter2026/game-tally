@@ -137,19 +137,19 @@ export default function LiveScoringPage() {
           </h2>
 
           {/* DATE + GAME */}
-          <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-sm font-bold text-center mb-1">
                 Date
               </label>
-              <div className="relative">
-              <input
+              <div className="relative flex items-center justify-center">
+                <input
                   type="date"
                   value={newSession.date}
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-datetime-edit]:text-center [&::-webkit-datetime-edit]:w-full [&::-webkit-datetime-edit-fields-wrapper]:justify-center ${frostedClass}`}
+                  style={{ paddingLeft: '12px' }}
+                  className={`h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center ${frostedClass}`}
                 />
               </div>
             </div>
