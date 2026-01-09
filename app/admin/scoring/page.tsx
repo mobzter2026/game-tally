@@ -102,7 +102,7 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, date: e.target.value })
                   }
-                  className="w-full p-3 bg-gradient-to-b from-purple-800/80 to-purple-950/90 rounded-lg border-2 border-fuchsia-600/40 text-center shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 transition-all"
+                  className="w-full p-3 bg-gradient-to-b from-purple-800/80 to-purple-950/90 rounded-lg border-2 border-fuchsia-600/30 text-center shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 transition-all"
                 />
               </div>
 
@@ -113,7 +113,7 @@ export default function LiveScoringPage() {
                   onChange={e =>
                     setNewSession({ ...newSession, game: e.target.value })
                   }
-                  className="w-full p-3 bg-gradient-to-b from-purple-800/80 to-purple-950/90 rounded-lg border-2 border-fuchsia-600/40 text-center shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 transition-all"
+                  className="w-full p-3 bg-gradient-to-b from-purple-800/80 to-purple-950/90 rounded-lg border-2 border-fuchsia-600/30 text-center shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 transition-all"
                 >
                   {SCORE_GAMES.map(g => (
                     <option key={g} value={g}>
@@ -133,14 +133,14 @@ export default function LiveScoringPage() {
                 {newSession.players.length === 0 ? (
                   <button
                     onClick={selectAllPlayers}
-                    className="w-full py-2 rounded-lg border-2 border-fuchsia-500 bg-gradient-to-br from-blue-700 to-blue-900 shadow-[0_5px_15px_rgba(59,130,246,0.4),0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_20px_rgba(59,130,246,0.6),0_6px_12px_rgba(0,0,0,0.6)] active:translate-y-[2px] transition-all font-semibold"
+                    className="w-full py-2 rounded-lg border-2 border-fuchsia-400 bg-gradient-to-br from-blue-700 to-blue-900 shadow-[0_5px_15px_rgba(59,130,246,0.4),0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_20px_rgba(59,130,246,0.6),0_6px_12px_rgba(0,0,0,0.6)] active:translate-y-[2px] transition-all font-semibold"
                   >
                     ♠ Deal All
                   </button>
                 ) : (
                   <button
                     onClick={clearPlayers}
-                    className="w-full py-2 rounded-lg border-2 border-fuchsia-500 bg-gradient-to-br from-blue-700 to-blue-900 shadow-[0_5px_15px_rgba(59,130,246,0.4),0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_20px_rgba(59,130,246,0.6),0_6px_12px_rgba(0,0,0,0.6)] active:translate-y-[2px] transition-all font-semibold"
+                    className="w-full py-2 rounded-lg border-2 border-fuchsia-400 bg-gradient-to-br from-blue-700 to-blue-900 shadow-[0_5px_15px_rgba(59,130,246,0.4),0_4px_8px_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_20px_rgba(59,130,246,0.6),0_6px_12px_rgba(0,0,0,0.6)] active:translate-y-[2px] transition-all font-semibold"
                   >
                     ✖ Clear Table
                   </button>
@@ -183,7 +183,7 @@ export default function LiveScoringPage() {
                   className={`p-3 rounded-lg border font-semibold text-center ${
                     newSession.players.includes(p)
                       ? 'bg-gradient-to-br from-purple-600 to-purple-800 text-white shadow-[0_3px_8px_rgba(147,51,234,0.5),inset_0_1px_2px_rgba(255,255,255,0.3)] border border-purple-300 border-white'
-                      : 'bg-gradient-to-b from-purple-800/80 to-purple-950/90 text-white border-2 border-fuchsia-600/40 shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 active:translate-y-[2px]'
+                      : 'bg-gradient-to-b from-purple-800/80 to-purple-950/90 text-white border-2 border-fuchsia-600/30 shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.15)] hover:border-purple-300/60 active:translate-y-[2px]'
                   }`}
                 >
                   {p}
@@ -195,7 +195,7 @@ export default function LiveScoringPage() {
             {newSession.game !== 'Blackjack' && (
               <button
                 onClick={createSession}
-                className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-black via-blue-950 to-black text-white border-2 border-white/50 shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_10px_25px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)] hover:border-white/70 active:translate-y-[2px] transition-all"
+                className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-br from-blue-900 via-fuchsia-900 to-violet-950 text-white border-2 border-white/50 shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:shadow-[0_10px_25px_rgba(255,255,255,0.3),inset_0_2px_4px_rgba(255,255,255,0.25)] hover:border-white/70 active:translate-y-[2px] transition-all"
               >
                 👊 Let the Madness Begin
               </button>
