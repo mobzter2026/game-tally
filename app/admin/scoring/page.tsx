@@ -72,10 +72,18 @@ export default function LiveScoringPage() {
         .select()
         .single()
 
-      if (error) return alert(`Database error: ${error.message}`)
-      if (!data) return alert('No data returned from database')
+      if (error) {
+        alert(`Database error: ${error.message}`)
+        return
+      }
 
-      router.push(`/admin/scoring/${(data as any).id}`)
+      if (!data) {
+        alert('No data returned from database')
+        return
+      }
+
+      const sessionId = (data as any).id
+      router.push(`/admin/scoring/${sessionId}`)
     } catch (error) {
       alert(`Failed to start new round: ${error}`)
     }
@@ -89,14 +97,21 @@ export default function LiveScoringPage() {
     )
   }
 
+  // Frosted inner shadow for inputs
+  const frostedClass =
+    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
+
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 mt-8 mb-6 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+        <h1 className="text-4xl font-bold text-center select-none text-amber-400 mt-8 mb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
           ⚔️ Points Royale ⚔️
         </h1>
+
+        {/* Spacer */}
+        <div className="h-6" />
 
         {/* SECTION BOX */}
         <div className="rounded-xl p-6 space-y-6 bg-gradient-to-br from-purple-900/50 to-slate-900/60 shadow-[inset_0_2px_4px_rgba(255,255,255,0.08)] shadow-[0_12px_25px_rgba(0,0,0,0.45)]">
@@ -109,24 +124,31 @@ export default function LiveScoringPage() {
           {/* DATE + GAME */}
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-bold text-center mb-1">Date</label>
-              <input
-                type="date"
-                value={newSession.date}
-                onChange={e =>
-                  setNewSession({ ...newSession, date: e.target.value })
-                }
-                className="h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
-              />
+              <label className="block text-sm font-bold text-center mb-1">
+                Date
+              </label>
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="date"
+                  value={newSession.date}
+                  onChange={e =>
+                    setNewSession({ ...newSession, date: e.target.value })
+                  }
+                  style={{ paddingLeft: '12px' }}
+                  className={`h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center ${frostedClass}`}
+                />
+              </div>
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-bold text-center mb-1">Game</label>
+              <label className="block text-sm font-bold text-center mb-1">
+                Game
+              </label>
               <select
                 value={newSession.game}
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className="h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
+                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 ${frostedClass}`}
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -140,11 +162,11 @@ export default function LiveScoringPage() {
           {/* DEAL / CLEAR + WIN THRESHOLD */}
           <div className="flex items-center gap-3">
             {newSession.players.length === 0 ? (
-              <Button onClick={selectAllPlayers} variant="pop" color="blue" className="flex-1 h-11">
+              <Button variant="pop" color="blue" className="flex-1 h-11" onClick={selectAllPlayers}>
                 ♠ Deal All
               </Button>
             ) : (
-              <Button onClick={clearPlayers} variant="pop" color="red" className="flex-1 h-11">
+              <Button variant="pop" color="red" className="flex-1 h-11" onClick={clearPlayers}>
                 ✖ Clear Table
               </Button>
             )}
@@ -158,8 +180,10 @@ export default function LiveScoringPage() {
                     onClick={() => toggleThreshold(num)}
                     variant="frosted"
                     color="purple"
-                    className={`w-10 h-10 rounded-full ${
-                      newSession.threshold === num ? 'brightness-110' : 'brightness-90'
+                    className={`w-10 h-10 rounded-full text-sm ${
+                      newSession.threshold === num
+                        ? 'bg-gradient-to-br from-lime-500 to-lime-700'
+                        : 'bg-gradient-to-br from-lime-800 to-lime-950'
                     }`}
                   >
                     {num}
@@ -180,7 +204,9 @@ export default function LiveScoringPage() {
                   variant="frosted"
                   color="purple"
                   className={`h-10 text-sm font-semibold ${
-                    selected ? 'brightness-110' : 'brightness-90'
+                    selected
+                      ? 'bg-gradient-to-br from-purple-700 to-blue-800'
+                      : 'bg-gradient-to-br from-purple-900 to-blue-950'
                   }`}
                 >
                   {p}
@@ -192,10 +218,12 @@ export default function LiveScoringPage() {
           {/* MADNESS BUTTON */}
           <Button
             onClick={startNewRound}
-            disabled={newSession.players.length === 0}
-            variant="frosted"
+            variant="pop"
             color="purple"
-            className="w-full py-3 text-lg rounded-xl"
+            className={`w-full py-3 text-lg ${
+              newSession.players.length === 0 ? 'opacity-60 cursor-not-allowed' : ''
+            }`}
+            disabled={newSession.players.length === 0}
           >
             👊 Let the Madness Begin
           </Button>
