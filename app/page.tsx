@@ -627,9 +627,9 @@ const getPlayerStats = () => getPlayerStatsForGame()
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">Survived</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
-                        <th className="text-center p-2 md:p-4 text-sm md:text-base">ðŸ’©</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">💩</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
-                        <th className="text-center p-2 md:p-4 text-sm md:text-base">ðŸ”¥ Best</th>
+                        <th className="text-center p-2 md:p-4 text-sm md:text-base">Best 🔥</th>
                       </tr>
                     </thead>
                     <tbody>
