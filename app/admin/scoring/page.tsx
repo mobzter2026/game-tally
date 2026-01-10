@@ -188,8 +188,8 @@ export default function LiveScoringPage() {
             </div>
           )}
 
-  {/* PLAYER SELECTION */}
-  <<div className="grid grid-cols-3 gap-x-4 gap-y-6">
+   {/* PLAYER SELECTION */}
+  <div className="grid grid-cols-3 gap-x-4 gap-y-6">
   {PLAYERS.map(p => {
     const selected = newSession.players.includes(p)
     return (
