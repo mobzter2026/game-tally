@@ -12,7 +12,7 @@ const GAME_EMOJIS: Record<string, string> = {
   Monopoly: '🎲',
   'Tai Ti': '🀄',
   Shithead: '💩',
-  Rung: '🎴'
+  Rung: '🎭'
 }
 
 export default function LiveScoringPage() {
