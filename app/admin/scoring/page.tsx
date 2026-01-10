@@ -137,6 +137,7 @@ export default function LiveScoringPage() {
           </h2>
 
           {/* DATE + GAME */}
+          <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-sm font-bold text-center mb-1">
                 Date
