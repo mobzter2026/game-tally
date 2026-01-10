@@ -33,7 +33,7 @@ export default function LiveScoringPage() {
       if (!data.user) router.push('/admin/login')
       else setLoading(false)
     })
-    
+
     // Force light color scheme for form elements
     document.documentElement.style.colorScheme = 'light'
   }, [])
@@ -82,8 +82,7 @@ export default function LiveScoringPage() {
         return
       }
 
-      const sessionId = (data as any).id
-      router.push(`/admin/scoring/${sessionId}`)
+      router.push(`/admin/scoring/${(data as any).id}`)
     } catch (error) {
       alert(`Failed to start new round: ${error}`)
     }
@@ -96,10 +95,6 @@ export default function LiveScoringPage() {
       </div>
     )
   }
-
-  // Frosted inner shadow for inputs
-  const frostedClass =
-    "shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
 
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
@@ -127,18 +122,16 @@ export default function LiveScoringPage() {
               <label className="block text-sm font-bold text-center mb-1">
                 Date
               </label>
-              <div className="relative flex items-center justify-center">
-                <input
-                  type="date"
-                  value={newSession.date}
-                  onChange={e =>
-                    setNewSession({ ...newSession, date: e.target.value })
-                  }
-                  style={{ paddingLeft: '12px' }}
-                  className={`h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center ${frostedClass}`}
-                />
-              </div>
+              <input
+                type="date"
+                value={newSession.date}
+                onChange={e =>
+                  setNewSession({ ...newSession, date: e.target.value })
+                }
+                className="h-11 w-full font-bold text-center rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all"
+              />
             </div>
+
             <div className="flex-1">
               <label className="block text-sm font-bold text-center mb-1">
                 Game
@@ -148,7 +141,7 @@ export default function LiveScoringPage() {
                 onChange={e =>
                   setNewSession({ ...newSession, game: e.target.value })
                 }
-                className={`h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 ${frostedClass}`}
+                className="h-11 w-full font-bold text-center rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all appearance-none px-4"
               >
                 {SCORE_GAMES.map(g => (
                   <option key={g} value={g}>
@@ -162,60 +155,76 @@ export default function LiveScoringPage() {
           {/* DEAL / CLEAR + WIN THRESHOLD */}
           <div className="flex items-center gap-3">
             {newSession.players.length === 0 ? (
-              <Button variant="pop" color="blue" className="flex-1 h-11" onClick={selectAllPlayers}>
+              <Button
+                onClick={selectAllPlayers}
+                variant="pop"
+                color="blue"
+                className="flex-1 h-11 font-semibold"
+              >
                 ♠ Deal All
               </Button>
             ) : (
-              <Button variant="pop" color="red" className="flex-1 h-11" onClick={clearPlayers}>
+              <Button
+                onClick={clearPlayers}
+                variant="pop"
+                color="red"
+                className="flex-1 h-11 font-semibold"
+              >
                 ✖ Clear Table
               </Button>
             )}
 
-          {/* Win Threshold switch (3/5) */}
-          {newSession.game !== 'Blackjack' && (
-            <div className="flex gap-2 items-center">
-              {[3, 5].map((num) => (
-                <Button
-                  key={num}
-                  onClick={() => toggleThreshold(num)}
-                  variant="frosted"
-                  color={newSession.threshold === num ? 'fuchsia' : 'purple'} // Dark fuchsia when selected
-                  className="w-10 h-10 rounded-full text-sm font-bold"
-                >
-                  {num}
-                </Button>
-              ))}
-            </div>
-          )}
+            {/* Win Threshold switch (3/5) */}
+            {newSession.game !== 'Blackjack' && (
+              <div className="flex gap-2 items-center">
+                {[3, 5].map(num => (
+                  <Button
+                    key={num}
+                    onClick={() => toggleThreshold(num)}
+                    variant="frosted"
+                    color="purple"
+                    className={`w-10 h-10 rounded-full text-sm ${
+                      newSession.threshold === num
+                        ? 'bg-gradient-to-br from-fuchsia-700 to-purple-800'
+                        : 'bg-gradient-to-br from-purple-900 to-blue-950'
+                    }`}
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
 
-   {/* PLAYER SELECTION */}
-  <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-  {PLAYERS.map(p => {
-    const selected = newSession.players.includes(p)
-    return (
-      <Button
-        key={p}
-        onClick={() => togglePlayer(p)}
-        variant="frosted"
-        color="purple"
-        selected={selected}          // <-- important
-        className="h-10 text-sm font-semibold"
-      >
-        {p}
-      </Button>
-    )
-  })}
-</div>
+          {/* PLAYER SELECTION */}
+          <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+            {PLAYERS.map(p => {
+              const selected = newSession.players.includes(p)
+              return (
+                <Button
+                  key={p}
+                  onClick={() => togglePlayer(p)}
+                  variant="frosted"
+                  color="purple"
+                  className={`h-10 text-sm font-semibold rounded-lg ${
+                    selected
+                      ? 'bg-gradient-to-br from-purple-700 to-fuchsia-700'
+                      : 'bg-gradient-to-br from-purple-900 to-blue-950'
+                  }`}
+                >
+                  {p}
+                </Button>
+              )
+            })}
+          </div>
 
           {/* MADNESS BUTTON */}
           <Button
             onClick={startNewRound}
-            variant="pop"
-            color="purple"
-            className={`w-full py-3 text-lg ${
-              newSession.players.length === 0 ? 'opacity-60 cursor-not-allowed' : ''
-            }`}
             disabled={newSession.players.length === 0}
+            variant="frosted"
+            color="purple"
+            className="w-full py-3 rounded-xl font-bold text-lg"
           >
             👊 Let the Madness Begin
           </Button>
