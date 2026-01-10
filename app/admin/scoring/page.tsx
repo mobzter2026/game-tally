@@ -129,7 +129,7 @@ export default function LiveScoringPage() {
         <div className="h-6" />
 
         {/* SECTION BOX */}
-        <div className="rounded-xl p-6 space-y-6 bg-gradient-to-br from-purple-900/50 to-slate-900/60 [box-shadow:inset_0_2px_4px_rgba(255,255,255,0.08)] shadow-[0_12px_25px_rgba(0,0,0,0.45)]">
+        <div className="rounded-xl p-6 space-y-6 bg-gradient-to-br from-purple-900/50 to-slate-900/60 shadow-[inset_0_2px_4px_rgba(255,255,255,0.08)] shadow-[0_12px_25px_rgba(0,0,0,0.45)]">
 
           {/* NEW ROUND */}
           <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
