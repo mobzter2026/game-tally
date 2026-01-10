@@ -171,49 +171,41 @@ export default function LiveScoringPage() {
               </Button>
             )}
 
-            {/* Win Threshold switch (3/5) */}
-            {newSession.game !== 'Blackjack' && (
-              <div className="flex gap-2 items-center">
-                {[3, 5].map(num => (
-                  <Button
-                    key={num}
-                    onClick={() => toggleThreshold(num)}
-                    variant="frosted"
-                    color="purple"
-                    className={`w-10 h-10 rounded-full text-sm ${
-                      newSession.threshold === num
-                        ? 'bg-gradient-to-br from-lime-500 to-lime-700'
-                        : 'bg-gradient-to-br from-lime-800 to-lime-950'
-                    }`}
-                  >
-                    {num}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* PLAYER SELECTION */}
-          <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-            {PLAYERS.map(p => {
-              const selected = newSession.players.includes(p)
-              return (
+          {/* Win Threshold switch (3/5) */}
+          {newSession.game !== 'Blackjack' && (
+            <div className="flex gap-2 items-center">
+              {[3, 5].map((num) => (
                 <Button
-                  key={p}
-                  onClick={() => togglePlayer(p)}
+                  key={num}
+                  onClick={() => toggleThreshold(num)}
                   variant="frosted"
-                  color="purple"
-                  className={`h-10 text-sm font-semibold ${
-                    selected
-                      ? 'bg-gradient-to-br from-purple-700 to-blue-800'
-                      : 'bg-gradient-to-br from-purple-900 to-blue-950'
-                  }`}
+                  color={newSession.threshold === num ? 'fuchsia' : 'purple'} // Dark fuchsia when selected
+                  className="w-10 h-10 rounded-full text-sm font-bold"
                 >
-                  {p}
+                  {num}
                 </Button>
-              )
-            })}
-          </div>
+              ))}
+            </div>
+          )}
+
+  {/* PLAYER SELECTION */}
+  <<div className="grid grid-cols-3 gap-x-4 gap-y-6">
+  {PLAYERS.map(p => {
+    const selected = newSession.players.includes(p)
+    return (
+      <Button
+        key={p}
+        onClick={() => togglePlayer(p)}
+        variant="frosted"
+        color="purple"
+        selected={selected}          // <-- important
+        className="h-10 text-sm font-semibold"
+      >
+        {p}
+      </Button>
+    )
+  })}
+</div>
 
           {/* MADNESS BUTTON */}
           <Button
