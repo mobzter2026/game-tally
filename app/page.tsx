@@ -599,10 +599,10 @@ const getPlayerStats = () => getPlayerStatsForGame()
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                      🃏 Blackjack | 🎲 Monopoly | 🀄 Tai Ti | 💩 Shithead
+                      🃏 Blackjack ⚜ 🎲 Monopoly ⚜ 🀄 Tai Ti ⚜ 💩 Shithead
                     </p>
                     <p className="text-slate-400 text-xs mb-3">
-                      Wins: 100% 🏆 | 2nd: 40% 🏃 | Survival: 10% 🤟🏼
+                      Wins: 100% 🏆 ⬩ 2nd: 40% 🏃 ⬩ Survival: 10% 🤟🏼
                     </p>
                     <select
                       value={selectedGameType}
