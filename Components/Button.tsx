@@ -4,12 +4,13 @@ import React, { useEffect, useState } from 'react'
 
 type ButtonProps = {
   variant?: 'frosted' | 'pop'
-  color?: 'blue' | 'red' | 'purple'
+  color?: 'blue' | 'red' | 'purple' | 'lime'
   children: React.ReactNode
   onClick?: () => void
   disabled?: boolean
   className?: string
-  selected?: boolean       // <-- new prop for selection
+  selected?: boolean           // Brighten / highlight
+  outlineColor?: string        // Optional neon / outline color
 }
 
 export default function Button({
@@ -19,7 +20,8 @@ export default function Button({
   onClick,
   disabled = false,
   className = '',
-  selected = false
+  selected = false,
+  outlineColor
 }: ButtonProps) {
   const [isDark, setIsDark] = useState(false)
 
@@ -37,22 +39,27 @@ export default function Button({
       ? 'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all'
       : 'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] transition-all'
 
+  // Enhanced pop shadow
   const popClass =
-    isDark
-      ? 'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all'
-      : 'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all'
+    'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all'
 
+  // Gradient map
   const colorGradients: Record<string, string> = {
     purple: 'from-purple-700 via-purple-900 to-blue-900',
     blue: 'from-blue-700 to-blue-900',
     red: 'from-red-700 to-red-900',
-    lime: selected ? 'from-lime-500 to-lime-700' : 'from-lime-800 to-lime-950'
+    lime: selected
+      ? 'from-lime-500 to-lime-700'
+      : 'from-lime-800 to-lime-950'
   }
 
   const shadowClass = variant === 'pop' ? popClass : frostedClass
-
-  // Slightly brighten if selected
   const selectedClass = selected ? 'brightness-110' : ''
+
+  // Optional outline for special buttons
+  const outlineClass = outlineColor
+    ? `border-2 border-[${outlineColor}]`
+    : ''
 
   return (
     <button
@@ -62,9 +69,10 @@ export default function Button({
         px-4 py-2 rounded-lg font-bold text-white
         bg-gradient-to-br ${colorGradients[color]}
         ${shadowClass}
+        ${selectedClass}
+        ${outlineClass}
         hover:brightness-110 active:translate-y-[2px]
         disabled:opacity-50 disabled:cursor-not-allowed
-        ${selectedClass}
         ${className}
       `}
     >
