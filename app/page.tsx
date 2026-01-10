@@ -29,11 +29,11 @@ const QUOTES = [
 ]
 
 const GAME_EMOJIS: Record<string, string> = {
-  'Blackjack': 'ðŸƒ',
-  'Monopoly': 'ðŸŽ²',
-  'Tai Ti': 'ðŸ€„',
-  'Shithead': 'ðŸ’©',
-  'Rung': 'ðŸŽ´'
+  'Blackjack': '🃏',
+  'Monopoly': '🎲',
+  'Tai Ti': '🀄',
+  'Shithead': '💩',
+  'Rung': '🎭'
 }
 
 const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
@@ -364,9 +364,9 @@ const getPlayerStats = () => getPlayerStatsForGame()
       position = getMedalPosition(sortedList, currentIndex - 1, getWinRate)
     }
 
-    if (position === 1) return 'ðŸ¥‡'
-    if (position === 2) return 'ðŸ¥ˆ'
-    if (position === 3) return 'ðŸ¥‰'
+    if (position === 1) return '🥇'
+    if (position === 2) return '🥈'
+    if (position === 3) return '🥉'
 
     const thirdPlaceWinRate = sortedList.find((_, idx) => getMedalPosition(sortedList, idx, getWinRate) === 3)
     if (thirdPlaceWinRate && getWinRate(sortedList[currentIndex]) === getWinRate(thirdPlaceWinRate)) {
@@ -446,7 +446,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
         {latestWinner && latestWinner.type === 'dominated' && (
           <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis animate-pulse">
-              âš¡ Flawless victory in {latestWinner.game.game_type} by {latestWinner.game.winners?.[0]} âš¡
+              🌟 Flawless victory in {latestWinner.game.game_type} by {latestWinner.game.winners?.[0]} 🌟
             </p>
           </div>
         )}
@@ -454,7 +454,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
         {latestWinner && latestWinner.type === 'shithead' && (
           <div className="mb-4 bg-gradient-to-r from-slate-100 via-white to-slate-100 px-4 py-2 rounded-lg shadow-lg border-2 border-amber-600 animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black">
-              ðŸ’© Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead ðŸ’©
+              💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
             </p>
           </div>
         )}
@@ -462,7 +462,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
         {latestWinner && latestWinner.type === 'normal' && (
           <div className="mb-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              ðŸ† {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! ðŸ†
+              🎖️ {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 🎖️
             </p>
           </div>
         )}
@@ -470,13 +470,13 @@ const getPlayerStats = () => getPlayerStatsForGame()
         {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
           <div className="mb-4 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 px-4 py-2 rounded-lg shadow-lg">
             <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! ðŸ’©
+              {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! 💩💩
             </p>
           </div>
         )}
 
         <div className="text-center mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard ðŸ†</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard 🏆</h1>
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
         </div>
 
@@ -559,7 +559,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                                       </span>
                                       <span className="font-bold">
                                         {player.player}
-                                        {worstShitheadPlayer === player.player && gameType === 'Shithead' && ' ðŸ’©'}
+                                        {worstShitheadPlayer === player.player && gameType === 'Shithead' && '💩'}
                                       </span>
                                     </div>
                                     <div className="text-right">
@@ -581,35 +581,35 @@ const getPlayerStats = () => getPlayerStatsForGame()
               <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 shadow-2xl overflow-hidden mb-8">
                 <div className="p-4 border-b border-slate-700">
                   <div className="text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board ðŸ”ª</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
                     <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
                       <button
                         onClick={() => setHallView('fame')}
                         className="px-4 py-2 bg-[#27AE60] hover:bg-[#229954] rounded text-sm font-bold"
                       >
-                        â­ Hall of Fame
+                        ⭐ Hall of Fame
                       </button>
                       <button
                         onClick={() => setHallView('shame')}
                         className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
                       >
-                        ðŸ¤¡ Hall of Shame
+                        🤡 Hall of Shame
                       </button>
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                      ðŸƒ Blackjack â€¢ ðŸŽ² Monopoly â€¢ ðŸ€„ Tai Ti â€¢ ðŸ’© Shithead
+                      🃏 Blackjack 🎲 Monopoly 🀄 Tai Ti 💩 Shithead
                     </p>
                     <p className="text-slate-400 text-xs mb-3">
-                      Wins: 100% â€¢ 2nd: 40% â€¢ Survival: 10%
+                      Wins: 100% 🏆 2nd: 40%🥈 Survival: 10% ✊
                     </p>
                     <select
                       value={selectedGameType}
                       onChange={(e) => setSelectedGameType(e.target.value)}
                       className="px-3 py-2 bg-violet-900/80 rounded text-sm"
                     >
-                      <option value="All Games">ðŸŒ All Games</option>
+                      <option value="All Games"> All Games</option>
                       {INDIVIDUAL_GAMES.map(game => (
                         <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                       ))}
