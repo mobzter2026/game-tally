@@ -526,7 +526,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                     onClick={() => setHallView('none')}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
                   >
-                    â† Back to Overall Leaderboard
+                    く◀ Back to Overall Leaderboard
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -599,17 +599,17 @@ const getPlayerStats = () => getPlayerStatsForGame()
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                      🃏 Blackjack 🎲 Monopoly 🀄 Tai Ti 💩 Shithead
+                      🃏 Blackjack | 🎲 Monopoly | 🀄 Tai Ti | 💩 Shithead
                     </p>
                     <p className="text-slate-400 text-xs mb-3">
-                      Wins: 100% 🏆 2nd: 40%🥈 Survival: 10% ✊
+                      Wins: 100% 🏆 | 2nd: 40% 🏃 | Survival: 10% 🤟🏼
                     </p>
                     <select
                       value={selectedGameType}
                       onChange={(e) => setSelectedGameType(e.target.value)}
                       className="px-3 py-2 bg-violet-900/80 rounded text-sm"
                     >
-                      <option value="All Games"> All Games</option>
+                      <option value="All Games">🎰 All Games</option>
                       {INDIVIDUAL_GAMES.map(game => (
                         <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                       ))}
@@ -673,7 +673,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
             {hallView === 'none' && (
               <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 p-6 mb-8">
                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                  <h2 className="text-2xl font-bold">ðŸ“œ Recent Games</h2>
+                  <h2 className="text-2xl font-bold">📜 Recent Games</h2>
                   <div className="text-sm">
                     <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
                     <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2">2nd</span>
