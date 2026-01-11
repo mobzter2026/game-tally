@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 type ButtonProps = {
   variant?: 'frosted' | 'pop'
@@ -10,7 +10,6 @@ type ButtonProps = {
   disabled?: boolean
   className?: string
   selected?: boolean
-  outlineColor?: string // for the Madness button neon
 }
 
 export default function Button({
@@ -20,29 +19,39 @@ export default function Button({
   onClick,
   disabled = false,
   className = '',
-  selected = false,
-  outlineColor
+  selected = false
 }: ButtonProps) {
-  // Frosted shadow, works for dark mode too
-  const baseShadow =
-    'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all'
-  const popShadow =
-    'shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_8px_rgba(255,255,255,0.3)] transition-all'
+  const [isDark, setIsDark] = useState(false)
 
-  const shadowClass = variant === 'pop' ? popShadow : baseShadow
+  useEffect(() => {
+    const m = window.matchMedia('(prefers-color-scheme: dark)')
+    setIsDark(m.matches)
+    const l = (e: MediaQueryListEvent) => setIsDark(e.matches)
+    m.addEventListener('change', l)
+    return () => m.removeEventListener('change', l)
+  }, [])
 
-  // Gradient mapping
-  const colorGradients: Record<string, string> = {
+  const innerShadow = isDark
+    ? 'inset_0_2px_6px_rgba(255,255,255,0.35)'
+    : 'inset_0_2px_6px_rgba(255,255,255,0.2)'
+
+  const baseShadow = '0_6px_12px_rgba(0,0,0,0.45)'
+
+  const shadowClass =
+    variant === 'pop'
+      ? `shadow-[${baseShadow},inset_0_2px_8px_rgba(255,255,255,0.35)]`
+      : `shadow-[${baseShadow},${innerShadow}]`
+
+  const gradients: Record<string, string> = {
     purple: selected
-      ? 'from-purple-600 via-purple-800 to-fuchsia-700'
-      : 'from-purple-700 via-purple-900 to-blue-900',
-    blue: selected ? 'from-blue-500 to-blue-700' : 'from-blue-700 to-blue-900',
-    red: selected ? 'from-red-500 to-red-700' : 'from-red-700 to-red-900'
+      ? 'from-fuchsia-600 via-purple-700 to-indigo-800'
+      : 'from-purple-800 via-purple-900 to-indigo-950',
+    blue: 'from-blue-700 to-blue-900',
+    red: 'from-red-700 to-red-900'
   }
 
-  // Outline style for special buttons
-  const outlineStyle = outlineColor
-    ? `border-2 border-[${outlineColor}]`
+  const selectedGlow = selected
+    ? 'ring-2 ring-fuchsia-400/60 shadow-[0_0_14px_rgba(217,70,239,0.55)]'
     : ''
 
   return (
@@ -51,12 +60,13 @@ export default function Button({
       disabled={disabled}
       className={`
         px-4 py-2 rounded-lg font-bold text-white
-        bg-gradient-to-br ${colorGradients[color]}
+        bg-gradient-to-br ${gradients[color]}
+        border border-white/5
         ${shadowClass}
-        ${outlineStyle}
+        ${selectedGlow}
+        transition-colors
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
-        focus:outline-none
       `}
     >
       {children}
