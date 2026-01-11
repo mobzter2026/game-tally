@@ -10,7 +10,6 @@ type ButtonProps = {
   disabled?: boolean
   className?: string
   selected?: boolean
-  isMadness?: boolean // special neon outline button
 }
 
 export default function Button({
@@ -20,27 +19,19 @@ export default function Button({
   onClick,
   disabled = false,
   className = '',
-  selected = false,
-  isMadness = false
+  selected = false
 }: ButtonProps) {
-
   /* ---------------- SHADOW SYSTEM ---------------- */
-
   const shadowClass =
     variant === 'pop'
-      ? 'shadow-[0_6px_14px_rgba(0,0,0,0.55),inset_0_3px_8px_rgba(255,255,255,0.45)]'
-      : 'shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_6px_rgba(255,255,255,0.35)]'
+      ? 'shadow-[0_5px_12px_rgba(0,0,0,0.4),inset_0_3px_7px_rgba(255,255,255,0.3)]'
+      : 'shadow-[0_3px_8px_rgba(0,0,0,0.35),inset_0_2px_5px_rgba(255,255,255,0.25)]'
 
   const selectedGlow = selected
     ? 'shadow-[0_0_16px_rgba(217,70,239,0.45),inset_0_2px_6px_rgba(255,255,255,0.35)]'
     : ''
 
-  const madnessGlow = isMadness
-    ? 'ring-2 ring-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.85),0_0_32px_rgba(251,191,36,0.55),inset_0_1px_0_rgba(255,255,255,0.25)]'
-    : ''
-
   /* ---------------- COLOURS ---------------- */
-
   const gradients: Record<string, string> = {
     purple: selected
       ? 'from-fuchsia-600 via-purple-700 to-indigo-800'
@@ -58,7 +49,6 @@ export default function Button({
         bg-gradient-to-br ${gradients[color]}
         ${shadowClass}
         ${selectedGlow}
-        ${madnessGlow}
         transition-[box-shadow,filter]
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
