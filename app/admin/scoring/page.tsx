@@ -258,7 +258,19 @@ export default function LiveScoringPage() {
   disabled={newSession.players.length === 0}
   variant="frosted"
   color="purple"
-  className="w-full py-3 rounded-xl font-bold text-lg madness"
+  className={`
+    w-full py-3 rounded-xl font-bold text-lg
+    ${
+      newSession.players.length > 0
+        ? `
+          ring-2 ring-amber-400
+          shadow-[inset_0_0_10px_rgba(255,170,0,0.85),
+                  0_0_18px_rgba(255,170,0,0.9),
+                  0_0_32px_rgba(255,170,0,0.55)]
+        `
+        : ''
+    }
+  `}
 >
   👊 Let the Madness Begin
 </Button>
