@@ -34,7 +34,6 @@ export default function LiveScoringPage() {
       else setLoading(false)
     })
 
-    document.documentElement.style.colorScheme = 'light'
   }, [])
 
   const togglePlayer = (player: string) => {
@@ -213,8 +212,11 @@ export default function LiveScoringPage() {
             disabled={newSession.players.length === 0}
             variant="frosted"
             color="purple"
-            outlineColor={newSession.players.length ? '#FFA500' : undefined} // Orange neon
-            className="w-full py-3 rounded-xl font-bold text-lg"
+            className={`w-full py-3 rounded-xl font-bold text-lg border-2 ${
+              newSession.players.length
+                ? 'border-amber-400 shadow-[0_0_18px_rgba(255,170,0,0.6)]'
+                : 'border-transparent'
+            }`}
           >
             👊 Let the Madness Begin
           </Button>
