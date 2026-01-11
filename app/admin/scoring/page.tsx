@@ -141,9 +141,22 @@ export default function LiveScoringPage() {
   "
 >
 
-          <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-            New Round
-          </h2>
+          <h2
+  className="
+    text-center
+    text-2xl sm:text-3xl
+    font-semibold
+    tracking-[0.1em]
+    select-none
+    whitespace-nowrap
+    bg-gradient-to-r
+    from-amber-300 via-yellow-200 to-amber-400
+    bg-clip-text text-transparent
+    drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]
+  "
+>
+  New Round
+</h2>
 
           {/* DATE + GAME */}
           <div className="flex gap-4">
