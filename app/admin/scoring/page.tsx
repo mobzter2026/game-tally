@@ -100,30 +100,33 @@ export default function LiveScoringPage() {
         {/* TITLE */}
         <h1
   className="
-    w-full max-w-full overflow-hidden
-    text-center whitespace-nowrap select-none
-    text-[1.85rem] sm:text-[2.15rem]
-    font-medium
-    tracking-[0.18em] sm:tracking-[0.22em]
-    drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]
+    w-full max-w-full
+    text-center select-none
+    whitespace-nowrap
+    overflow-hidden
+    text-[1.75rem] sm:text-[2.05rem]
+    font-semibold
+    tracking-[0.16em] sm:tracking-[0.2em]
+    drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]
   "
 >
-  <span className="inline-block drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+  <span className="inline-block mr-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
     ♠
   </span>
 
   <span
     className="
-      mx-2
-      bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-300
+      bg-gradient-to-r
+      from-amber-300 via-yellow-200 to-amber-400
       bg-clip-text text-transparent
+      drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]
     "
   >
-    POINTS&nbsp;ROYALE
+    POINTS&nbsp;ROYAL
   </span>
 
-  <span className="inline-block drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-    ♣
+  <span className="inline-block ml-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
+    ♠
   </span>
 </h1>
         <div className="h-6" />
