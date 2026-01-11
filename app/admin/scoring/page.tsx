@@ -98,9 +98,18 @@ export default function LiveScoringPage() {
       <div className="max-w-3xl mx-auto flex flex-col justify-start">
 
         {/* TITLE */}
-        <h1 className="text-4xl font-bold text-center select-none text-amber-400 mt-8 mb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-          ⚔️ Points Royale ⚔️
-        </h1>
+        <h1
+  className={`
+    text-5xl md:text-6xl font-extrabold text-center select-none
+    bg-gradient-to-br from-amber-400 via-orange-400 to-yellow-300
+    text-transparent bg-clip-text
+    drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]
+    shadow-[inset_0_2px_4px_rgba(255,255,255,0.3)]
+    tracking-widest
+  `}
+>
+  ⚔️ Points Royale ⚔️
+</h1>
 
         <div className="h-6" />
 
