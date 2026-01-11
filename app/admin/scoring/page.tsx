@@ -146,16 +146,17 @@ export default function LiveScoringPage() {
     text-center
     text-2xl sm:text-3xl
     font-semibold
-    tracking-[0.1em]
+    uppercase
+    tracking-widest  /* adds spacing between letters */
     select-none
     whitespace-nowrap
     bg-gradient-to-r
-    from-white via-gray-150 to-gray-300
+    from-white via-gray-100 to-gray-250
     bg-clip-text text-transparent
     drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]
   "
 >
-  New Round
+  NEW ROUND
 </h2>
 
           {/* DATE + GAME */}
