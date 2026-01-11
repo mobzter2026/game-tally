@@ -149,7 +149,7 @@ export default function LiveScoringPage() {
     uppercase
     tracking-wider
     select-none
-    bg-gradient-to-r from-gray-50 via-gray-250 to-gray-100
+    bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100
     bg-clip-text text-transparent
     drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]
   "
