@@ -31,50 +31,21 @@ export default function Button({
     return () => m.removeEventListener('change', l)
   }, [])
 
-  /* ---------------- SHADOW SYSTEM ---------------- */
-
-  const outerShadow =
-    variant === 'pop'
-      ? '0_14px_30px_rgba(0,0,0,0.75)'
-      : '0_8px_18px_rgba(0,0,0,0.55)'
-
-  const innerHighlight = isDark
-    ? 'inset_0_3px_8px_rgba(255,255,255,0.45)'
-    : 'inset_0_2px_6px_rgba(255,255,255,0.25)'
-
-  const innerDepth =
-    variant === 'pop'
-      ? 'inset_0_-2px_6px_rgba(0,0,0,0.4)'
-      : ''
-
-  const selectedGlow = selected
-  ? `
-    shadow-[0_10px_22px_rgba(0,0,0,0.6),
-            inset_0_1px_0_rgba(255,255,255,0.4),
-            inset_0_3px_8px_rgba(255,255,255,0.35),
-            0_0_14px_rgba(217,70,239,0.4)]
-  `
-  : ''
+  /* ---------------- SHADOW SYSTEM (AUTHORITATIVE) ---------------- */
 
   const shadowClass =
-  variant === 'pop'
-    ? `
-      shadow-[0_10px_22px_rgba(0,0,0,0.65),
-              inset_0_1px_0_rgba(255,255,255,0.35),
-              inset_0_3px_10px_rgba(255,255,255,0.35)]
-    `
-    : `
-      shadow-[0_8px_18px_rgba(0,0,0,0.55),
-              inset_0_1px_0_rgba(255,255,255,0.28),
-              inset_0_3px_8px_rgba(255,255,255,0.25)]
-    `
+    variant === 'pop'
+      ? isDark
+        ? 'shadow-[0_14px_32px_rgba(0,0,0,0.8),inset_0_3px_10px_rgba(255,255,255,0.4)]'
+        : 'shadow-[0_12px_26px_rgba(0,0,0,0.6),inset_0_3px_8px_rgba(255,255,255,0.3)]'
+      : isDark
+        ? 'shadow-[0_8px_18px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.32)]'
+        : 'shadow-[0_6px_14px_rgba(0,0,0,0.45),inset_0_2px_6px_rgba(255,255,255,0.25)]'
 
-  const madnessGlow = `
-  ring-2 ring-amber-400
-  shadow-[0_0_18px_rgba(251,191,36,0.85),
-          0_0_32px_rgba(251,191,36,0.55),
-          inset_0_1px_0_rgba(255,255,255,0.25)]
-`
+  const selectedGlow = selected
+    ? 'shadow-[0_0_16px_rgba(217,70,239,0.45),inset_0_2px_6px_rgba(255,255,255,0.35)]'
+    : ''
+
   /* ---------------- COLOURS ---------------- */
 
   const gradients: Record<string, string> = {
@@ -93,7 +64,8 @@ export default function Button({
         px-4 py-2 rounded-lg font-bold text-white
         bg-gradient-to-br ${gradients[color]}
         ${shadowClass}
-        transition-[filter,box-shadow]
+        ${selectedGlow}
+        transition-[box-shadow,filter]
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}
