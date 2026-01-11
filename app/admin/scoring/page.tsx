@@ -217,14 +217,18 @@ export default function LiveScoringPage() {
 <Button
   onClick={startNewRound}
   disabled={newSession.players.length === 0}
-  variant="frosted"
-  color="purple"
-  isMadness={true}         // <-- triggers neon amber outline
-  className="w-full py-3 rounded-xl font-bold text-lg"
+  variant="frosted"       // keep frosted for consistency
+  color="purple"           // gradient color of the button
+  className={`
+    w-full py-3 rounded-xl font-bold text-lg
+    ${newSession.players.length 
+      ? 'ring-2 ring-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.85),0_0_32px_rgba(251,191,36,0.55)]'
+      : 'ring-0 shadow-none opacity-50 cursor-not-allowed'
+    }
+  `}
 >
   👊 Let the Madness Begin
 </Button>
-
         </div>
       </div>
     </div>
