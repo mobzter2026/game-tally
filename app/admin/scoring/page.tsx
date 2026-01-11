@@ -105,7 +105,14 @@ export default function LiveScoringPage() {
         <div className="h-6" />
 
         {/* SECTION BOX */}
-        <div className="rounded-xl p-6 space-y-6 bg-gradient-to-br from-purple-900/50 to-slate-900/60 shadow-[inset_0_2px_4px_rgba(255,255,255,0.08)] shadow-[0_12px_25px_rgba(0,0,0,0.45)]">
+<div
+  className="
+    rounded-xl p-6 space-y-6
+    bg-gradient-to-br from-purple-900/50 to-slate-900/60
+    shadow-[0_12px_25px_rgba(0,0,0,0.45),
+            inset_0_2px_8px_rgba(255,255,255,0.25)]
+  "
+>
 
           <h2 className="text-center text-3xl font-bold tracking-[3px] select-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
             New Round
@@ -150,67 +157,69 @@ export default function LiveScoringPage() {
           </div>
 
           {/* DEAL / CLEAR + WIN THRESHOLD */}
-          <div className="flex items-center gap-3">
-            {newSession.players.length === 0 ? (
-              <Button
-                onClick={selectAllPlayers}
-                variant="pop"
-                color="blue"
-                className="flex-1 h-11"
-              >
-                ♠ Deal All
-              </Button>
-            ) : (
-              <Button
-                onClick={clearPlayers}
-                variant="pop"
-                color="red"
-                className="flex-1 h-11"
-              >
-                ✖ Clear Table
-              </Button>
-            )}
+<div className="flex items-center gap-3">
+  {newSession.players.length === 0 ? (
+    <Button
+      onClick={selectAllPlayers}
+      variant="pop"       // gives pop shadow + inner highlight
+      color="blue"
+      className="flex-1 h-11"
+    >
+      ♠ Deal All
+    </Button>
+  ) : (
+    <Button
+      onClick={clearPlayers}
+      variant="pop"       // gives pop shadow + inner highlight
+      color="red"
+      className="flex-1 h-11"
+    >
+      ✖ Clear Table
+    </Button>
+  )}
 
-            {/* Win Threshold switch */}
-            {newSession.game !== 'Blackjack' && (
-              <div className="flex gap-2 items-center">
-                {[3, 5].map(num => (
-                  <Button
-                    key={num}
-                    onClick={() => toggleThreshold(num)}
-                    variant="frosted"
-                    color="purple"
-                    selected={newSession.threshold === num}
-                    className="w-10 h-10 rounded-full text-sm"
-                  >
-                    {num}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+  {/* Win Threshold switch */}
+  {newSession.game !== 'Blackjack' && (
+    <div className="flex gap-2 items-center">
+      {[3, 5].map(num => (
+        <Button
+          key={num}
+          onClick={() => toggleThreshold(num)}
+          variant="frosted"
+          color="purple"
+          selected={newSession.threshold === num}
+          className="w-10 h-10 rounded-full text-sm"
+        >
+          {num}
+        </Button>
+      ))}
+    </div>
+  )}
+</div>
 
-          {/* PLAYER SELECTION */}
-          <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-            {PLAYERS.map(p => (
-              <Button
-                key={p}
-                onClick={() => togglePlayer(p)}
-                variant="frosted"
-                color="purple"
-                selected={newSession.players.includes(p)}
-                className="h-10 text-sm font-semibold"
-              >
-                {p}
-              </Button>
-            ))}
-          </div>
+{/* PLAYER SELECTION */}
+<div className="grid grid-cols-3 gap-x-4 gap-y-6">
+  {PLAYERS.map(p => (
+    <Button
+      key={p}
+      onClick={() => togglePlayer(p)}
+      variant="frosted"
+      color="purple"
+      selected={newSession.players.includes(p)}
+      className="h-10 text-sm font-semibold"
+    >
+      {p}
+    </Button>
+  ))}
+</div>
 
-          {/* MADNESS BUTTON */}
-          <Button
+{/* MADNESS BUTTON */}
+<Button
   onClick={startNewRound}
   disabled={newSession.players.length === 0}
-  madness
+  variant="frosted"
+  color="purple"
+  isMadness={true}         // <-- triggers neon amber outline
   className="w-full py-3 rounded-xl font-bold text-lg"
 >
   👊 Let the Madness Begin
