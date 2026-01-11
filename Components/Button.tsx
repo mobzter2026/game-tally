@@ -34,13 +34,13 @@ export default function Button({
   /* ---------------- SHADOW SYSTEM (AUTHORITATIVE) ---------------- */
 
   const shadowClass =
-    variant === 'pop'
-      ? isDark
-        ? 'shadow-[0_14px_32px_rgba(0,0,0,0.8),inset_0_3px_10px_rgba(255,255,255,0.4)]'
-        : 'shadow-[0_12px_26px_rgba(0,0,0,0.6),inset_0_3px_8px_rgba(255,255,255,0.3)]'
-      : isDark
-        ? 'shadow-[0_8px_18px_rgba(0,0,0,0.6),inset_0_2px_6px_rgba(255,255,255,0.32)]'
-        : 'shadow-[0_6px_14px_rgba(0,0,0,0.45),inset_0_2px_6px_rgba(255,255,255,0.25)]'
+  variant === 'pop'
+    ? isDark
+      ? 'shadow-[0_6px_14px_rgba(0,0,0,0.55),inset_0_3px_8px_rgba(255,255,255,0.45)]'
+      : 'shadow-[0_5px_12px_rgba(0,0,0,0.4),inset_0_3px_7px_rgba(255,255,255,0.3)]'
+    : isDark
+      ? 'shadow-[0_4px_10px_rgba(0,0,0,0.45),inset_0_2px_6px_rgba(255,255,255,0.4)]'
+      : 'shadow-[0_3px_8px_rgba(0,0,0,0.35),inset_0_2px_5px_rgba(255,255,255,0.25)]'
 
   const selectedGlow = selected
     ? 'shadow-[0_0_16px_rgba(217,70,239,0.45),inset_0_2px_6px_rgba(255,255,255,0.35)]'
