@@ -35,12 +35,14 @@ export default function Button({
     ? 'inset_0_2px_6px_rgba(255,255,255,0.35)'
     : 'inset_0_2px_6px_rgba(255,255,255,0.2)'
 
-  const baseShadow = '0_6px_12px_rgba(0,0,0,0.45)'
+  const baseShadow = '0_8px_18px_rgba(0,0,0,0.55)'
 
   const shadowClass =
-    variant === 'pop'
-      ? `shadow-[${baseShadow},inset_0_2px_8px_rgba(255,255,255,0.35)]`
-      : `shadow-[${baseShadow},${innerShadow}]`
+  variant === 'pop'
+    ? `shadow-[0_10px_22px_rgba(0,0,0,0.65),
+              inset_0_3px_10px_rgba(255,255,255,0.4)]`
+    : `shadow-[${baseShadow},
+              ${innerShadow}]`
 
   const gradients: Record<string, string> = {
     purple: selected
@@ -51,8 +53,12 @@ export default function Button({
   }
 
   const selectedGlow = selected
-    ? 'ring-2 ring-fuchsia-400/60 shadow-[0_0_14px_rgba(217,70,239,0.55)]'
-    : ''
+  ? `
+    shadow-[0_10px_22px_rgba(0,0,0,0.6),
+            inset_0_3px_8px_rgba(255,255,255,0.35),
+            0_0_16px_rgba(217,70,239,0.45)]
+    `
+  : ''
 
   return (
     <button
