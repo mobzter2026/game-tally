@@ -48,11 +48,33 @@ export default function Button({
       : ''
 
   const selectedGlow = selected
-    ? '0_0_16px_2px_rgba(217,70,239,0.45)'
-    : ''
+  ? `
+    shadow-[0_10px_22px_rgba(0,0,0,0.6),
+            inset_0_1px_0_rgba(255,255,255,0.4),
+            inset_0_3px_8px_rgba(255,255,255,0.35),
+            0_0_14px_rgba(217,70,239,0.4)]
+  `
+  : ''
 
-  const shadowClass = `shadow-[${outerShadow},${innerHighlight}${innerDepth ? `,${innerDepth}` : ''}${selectedGlow ? `,${selectedGlow}` : ''}]`
+  const shadowClass =
+  variant === 'pop'
+    ? `
+      shadow-[0_10px_22px_rgba(0,0,0,0.65),
+              inset_0_1px_0_rgba(255,255,255,0.35),
+              inset_0_3px_10px_rgba(255,255,255,0.35)]
+    `
+    : `
+      shadow-[0_8px_18px_rgba(0,0,0,0.55),
+              inset_0_1px_0_rgba(255,255,255,0.28),
+              inset_0_3px_8px_rgba(255,255,255,0.25)]
+    `
 
+  const madnessGlow = `
+  ring-2 ring-amber-400
+  shadow-[0_0_18px_rgba(251,191,36,0.85),
+          0_0_32px_rgba(251,191,36,0.55),
+          inset_0_1px_0_rgba(255,255,255,0.25)]
+`
   /* ---------------- COLOURS ---------------- */
 
   const gradients: Record<string, string> = {
