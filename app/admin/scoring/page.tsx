@@ -100,14 +100,16 @@ export default function LiveScoringPage() {
         {/* TITLE */}
         <h1
   className="
-    text-xl font-semibold tracking-wide
+    w-full text-center
+    text-3xl sm:text-4xl
+    font-semibold tracking-[0.35em]
     bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400
     bg-clip-text text-transparent
-    drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]
+    drop-shadow-[0_2px_3px_rgba(0,0,0,0.55)]
     whitespace-nowrap select-none
   "
 >
-  ♠ Points Royal ♣
+  ♠ POINTS&nbsp;ROYALE ♣
 </h1>
 
         <div className="h-6" />
