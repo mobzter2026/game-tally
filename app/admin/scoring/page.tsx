@@ -210,14 +210,8 @@ export default function LiveScoringPage() {
           <Button
   onClick={startNewRound}
   disabled={newSession.players.length === 0}
-  variant="frosted"
-  color="purple"
-  className={`
-    w-full py-3 rounded-xl font-bold text-lg
-    ${newSession.players.length
-      ? 'ring-2 ring-amber-400/80 shadow-[0_0_18px_rgba(251,191,36,0.55)]'
-      : 'ring-2 ring-transparent'}
-  `}
+  madness
+  className="w-full py-3 rounded-xl font-bold text-lg"
 >
   👊 Let the Madness Begin
 </Button>
