@@ -150,7 +150,7 @@ export default function LiveScoringPage() {
     select-none
     whitespace-nowrap
     bg-gradient-to-r
-    from-amber-300 via-yellow-200 to-amber-400
+    from-white via-gray-300 to-gray-400
     bg-clip-text text-transparent
     drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]
   "
