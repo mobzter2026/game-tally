@@ -100,18 +100,18 @@ export default function LiveScoringPage() {
         {/* TITLE */}
         <h1
   className="
-    w-full text-center
+    w-full max-w-full overflow-hidden
+    text-center whitespace-nowrap select-none
     text-3xl sm:text-4xl
-    font-semibold tracking-[0.35em]
+    font-semibold
+    tracking-[0.25em] sm:tracking-[0.32em]
     bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400
     bg-clip-text text-transparent
     drop-shadow-[0_2px_3px_rgba(0,0,0,0.55)]
-    whitespace-nowrap select-none
   "
 >
   ♠ POINTS&nbsp;ROYALE ♣
 </h1>
-
         <div className="h-6" />
 
         {/* SECTION BOX */}
