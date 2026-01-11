@@ -31,18 +31,29 @@ export default function Button({
     return () => m.removeEventListener('change', l)
   }, [])
 
-  const innerShadow = isDark
-    ? 'inset_0_2px_6px_rgba(255,255,255,0.35)'
-    : 'inset_0_2px_6px_rgba(255,255,255,0.2)'
+  /* ---------------- SHADOW SYSTEM ---------------- */
 
-  const baseShadow = '0_8px_18px_rgba(0,0,0,0.55)'
+  const outerShadow =
+    variant === 'pop'
+      ? '0_14px_30px_rgba(0,0,0,0.75)'
+      : '0_8px_18px_rgba(0,0,0,0.55)'
 
-  const shadowClass =
-  variant === 'pop'
-    ? `shadow-[0_10px_22px_rgba(0,0,0,0.65),
-              inset_0_3px_10px_rgba(255,255,255,0.4)]`
-    : `shadow-[${baseShadow},
-              ${innerShadow}]`
+  const innerHighlight = isDark
+    ? 'inset_0_3px_8px_rgba(255,255,255,0.45)'
+    : 'inset_0_2px_6px_rgba(255,255,255,0.25)'
+
+  const innerDepth =
+    variant === 'pop'
+      ? 'inset_0_-2px_6px_rgba(0,0,0,0.4)'
+      : ''
+
+  const selectedGlow = selected
+    ? '0_0_16px_2px_rgba(217,70,239,0.45)'
+    : ''
+
+  const shadowClass = `shadow-[${outerShadow},${innerHighlight}${innerDepth ? `,${innerDepth}` : ''}${selectedGlow ? `,${selectedGlow}` : ''}]`
+
+  /* ---------------- COLOURS ---------------- */
 
   const gradients: Record<string, string> = {
     purple: selected
@@ -52,14 +63,6 @@ export default function Button({
     red: 'from-red-700 to-red-900'
   }
 
-  const selectedGlow = selected
-  ? `
-    shadow-[0_10px_22px_rgba(0,0,0,0.6),
-            inset_0_3px_8px_rgba(255,255,255,0.35),
-            0_0_16px_rgba(217,70,239,0.45)]
-    `
-  : ''
-
   return (
     <button
       onClick={onClick}
@@ -67,10 +70,8 @@ export default function Button({
       className={`
         px-4 py-2 rounded-lg font-bold text-white
         bg-gradient-to-br ${gradients[color]}
-        border border-white/5
         ${shadowClass}
-        ${selectedGlow}
-        transition-colors
+        transition-[filter,box-shadow]
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}
