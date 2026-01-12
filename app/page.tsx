@@ -697,8 +697,7 @@ export default function PublicView() {
         </div>
       ) : (
         recentGames.map(game => (
-          <div key={game.id} className="rounded p-3 border border-fuchsia-700/60 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-900/50 to-purple-950/70">
-            <div className="text-slate-300 text-base font-bold mb-2">
+          <div key={game.id} className="rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-800/80 to-slate-800"> <div className="text-slate-300 text-base font-bold mb-2">
               {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
             </div>
             <div className="flex gap-1 flex-wrap">
@@ -775,7 +774,7 @@ export default function PublicView() {
                   </div>
                 ) : (
                   recentGames.map(game => (
-                    <div key={game.id} className="rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-800/50 to-slate-600">
+                    <div key={game.id} className="rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-800/80 to-slate-800">
                       <div className="text-slate-300 text-base font-bold mb-2">
                         {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
