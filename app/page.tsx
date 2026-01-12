@@ -725,53 +725,30 @@ export default function Page() {
         </div>
       )}
 
-      {activeTab === 'rung-teams' && (
-        <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-          <div className="p-6 border-b border-slate-700">
-            <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
-            <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-700 bg-slate-900">
-                  <th className="text-center p-4 w-20">Rank</th>
-                  <th className="text-left p-4 w-48">Team</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rungTeamStats.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center p-8 text-slate-400">No teams have played yet.</td>
-                  </tr>
-                ) : (
-                  rungTeamStats.map((team, idx) => (
-                    <tr key={team.team} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= rungTeamStats.length - 3 ? 'bg-purple-900/15' : '')}`}>
-                      <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungTeamStats, idx, t => t.winRate)}</td>
-                      <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{team.team}</td>
-                      <td className="text-center p-2 md:p-4 text-sm md:text-base">{team.gamesPlayed}</td>
-                      <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
-                      <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
-                      <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
       {activeTab === 'rung-players' && (
         <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
           <div className="p-6 border-b border-slate-700">
             <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">Rung - Solo: Revenge of the Stats</h2>
             <p className="text-slate-400 text-sm mt-1">Your Score? A Tragedy in Digits!</p>
+
+            <p className="text-slate-400 text-xs sm:text-sm mb-2">
+              🃏 Blackjack ⚜ 🎲 Monopoly ⚜ 🀄 Tai Ti ⚜ 💩 Shithead
+            </p>
+            <p className="text-slate-400 text-xs mb-3">
+              Wins: 100% 🏆 ⬩ 2nd: 40% 🏃 ⬩ Survival: 10% 🤟🏼
+            </p>
+            <select
+              value={selectedGameType}
+              onChange={(e) => setSelectedGameType(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
+            >
+              <option value="All Games">🎰 All Games</option>
+              {INDIVIDUAL_GAMES.map(game => (
+                <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+              ))}
+            </select>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -780,24 +757,38 @@ export default function Page() {
                   <th className="text-left p-4">Player</th>
                   <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
                   <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                  <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
+                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Survived</th>
                   <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                  <th className="text-center p-2 md:p-4 text-sm md:text-base">💩</th>
                   <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
+                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Best 🔥</th>
                 </tr>
               </thead>
               <tbody>
-                {rungPlayerStats.length === 0 ? (
+                {playerStats.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center p-8 text-slate-400">No Rung games played yet.</td>
+                    <td colSpan={10} className="text-center p-8 text-slate-400">No games played yet.</td>
                   </tr>
                 ) : (
-                  rungPlayerStats.map((player, idx) => (
+                  playerStats.map((player, idx) => (
                     <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= playerStats.length - 3 ? 'bg-purple-900/15' : '')}`}>
-                      <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungPlayerStats, idx, p => p.winRate)}</td>
+                      <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, p => p.winRate)}</td>
                       <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}{worstShitheadPlayer === player.player && ' 💩'}</td>
                       <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                       <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                      <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+                      <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
                       <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                      <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
                       <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                      <td className="text-center p-2 md:p-4 text-sm md:text-base">
+                        {player.bestStreak > 0 ? (
+                          <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
+                        ) : (
+                          <span className="text-slate-500">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -855,7 +846,7 @@ export default function Page() {
               from { transform: translateY(100%); } 
               to { transform: translateY(0); } 
             }
-          `}</style>          
+          `}</style>
         </>
       )}
 
@@ -863,5 +854,5 @@ export default function Page() {
         <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
       </div>
     </>
-  )
+  );
 }
