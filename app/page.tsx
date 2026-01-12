@@ -679,6 +679,9 @@ export default function PublicView() {
               </div>
             )}
 
+export default function Page() {
+  return (
+    <>
 {hallView === 'none' && (
     <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
