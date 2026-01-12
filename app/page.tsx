@@ -680,100 +680,100 @@ export default function PublicView() {
             )}
 
 {hallView === 'none' && (
-  <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 
-                shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-  <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-    <h2 className="text-2xl font-bold">📜 Recent Games</h2>
-    <div className="text-sm">
-      <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
-      <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
-    </div>
-  </div>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {recentGames.length === 0 ? (
-      <div className="col-span-2 text-center p-8 text-slate-400">
-        No games found with selected filter
+  {/* Recent Games Section */}
+  <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+      <h2 className="text-2xl font-bold">📜 Recent Games</h2>
+      <div className="text-sm">
+        <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
+        <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
       </div>
-    ) : (
-      recentGames.map(game => (
-        <div key={game.id} className="bg-purple-900/60 rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
-          <div className="text-slate-300 text-base font-bold mb-2">
-            {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} 
-            {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' })}`}
-          </div>
-          <div className="flex gap-1 flex-wrap items-center">
-            {/* Winning team */}
-            {game.winning_team === 1 && game.team1?.map(player => (
-              <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
-            ))}
-            {game.winning_team === 2 && game.team2?.map(player => (
-              <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
-            ))}
-            <span className="text-slate-400 px-2">vs</span>
-            {/* Losing team */}
-            {game.winning_team === 2 && game.team1?.map(player => (
-              <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
-            ))}
-            {game.winning_team === 1 && game.team2?.map(player => (
-              <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
-            ))}
-          </div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {recentGames.length === 0 ? (
+        <div className="col-span-2 text-center p-8 text-slate-400">
+          No games found with selected filter
         </div>
-      ))
-    )}
-  </div>
-</div>
-)}
-</>
-   {activeTab === 'rung-teams' && (
-  <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 
-                  shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-    <div className="p-6 border-b border-slate-700">
-      <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
-      <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
+      ) : (
+        recentGames.map(game => (
+          <div key={game.id} className="bg-purple-900/60 rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+            <div className="text-slate-300 text-base font-bold mb-2">
+              {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} 
+              {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' })}`}
+            </div>
+            <div className="flex gap-1 flex-wrap items-center">
+              {/* Winning team */}
+              {game.winning_team === 1 && game.team1?.map(player => (
+                <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
+              ))}
+              {game.winning_team === 2 && game.team2?.map(player => (
+                <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
+              ))}
+              <span className="text-slate-400 px-2">vs</span>
+              {/* Losing team */}
+              {game.winning_team === 2 && game.team1?.map(player => (
+                <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
+              ))}
+              {game.winning_team === 1 && game.team2?.map(player => (
+                <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold">{player}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
     </div>
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-slate-700 bg-slate-900">
-            <th className="text-center p-4 w-20">Rank</th>
-            <th className="text-left p-4 w-48">Team</th>
-            <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
-            <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
-            <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
-            <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rungTeamStats.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="text-center p-8 text-slate-400">
-                No teams have played yet.
-              </td>
+  </div>
+
+  {/* Rung Teams Section */}
+  {activeTab === 'rung-teams' && (
+    <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+      <div className="p-6 border-b border-slate-700">
+        <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
+        <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-slate-700 bg-slate-900">
+              <th className="text-center p-4 w-20">Rank</th>
+              <th className="text-left p-4 w-48">Team</th>
+              <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+              <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+              <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+              <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
             </tr>
-          ) : (
-            rungTeamStats.map((team, idx) => (
-              <tr key={team.team} className={`border-b border-slate-700/50 ${
-                idx < 3
-                  ? 'bg-yellow-900/10'
-                  : (idx >= rungTeamStats.length - 3 ? 'bg-purple-900/15' : '')
-              }`}>
-                <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                  {getMedal(rungTeamStats, idx, (t) => t.winRate)}
+          </thead>
+          <tbody>
+            {rungTeamStats.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center p-8 text-slate-400">
+                  No teams have played yet.
                 </td>
-                <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{team.team}</td>
-                <td className="text-center p-2 md:p-4 text-sm md:text-base">{team.gamesPlayed}</td>
-                <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
-                <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
-                <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              rungTeamStats.map((team, idx) => (
+                <tr key={team.team} className={`border-b border-slate-700/50 ${
+                  idx < 3
+                    ? 'bg-yellow-900/10'
+                    : (idx >= rungTeamStats.length - 3 ? 'bg-purple-900/15' : '')
+                }`}>
+                  <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
+                    {getMedal(rungTeamStats, idx, t => t.winRate)}
+                  </td>
+                  <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{team.team}</td>
+                  <td className="text-center p-2 md:p-4 text-sm md:text-base">{team.gamesPlayed}</td>
+                  <td className="text-center p-4 text-green-400 font-bold">{team.wins}</td>
+                  <td className="text-center p-4 text-red-400 font-bold">{team.losses}</td>
+                  <td className="text-center p-4 text-yellow-400 font-bold text-xl">{team.winRate}%</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-)}
+  )}
+</>
 		  
         {activeTab === 'rung-players' && (
           <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
