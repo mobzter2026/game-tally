@@ -680,7 +680,6 @@ export default function PublicView() {
             )}
 
 {hallView === 'none' && (
-  {/* Recent Games Section */}
   <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
     <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
       <h2 className="text-2xl font-bold">📜 Recent Games</h2>
@@ -724,7 +723,6 @@ export default function PublicView() {
     </div>
   </div>
 
-  {/* Rung Teams Section */}
   {activeTab === 'rung-teams' && (
     <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
       <div className="p-6 border-b border-slate-700">
