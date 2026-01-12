@@ -592,19 +592,19 @@ export default function PublicView() {
                     <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
                       <Button
-                        onClick={() => setHallView('fame')}
-                        variant="pop"
-                        className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-green-600 to-green-800"
-                      >
-                        ⭐ Hall of Fame
-                      </Button>
+  onClick={() => setHallView('fame')}
+  variant="pop"
+  className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+>
+  ⭐ Hall of Fame
+</Button>
                       <Button
-                        onClick={() => setHallView('shame')}
-                        variant="pop"
-                        className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-red-600 to-red-800"
-                      >
-                        🤡 Hall of Shame
-                      </Button>
+  onClick={() => setHallView('shame')}
+  variant="pop"
+  className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-rose-600 to-rose-900"
+>
+  🤡 Hall of Shame
+</Button>
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
@@ -614,10 +614,10 @@ export default function PublicView() {
                       Wins: 100% 🏆 ⬩ 2nd: 40% 🏃 ⬩ Survival: 10% 🤟🏼
                     </p>
                     <select
-                      value={selectedGameType}
-                      onChange={(e) => setSelectedGameType(e.target.value)}
-                      className="px-3 py-2 rounded text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
-                    >
+  value={selectedGameType}
+  onChange={(e) => setSelectedGameType(e.target.value)}
+  className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
+>
                       <option value="All Games">🎰 All Games</option>
                       {INDIVIDUAL_GAMES.map(game => (
                         <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
