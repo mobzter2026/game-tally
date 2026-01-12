@@ -709,12 +709,13 @@ export default function PublicView() {
               ))}
             </div>
           </div>
-        ))
+))
+            )}
+          </div>
+        </div>
       )}
-    </div>
-  </div>
-)}
-        
+          </>
+        )}
 
         {activeTab === 'rung-teams' && (
           <>
