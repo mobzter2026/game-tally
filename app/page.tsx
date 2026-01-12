@@ -697,7 +697,7 @@ export default function PublicView() {
         </div>
       ) : (
         recentGames.map(game => (
-          <div key={game.id} className="rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-900/60 to-purple-850"> <div className="text-slate-300 text-base font-bold mb-2">
+          <div key={game.id} className="rounded p-3 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-900/50 to-slate-900/60"> <div className="text-slate-300 text-base font-bold mb-2">
               {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
             </div>
             <div className="flex gap-1 flex-wrap">
