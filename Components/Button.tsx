@@ -38,13 +38,17 @@ export default function Button({
     red: 'from-red-700 to-red-900'
   }
 
+  // Check if className contains a custom gradient (bg-gradient-)
+  const hasCustomGradient = className.includes('bg-gradient-')
+  const backgroundClass = hasCustomGradient ? '' : `bg-gradient-to-br ${gradients[color]}`
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={`
         px-4 py-2 rounded-lg font-bold text-white
-        bg-gradient-to-br ${gradients[color]}
+        ${backgroundClass}
         ${shadowClass}
         ${selectedGlow}
         transition-[box-shadow,filter]
