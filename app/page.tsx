@@ -863,3 +863,5 @@ export default function Page() {
     <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
   </div>
 </>
+)
+}
