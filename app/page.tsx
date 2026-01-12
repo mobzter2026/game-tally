@@ -714,7 +714,7 @@ export default function PublicView() {
               </div>
             )}
           </>
-        )}
+        
 
         {activeTab === 'rung-teams' && (
           <>
