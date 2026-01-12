@@ -696,17 +696,17 @@ export default function PublicView() {
                     </div>
                   ) : (
                     recentGames.map(game => (
-                      <div key={game.id} className="bg-purple-900/50 rounded p-3 border border-fuchsia-500/40 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                      <div key={game.id} className="bg-purple-900/50 rounded p-3 border border-fuchsia-700/60 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
                         <div className="text-slate-300 text-base font-bold mb-2">
                           {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         <div className="flex gap-1 flex-wrap">
-                    {sortPlayersInGame(game).map(player => (
-                      <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                        {player}
-                      </span>
-                    ))}
-                  </div>
+                          {sortPlayersInGame(game).map(player => (
+                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                              {player}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     ))
                   )}
