@@ -13,19 +13,19 @@ const QUOTES = [
   "It's not about winning, it's about making others lose.",
   "Every card tells a story of betrayal.",
   "Where loyalty dies and legends are born.",
-  "Every loss is just character buildingâ€¦ and humiliation.",
-  "If at first you don't succeedâ€¦ shuffle and try again.",
+  "Every loss is just character building… and humiliation.",
+  "If at first you don't succeed… shuffle and try again.",
   "Victory is earned. Humiliation is free.",
   "Some are born winners. Others are just funny losers.",
   "The table is a battlefield. Your ego is the weapon.",
-  "You can't control luckâ€¦ but you can ruin everyone else's day.",
+  "You can't control luck… but you can ruin everyone else's day.",
   "Pain is temporary. Bragging rights are forever.",
   "Hope your therapy sessions are ready.",
   "One table. Many casualties.",
   "Lose today. Regret tomorrow. Cry later.",
-  "Your dignity calledâ€¦ it's filing a complaint.",
+  "Your dignity called… it's filing a complaint.",
   "Lose today. Learn tomorrow. Dominate next time.",
-  "Winners rise. Everyone else takes notesâ€¦ or cry.",
+  "Winners rise. Everyone else takes notes… or cry.",
   "Step up or step aside."
 ]
 
@@ -263,7 +263,7 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
   }
 
-const getPlayerStats = () => getPlayerStatsForGame()
+  const getPlayerStats = () => getPlayerStatsForGame()
 
   const getWorstShitheadPlayer = () => {
     const allStats = getPlayerStats()
@@ -349,9 +349,8 @@ const getPlayerStats = () => getPlayerStatsForGame()
       }))
       .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
-  }
-
-  const getMedal = (sortedList: any[], currentIndex: number, getWinRate: (item: any) => string) => {
+				  }
+	const getMedal = (sortedList: any[], currentIndex: number, getWinRate: (item: any) => string) => {
     const currentWinRate = getWinRate(sortedList[currentIndex])
 
     let position = 1
@@ -371,7 +370,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
 
     const thirdPlaceWinRate = sortedList.find((_, idx) => getMedalPosition(sortedList, idx, getWinRate) === 3)
     if (thirdPlaceWinRate && getWinRate(sortedList[currentIndex]) === getWinRate(thirdPlaceWinRate)) {
-      return 'ðŸ¥‰'
+      return '🥉'
     }
 
     return `${currentIndex + 1}`
@@ -426,7 +425,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 flex items-center justify-center">
         <div className="text-white text-2xl font-mono">Loading...</div>
       </div>
     )
@@ -442,7 +441,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {latestWinner && latestWinner.type === 'dominated' && (
           <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
@@ -477,43 +476,46 @@ const getPlayerStats = () => getPlayerStatsForGame()
         )}
 
         <div className="text-center mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 break-words">Ultimate Card Championship Leaderboard 🏆</h1>
+          <h1 className="w-full max-w-full text-center select-none whitespace-nowrap overflow-hidden text-[1.75rem] sm:text-[2.05rem] font-semibold tracking-[0.16em] sm:tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3">
+            <span className="inline-block mr-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
+            <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+              POINTS&nbsp;ROYALE
+            </span>
+            <span className="inline-block ml-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
+          </h1>
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
         </div>
 
         <div className="mb-6 flex justify-center">
-          <div className="bg-violet-950/25 rounded-xl border-2 border-white/60 p-4 max-w-md w-full">
+          <div className="rounded-xl p-4 max-w-md w-full bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="grid grid-cols-3 gap-2">
-              <button
+              <Button
                 onClick={() => setActiveTab('individual')}
-                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
-                  activeTab === 'individual'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
-                }`}
+                variant="frosted"
+                color="purple"
+                selected={activeTab === 'individual'}
+                className="px-2 py-2 text-xs sm:text-sm"
               >
                 Solo Games
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setActiveTab('rung-teams')}
-                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
-                  activeTab === 'rung-teams'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
-                }`}
+                variant="frosted"
+                color="purple"
+                selected={activeTab === 'rung-teams'}
+                className="px-2 py-2 text-xs sm:text-sm"
               >
                 Rung - Duo
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setActiveTab('rung-players')}
-                className={`px-2 py-2 rounded-lg font-semibold transition text-xs sm:text-sm ${
-                  activeTab === 'rung-players'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-violet-900/80 text-slate-300 hover:bg-violet-800'
-                }`}
+                variant="frosted"
+                color="purple"
+                selected={activeTab === 'rung-players'}
+                className="px-2 py-2 text-xs sm:text-sm"
               >
                 Rung - Solo
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -523,12 +525,14 @@ const getPlayerStats = () => getPlayerStatsForGame()
             {hallView !== 'none' ? (
               <>
                 <div className="mb-4 flex justify-end">
-                  <button
+                  <Button
                     onClick={() => setHallView('none')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+                    variant="pop"
+                    color="blue"
+                    className="px-4 py-2"
                   >
-                    く◀ Back to Overall Leaderboard
-                  </button>
+                    ◀ Back to Overall Leaderboard
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {INDIVIDUAL_GAMES.map(gameType => {
@@ -538,7 +542,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                       : gameStats.slice(-3).reverse()
 
                     return (
-                      <div key={gameType} className="bg-violet-950/30 rounded-xl border-2 border-white/75 shadow-2xl overflow-hidden">
+                      <div key={gameType} className="rounded-xl shadow-2xl overflow-hidden bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
                         <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-900' : 'bg-gray-800'}`}>
                           <h3 className="text-xl font-bold whitespace-nowrap">{GAME_EMOJIS[gameType]} {gameType}</h3>
                           <p className="text-slate-200 text-xs mt-1">
@@ -553,7 +557,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                               {displayStats.map((player, idx) => {
                                 const actualIdx = hallView === 'fame' ? idx : gameStats.length - 3 + idx
                                 return (
-                                  <div key={player.player} className="flex items-center justify-between bg-violet-900/80 p-3 rounded">
+                                  <div key={player.player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
                                     <div className="flex items-center gap-3">
                                       <span className="text-2xl">
                                         {hallView === 'fame' ? getMedal(gameStats, actualIdx, (p) => p.winRate) : `${gameStats.length - idx}`}
@@ -579,24 +583,26 @@ const getPlayerStats = () => getPlayerStatsForGame()
                 </div>
               </>
             ) : (
-              <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 shadow-2xl overflow-hidden mb-8">
+              <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
                 <div className="p-4 border-b border-slate-700">
                   <div className="text-center">
                     <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
                     <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
-                      <button
+                      <Button
                         onClick={() => setHallView('fame')}
-                        className="px-4 py-2 bg-[#27AE60] hover:bg-[#229954] rounded text-sm font-bold"
+                        variant="pop"
+                        className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-green-600 to-green-800"
                       >
                         ⭐ Hall of Fame
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => setHallView('shame')}
-                        className="px-4 py-2 bg-[#C0392B] hover:bg-[#A93226] rounded text-sm font-bold"
+                        variant="pop"
+                        className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-red-600 to-red-800"
                       >
                         🤡 Hall of Shame
-                      </button>
+                      </Button>
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
@@ -608,7 +614,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                     <select
                       value={selectedGameType}
                       onChange={(e) => setSelectedGameType(e.target.value)}
-                      className="px-3 py-2 bg-violet-900/80 rounded text-sm"
+                      className="px-3 py-2 rounded text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
                     >
                       <option value="All Games">🎰 All Games</option>
                       {INDIVIDUAL_GAMES.map(game => (
@@ -646,7 +652,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                             <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                               {player.player}
-                              {worstShitheadPlayer === player.player && ' ðŸ’©'}
+                              {worstShitheadPlayer === player.player && ' 💩'}
                             </td>
                             <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
@@ -672,7 +678,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
             )}
 
             {hallView === 'none' && (
-              <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 p-6 mb-8">
+              <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                   <h2 className="text-2xl font-bold">📜 Recent Games</h2>
                   <div className="text-sm">
@@ -689,9 +695,9 @@ const getPlayerStats = () => getPlayerStatsForGame()
                     </div>
                   ) : (
                     recentGames.map(game => (
-                      <div key={game.id} className="bg-violet-900/80 rounded p-3 border border-fuchsia-500/40">
+                      <div key={game.id} className="bg-purple-900/50 rounded p-3 border border-fuchsia-500/40 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
                         <div className="text-slate-300 text-base font-bold mb-2">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} â€¢ {new Date(game.game_date).toLocaleDateString()} {game.created_at && `â€¢ ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         <div className="flex gap-1 flex-wrap">
                           {sortPlayersInGame(game).map(player => (
@@ -708,9 +714,10 @@ const getPlayerStats = () => getPlayerStatsForGame()
             )}
           </>
         )}
+
         {activeTab === 'rung-teams' && (
           <>
-            <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 shadow-2xl overflow-hidden mb-8">
+            <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <div className="p-6 border-b border-slate-700">
                 <h2 className="text-2xl font-bold">Rung - Duo: The Reckoning</h2>
                 <p className="text-slate-400 text-sm mt-1">Duo or Die Trying!</p>
@@ -751,9 +758,9 @@ const getPlayerStats = () => getPlayerStatsForGame()
               </div>
             </div>
 
-            <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 p-6 mb-8">
+            <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <h2 className="text-2xl font-bold">ðŸ“œ Recent Games</h2>
+                <h2 className="text-2xl font-bold">📜 Recent Games</h2>
                 <div className="text-sm">
                   <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2">Winner</span>
                   <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded">Loser</span>
@@ -766,9 +773,9 @@ const getPlayerStats = () => getPlayerStatsForGame()
                   </div>
                 ) : (
                   recentGames.map(game => (
-                    <div key={game.id} className="bg-violet-900/80 rounded p-3 border border-fuchsia-500/40">
+                    <div key={game.id} className="bg-purple-900/50 rounded p-3 border border-fuchsia-500/40 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
                       <div className="text-slate-300 text-base font-bold mb-2">
-                        {GAME_EMOJIS[game.game_type]} {game.game_type} â€¢ {new Date(game.game_date).toLocaleDateString()} {game.created_at && `â€¢ ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
                       <div className="flex gap-1 flex-wrap items-center">
                         {game.winning_team === 1 && game.team1?.map(player => (
@@ -802,7 +809,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
         )}
 
         {activeTab === 'rung-players' && (
-          <div className="bg-violet-950/30 rounded-xl border-2 border-white/75 shadow-2xl overflow-hidden mb-8">
+          <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="p-6 border-b border-slate-700">
               <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">Rung - Solo: Revenge of the Stats</h2>
               <p className="text-slate-400 text-sm mt-1">Your Score? A Tragedy in Digits!</p>
@@ -832,7 +839,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
                         <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
                         <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                           {player.player}
-                          {worstShitheadPlayer === player.player && ' ðŸ’©'}
+                          {worstShitheadPlayer === player.player && ' 💩'}
                         </td>
                         <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
@@ -847,7 +854,7 @@ const getPlayerStats = () => getPlayerStatsForGame()
           </div>
         )}
 
-	<button
+        <button
           onClick={() => setShowFloatingFilter(!showFloatingFilter)}
           className="fixed bottom-42 right-8 w-12 h-12 bg-gradient-to-br from-violet-900 to-fuchsia-950 rounded-full flex items-center justify-center hover:scale-110 transition-all z-50 border-2 border-fuchsia-500"
         >
@@ -861,47 +868,42 @@ const getPlayerStats = () => getPlayerStatsForGame()
           )}
         </button>
 
-        {showFloatingFilter && (
+		  {showFloatingFilter && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowFloatingFilter(false)} />
-            <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-fuchsia-500" style={{animation: "slideUp 0.3s ease-out"}}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-purple-900/95 to-slate-900/95 rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-fuchsia-500" style={{animation: "slideUp 0.3s ease-out"}}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
               </div>
               <h3 className="text-lg font-bold text-white mb-4">Filter Players</h3>
               <div className="flex gap-2 mb-3">
-                <button onClick={selectAllPlayers} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">Select All</button>
+                <Button onClick={selectAllPlayers} variant="pop" color="blue" className="px-3 py-1.5 text-sm">Select All</Button>
                 {selectedPlayers.length > 0 && (
-                  <button onClick={clearFilter} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm">Clear</button>
+                  <Button onClick={clearFilter} variant="pop" color="red" className="px-3 py-1.5 text-sm">Clear</Button>
                 )}
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {PLAYERS.map(player => (
-                  <button
+                  <Button
                     key={player}
                     onClick={() => togglePlayerFilter(player)}
-                    className={`px-4 py-2 rounded text-sm font-medium transition ${selectedPlayers.includes(player) ? 'bg-green-600 text-white' : 'bg-violet-900/80 text-slate-200 hover:bg-violet-800'}`}
+                    variant="frosted"
+                    color="purple"
+                    selected={selectedPlayers.includes(player)}
+                    className="px-4 py-2 text-sm"
                   >
                     {player}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
-	    <style jsx>{`
+            <style jsx>{`
               @keyframes slideUp { 
                 from { transform: translateY(100%); } 
                 to { transform: translateY(0); } 
               }
-              @keyframes neonGlow {
-                0% { 
-                  box-shadow: 0 0 15px rgba(217,70,239,0.8), 0 0 30px rgba(217,70,239,0.5), 0 0 45px rgba(217,70,239,0.3), inset 0 0 10px rgba(217,70,239,0.4);
-                }
-                100% { 
-                  box-shadow: 0 0 25px rgba(217,70,239,1), 0 0 50px rgba(217,70,239,0.7), 0 0 75px rgba(217,70,239,0.5), inset 0 0 15px rgba(217,70,239,0.6);
-                }
-              }
             `}</style>          
-	  </>
+          </>
         )}
 
         <div className="text-center mt-8">
