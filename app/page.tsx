@@ -650,27 +650,27 @@ export default function PublicView() {
         </tr>
       ) : (
         playerStats.map((player, idx) => (
-          <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10 shadow-[0_0_15px_rgba(234,179,8,0.2),inset_0_1px_2px_rgba(255,255,255,0.15)]' : (idx >= playerStats.length - 3 ? 'bg-purple-900/15 shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)]' : 'shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)]')} hover:bg-purple-800/20 transition-all`}>
-            <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
-            <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
-              {player.player}
-              {worstShitheadPlayer === player.player && ' 💩'}
-            </td>
-            <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
-            <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-            <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-            <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
-            <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-            <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
-            <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-            <td className="text-center p-2 md:p-4 text-sm md:text-base">
-              {player.bestStreak > 0 ? (
-                <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
-              ) : (
-                <span className="text-slate-500">-</span>
-              )}
-            </td>
-          </tr>
+          <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= playerStats.length - 3 ? 'bg-purple-900/15' : '')} shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all`}>
+  <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, (p) => p.winRate)}</td>
+  <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
+    {player.player}
+    {worstShitheadPlayer === player.player && <span className="inline-block animate-bounce ml-1">💩</span>}
+  </td>
+  <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
+  <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+  <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+  <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
+  <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+  <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
+  <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+  <td className="text-center p-2 md:p-4 text-sm md:text-base">
+    {player.bestStreak > 0 ? (
+      <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
+    ) : (
+      <span className="text-slate-500">-</span>
+    )}
+  </td>
+</tr>
         ))
       )}
     </tbody>
