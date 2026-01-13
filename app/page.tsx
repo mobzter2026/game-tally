@@ -681,7 +681,7 @@ export default function PublicView() {
   <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
     <div className="flex flex-col items-center mb-4 gap-2">
      <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-  📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">Recent Games</span>
+  📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
 </h2>
       <div className="text-sm">
         <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
@@ -690,7 +690,7 @@ export default function PublicView() {
         <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
       </div>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
       {recentGames.length === 0 ? (
         <div className="col-span-2 text-center p-8 text-slate-400">
           No games found with selected filter
