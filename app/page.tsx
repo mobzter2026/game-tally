@@ -682,7 +682,7 @@ export default function PublicView() {
     <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
      <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
   📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">Recent Games</span>
-</h2
+</h2>
       <div className="text-sm">
         <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
         <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
