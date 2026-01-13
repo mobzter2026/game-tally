@@ -445,16 +445,16 @@ export default function PublicView() {
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {/* 1. Flawless Victory */}
 {latestWinner && latestWinner.type === 'dominated' && (
-  <div className="mb-4 bg-gradient-to-r from-purple-950 via-fuchsia-700 to-purple-950 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(217,70,239,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-fuchsia-500/40">
+  <div className="mb-4 bg-gradient-to-r from-purple-950 via-fuchsia-700 to-purple-950 px-6 py-2 rounded-2xl shadow-[0_2px_8px_rgba(217,70,239,0.3),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-fuchsia-500/40">
     <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
       ✨ FLAWLESS VICTORY IN {latestWinner.game.game_type.toUpperCase()} BY {latestWinner.game.winners?.[0].toUpperCase()} ✨
     </p>
   </div>
 )}
 
-{/* 2. Shithead */}
+{/* 2. Shithead - Premium White/Orange */}
 {latestWinner && latestWinner.type === 'shithead' && (
-  <div className="mb-4 bg-gradient-to-r from-amber-700 via-yellow-500 to-amber-700 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(251,191,36,0.4),inset_0_2px_6px_rgba(255,255,255,0.3)] border-2 border-amber-700">
+  <div className="mb-4 bg-gradient-to-r from-orange-600 via-white to-orange-600 px-6 py-2 rounded-2xl shadow-[0_2px_8px_rgba(251,146,60,0.3),inset_0_2px_6px_rgba(255,255,255,0.4)] border-2 border-orange-500">
     <p className="text-xs sm:text-sm font-extrabold text-center truncate text-black tracking-wide">
       💩 BREAKING NEWS: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1].toUpperCase()} IS THE SHITHEAD 💩
     </p>
@@ -463,7 +463,7 @@ export default function PublicView() {
 
 {/* 3. Normal Victory */}
 {latestWinner && latestWinner.type === 'normal' && (
-  <div className="mb-4 bg-gradient-to-r from-blue-900 via-cyan-700 to-blue-900 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(34,211,238,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-cyan-500/40">
+  <div className="mb-4 bg-gradient-to-r from-blue-900 via-cyan-700 to-blue-900 px-6 py-2 rounded-2xl shadow-[0_2px_8px_rgba(34,211,238,0.3),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-cyan-500/40">
     <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
       🎖️ {latestWinner.game.winners?.[0].toUpperCase()} WON {latestWinner.game.game_type.toUpperCase()}. IT WASN'T PRETTY! 🎖️
     </p>
@@ -472,7 +472,7 @@ export default function PublicView() {
 
 {/* 4. Shithead Losing Streak */}
 {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
-  <div className="mb-4 bg-gradient-to-r from-red-800 via-orange-700 to-red-800 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(239,68,68,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-orange-600">
+  <div className="mb-4 bg-gradient-to-r from-red-800 via-orange-700 to-red-800 px-6 py-2 rounded-2xl shadow-[0_2px_8px_rgba(239,68,68,0.3),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-orange-600">
     <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
       🔥 {shitheadLosingStreak.player.toUpperCase()} IS ON A {shitheadLosingStreak.streak} GAME SHITHEAD LOSING STREAK! 💩💩
     </p>
