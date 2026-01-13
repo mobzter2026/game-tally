@@ -476,7 +476,7 @@ export default function PublicView() {
         )}
 
         <div className="text-center mb-8">
-  <h1 className="w-full max-w-full text-center select-none text-[1.75rem] sm:text-[2.05rem] font-semibold tracking-[0.16em] sm:tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3 leading-tight">
+  <h2 className="w-full max-w-full text-center select-none text-[1.75rem] sm:text-[2.05rem] font-semibold tracking-[0.16em] sm:tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3 leading-tight">
     <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
       ULTIMATE CARD CHAMPIONSHIP
     </span>
@@ -484,7 +484,7 @@ export default function PublicView() {
     <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
       LEADERBOARD 🏆
     </span>
-  </h1>
+  </h2>
   <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
 </div>
 
@@ -566,7 +566,7 @@ export default function PublicView() {
                                       </span>
                                       <span className="font-bold">
                                         {player.player}
-                                        {worstShitheadPlayer === player.player && gameType === 'Shithead' && '💩'}
+                                        {worstShitheadPlayer === player.player && gameType === 'Shithead' && ' 💩'}
                                       </span>
                                     </div>
                                     <div className="text-right">
