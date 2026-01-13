@@ -812,18 +812,18 @@ export default function PublicView() {
         )}
 
         <button
-          onClick={() => setShowFloatingFilter(!showFloatingFilter)}
-          className="fixed bottom-42 right-8 w-12 h-12 bg-gradient-to-br from-violet-900 to-fuchsia-950 rounded-full flex items-center justify-center hover:scale-110 transition-all z-50 border-2 border-fuchsia-500"
-        >
-          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
-          </svg>
-          {selectedPlayers.length > 0 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">
-              {selectedPlayers.length}
-            </div>
-          )}
-        </button>
+  onClick={() => setShowFloatingFilter(!showFloatingFilter)}
+  className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-700/90 to-indigo-900/90 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] hover:scale-110 transition-all z-50 border border-purple-500/30"
+>
+  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
+  </svg>
+  {selectedPlayers.length > 0 && (
+    <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-purple-900">
+      {selectedPlayers.length}
+    </div>
+  )}
+</button>
 
 		  {showFloatingFilter && (
           <>
