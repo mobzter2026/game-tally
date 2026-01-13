@@ -813,13 +813,13 @@ export default function PublicView() {
 
         <button
   onClick={() => setShowFloatingFilter(!showFloatingFilter)}
-  className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-700/90 to-indigo-900/90 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] hover:scale-110 transition-all z-50 border border-purple-500/30"
+  className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-br from-purple-700/90 to-indigo-900/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] hover:scale-110 transition-all z-50 border border-purple-500/30"
 >
-  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
     <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
   </svg>
   {selectedPlayers.length > 0 && (
-    <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-purple-900">
+    <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-purple-900">
       {selectedPlayers.length}
     </div>
   )}
@@ -828,7 +828,7 @@ export default function PublicView() {
 		  {showFloatingFilter && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowFloatingFilter(false)} />
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-purple-900/95 to-slate-900/95 rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-fuchsia-500" style={{animation: "slideUp 0.3s ease-out"}}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-slate-900/98 to-black/98 backdrop-blur-md rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-purple-700/50" style={{animation: "slideUp 0.3s ease-out"}}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
               </div>
