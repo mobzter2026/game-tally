@@ -492,7 +492,7 @@ export default function PublicView() {
   <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
 </div>
 
-        <div className="mb-6 flex justify-center">
+        <div className="mb-6 mt-2 flex justify-center">
   <div className="grid grid-cols-3 gap-3 max-w-md w-full px-4">
     <Button
       onClick={() => setActiveTab('individual')}
@@ -590,7 +590,7 @@ export default function PublicView() {
               <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
                 <div className="p-4 border-b border-slate-700">
                   <div className="text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
+                    <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
   <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
     The Ultimate Backstab Board
   </span> 🔪
