@@ -828,7 +828,7 @@ export default function PublicView() {
 		  {showFloatingFilter && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowFloatingFilter(false)} />
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-slate-900/98 to-black/98 backdrop-blur-md rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-purple-700/50" style={{animation: "slideUp 0.3s ease-out"}}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-purple-900/95 to-purple/98 backdrop-blur-md rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-purple-700/50" style={{animation: "slideUp 0.3s ease-out"}}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
               </div>
