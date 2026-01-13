@@ -489,38 +489,38 @@ export default function PublicView() {
 </div>
 
         <div className="mb-6 flex justify-center">
-          <div className="rounded-xl p-4 max-w-md w-full bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                onClick={() => setActiveTab('individual')}
-                variant="frosted"
-                color="purple"
-                selected={activeTab === 'individual'}
-                className="px-2 py-2 text-xs sm:text-sm"
-              >
-                Solo Games
-              </Button>
-              <Button
-                onClick={() => setActiveTab('rung-teams')}
-                variant="frosted"
-                color="purple"
-                selected={activeTab === 'rung-teams'}
-                className="px-2 py-2 text-xs sm:text-sm"
-              >
-                Rung - Duo
-              </Button>
-              <Button
-                onClick={() => setActiveTab('rung-players')}
-                variant="frosted"
-                color="purple"
-                selected={activeTab === 'rung-players'}
-                className="px-2 py-2 text-xs sm:text-sm"
-              >
-                Rung - Solo
-              </Button>
-            </div>
-          </div>
-        </div>
+  <div className="rounded-xl p-4 max-w-md w-full bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+    <div className="grid grid-cols-3 gap-2">
+      <Button
+        onClick={() => setActiveTab('individual')}
+        variant="frosted"
+        color="purple"
+        selected={activeTab === 'individual'}
+        className="px-2 py-2 text-xs sm:text-sm"
+      >
+        Solo Games
+      </Button>
+      <Button
+        onClick={() => setActiveTab('rung-teams')}
+        variant="frosted"
+        color="purple"
+        selected={activeTab === 'rung-teams'}
+        className="px-2 py-2 text-xs sm:text-sm"
+      >
+        Rung - Duo
+      </Button>
+      <Button
+        onClick={() => setActiveTab('rung-players')}
+        variant="frosted"
+        color="purple"
+        selected={activeTab === 'rung-players'}
+        className="px-2 py-2 text-xs sm:text-sm"
+      >
+        Rung - Solo
+      </Button>
+    </div>
+  </div>
+</div>
 
         {activeTab === 'individual' && (
           <>
