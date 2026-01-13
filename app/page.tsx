@@ -443,37 +443,41 @@ export default function PublicView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
-        {latestWinner && latestWinner.type === 'dominated' && (
-          <div className="mb-4 bg-gradient-to-r from-purple-900 via-fuchsia-600 to-purple-900 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(217,70,239,0.6),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-fuchsia-400/50 animate-pulse">
-  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
-    ✨ FLAWLESS VICTORY IN {latestWinner.game.game_type.toUpperCase()} BY {latestWinner.game.winners?.[0].toUpperCase()} ✨
-  </p>
-</div>
-        )}
+        {/* 1. Flawless Victory */}
+{latestWinner && latestWinner.type === 'dominated' && (
+  <div className="mb-4 bg-gradient-to-r from-purple-950 via-fuchsia-700 to-purple-950 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(217,70,239,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-fuchsia-500/40">
+    <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
+      ✨ FLAWLESS VICTORY IN {latestWinner.game.game_type.toUpperCase()} BY {latestWinner.game.winners?.[0].toUpperCase()} ✨
+    </p>
+  </div>
+)}
 
-        {latestWinner && latestWinner.type === 'shithead' && (
-          <div className="mb-4 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(251,191,36,0.6),inset_0_2px_8px_rgba(255,255,255,0.4)] border-2 border-amber-600 animate-pulse">
-  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black tracking-wide">
-    💩 BREAKING NEWS: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1].toUpperCase()} IS THE SHITHEAD 💩
-  </p>
-</div>
-        )}
+{/* 2. Shithead */}
+{latestWinner && latestWinner.type === 'shithead' && (
+  <div className="mb-4 bg-gradient-to-r from-amber-700 via-yellow-500 to-amber-700 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(251,191,36,0.4),inset_0_2px_6px_rgba(255,255,255,0.3)] border-2 border-amber-700">
+    <p className="text-xs sm:text-sm font-extrabold text-center truncate text-black tracking-wide">
+      💩 BREAKING NEWS: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1].toUpperCase()} IS THE SHITHEAD 💩
+    </p>
+  </div>
+)}
 
-        {latestWinner && latestWinner.type === 'normal' && (
-          <div className="mb-4 bg-gradient-to-r from-blue-800 via-cyan-600 to-blue-800 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(34,211,238,0.5),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-cyan-400/50 animate-pulse">
-  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
-    🎖️ {latestWinner.game.winners?.[0].toUpperCase()} WON {latestWinner.game.game_type.toUpperCase()}. IT WASN'T PRETTY! 🎖️
-  </p>
-</div>
-        )}
+{/* 3. Normal Victory */}
+{latestWinner && latestWinner.type === 'normal' && (
+  <div className="mb-4 bg-gradient-to-r from-blue-900 via-cyan-700 to-blue-900 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(34,211,238,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-cyan-500/40">
+    <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
+      🎖️ {latestWinner.game.winners?.[0].toUpperCase()} WON {latestWinner.game.game_type.toUpperCase()}. IT WASN'T PRETTY! 🎖️
+    </p>
+  </div>
+)}
 
-        {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
-          <div className="mb-4 bg-gradient-to-r from-red-700 via-orange-600 to-red-700 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(239,68,68,0.6),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-orange-500 animate-pulse">
-  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
-    🔥 {shitheadLosingStreak.player.toUpperCase()} IS ON A {shitheadLosingStreak.streak} GAME SHITHEAD LOSING STREAK! 💩💩
-  </p>
-</div>
-        )}
+{/* 4. Shithead Losing Streak */}
+{shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
+  <div className="mb-4 bg-gradient-to-r from-red-800 via-orange-700 to-red-800 px-6 py-2 rounded-2xl shadow-[0_4px_12px_rgba(239,68,68,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] border-2 border-orange-600">
+    <p className="text-xs sm:text-sm font-extrabold text-center truncate tracking-wide">
+      🔥 {shitheadLosingStreak.player.toUpperCase()} IS ON A {shitheadLosingStreak.streak} GAME SHITHEAD LOSING STREAK! 💩💩
+    </p>
+  </div>
+)}
 
         <div className="text-center mb-8">
   <h1 className="w-full max-w-full text-center select-none text-[1.15rem] sm:text-[1.5rem] font-semibold tracking-[0.12em] sm:tracking-[0.16em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3 leading-tight">
@@ -586,7 +590,11 @@ export default function PublicView() {
               <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
                 <div className="p-4 border-b border-slate-700">
                   <div className="text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
+  <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
+    The Ultimate Backstab Board
+  </span> 🔪
+</h2>
                     <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
                     <div className="flex gap-2 mb-3 justify-center flex-wrap">
                       <Button
@@ -606,10 +614,10 @@ export default function PublicView() {
                     </div>
 
                     <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                      🃏 Blackjack ⚜ 🎲 Monopoly ⚜ 🀄 Tai Ti ⚜ 💩 Shithead
+                      🃏 Blackjack ⬩ 🎲 Monopoly ⬩ 🀄 Tai Ti ⬩ 💩 Shithead
                     </p>
                     <p className="text-slate-400 text-xs mb-3">
-                      Wins: 100% 🏆 ⬩ 2nd: 40% 🏃 ⬩ Survival: 10% 🤟🏼
+                      🏆 Wins: 100%  ⬩  🏃 2nd: 40%  ⬩  🤟🏼 Survival: 10%
                     </p>
                     <select
   value={selectedGameType}
