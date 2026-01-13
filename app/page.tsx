@@ -680,7 +680,11 @@ export default function PublicView() {
 {hallView === 'none' && (
   <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
     <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-      <h2 className="text-2xl font-bold">📜 Recent Games</h2>
+      <h2 className="text-2xl font-bold mb-1 uppercase">
+  <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+    📜 Recent Games
+  </span>
+</h2>
       <div className="text-sm">
         <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
         <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
