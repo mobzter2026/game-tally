@@ -585,109 +585,67 @@ export default function PublicView() {
                 </div>
               </>
             ) : (
-              <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-                <div className="p-4 border-b border-slate-700">
-                  <div className="text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold mb-1 whitespace-nowrap">The Ultimate Backstab Board 🔪</h2>
-                    <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
-                    <div className="flex gap-2 mb-3 justify-center flex-wrap">
-                      <Button
-  onClick={() => setHallView('fame')}
-  variant="pop"
-  className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
->
-  ⭐ Hall of Fame
-</Button>
-                      <Button
-  onClick={() => setHallView('shame')}
-  variant="pop"
-  className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-rose-600 to-rose-900"
->
-  🤡 Hall of Shame
-</Button>
-                    </div>
-
-                    <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                      🃏 Blackjack ⚜ 🎲 Monopoly ⚜ 🀄 Tai Ti ⚜ 💩 Shithead
-                    </p>
-                    <p className="text-slate-400 text-xs mb-3">
-                      Wins: 100% 🏆 ⬩ 2nd: 40% 🏃 ⬩ Survival: 10% 🤟🏼
-                    </p>
-                    <select
-  value={selectedGameType}
-  onChange={(e) => setSelectedGameType(e.target.value)}
-  className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
->
-                      <option value="All Games">🎰 All Games</option>
-                      {INDIVIDUAL_GAMES.map(game => (
-                        <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="overflow-x-auto shadow-lg rounded-xl">
-  <table className="w-full border-separate border-spacing-0 text-slate-300">
-    <thead>
-      <tr className="border-b border-slate-700 bg-slate-900">
-        <th className="text-center p-4 w-20">Rank</th>
-        <th className="text-left p-4 w-48">Player</th>
-        <th className="text-center p-4 text-sm md:text-base">Games</th>
-        <th className="text-center p-4 text-sm md:text-base text-green-400">Wins</th>
-        <th className="text-center p-4 text-sm md:text-base text-blue-400">2nd</th>
-        <th className="text-center p-4 text-sm md:text-base text-slate-400">Survived</th>
-        <th className="text-center p-4 text-sm md:text-base text-red-400">Losses</th>
-        <th className="text-center p-4 text-sm md:text-base text-orange-400">💩</th>
-        <th className="text-center p-4 text-sm md:text-base text-yellow-400">Win Rate</th>
-        <th className="text-center p-4 text-sm md:text-base">Best 🔥</th>
-      </tr>
-    </thead>
-    <tbody>
-      {playerStats.length === 0 ? (
-        <tr>
-          <td colSpan={10} className="text-center p-8 text-slate-400">
-            No games played yet.
-          </td>
+              <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/80 to-slate-900/90">
+  <div className="p-6">
+    <h2 className="text-2xl font-bold text-white mb-1">Leaderboard</h2>
+    <p className="text-slate-400 text-sm">Top players and stats</p>
+  </div>
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse">
+      <thead>
+        <tr className="bg-slate-900 border-b-2 border-purple-700">
+          <th className="text-center p-4 w-20 text-white">Rank</th>
+          <th className="text-left p-4 text-white">Player</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-white">Games</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-green-400 font-semibold">Wins</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-blue-400 font-semibold">2nd</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-slate-400 font-semibold">Survived</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-red-400 font-semibold">Losses</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-orange-400 font-semibold">💩</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-yellow-400 font-bold">Win %</th>
+          <th className="text-center p-2 md:p-4 text-sm md:text-base text-orange-400 font-bold">Best 🔥</th>
         </tr>
-      ) : (
-        playerStats.map((player, idx) => (
-          <tr
-            key={player.player}
-            className={`
-              border-b border-slate-700/50
-              ${idx % 2 === 0 ? 'bg-slate-900/20' : 'bg-slate-900/10'}
-              ${idx < 3 ? 'bg-yellow-900/30' : ''}
-              ${idx >= playerStats.length - 3 ? 'bg-purple-900/25' : ''}
-              hover:bg-slate-800 hover:scale-105 transition-all duration-200 transform
-            `}
-          >
-            <td className="text-center p-2 md:p-4 text-xl md:text-2xl">{getMedal(playerStats, idx, p => p.winRate)}</td>
-            <td className="p-2 md:p-4 font-bold text-lg md:text-xl flex items-center gap-2">
-              {player.player}
-              {worstShitheadPlayer === player.player && (
-                <span className="animate-bounce">💩</span>
-              )}
-            </td>
-            <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
-            <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-            <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-            <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
-            <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-            <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
-            <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-            <td className="text-center p-2 md:p-4 text-sm md:text-base">
-              {player.bestStreak > 0 ? (
-                <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
-              ) : (
-                <span className="text-slate-500">-</span>
-              )}
+      </thead>
+      <tbody>
+        {playerStats.length === 0 ? (
+          <tr>
+            <td colSpan={10} className="text-center p-8 text-slate-400">
+              No games played yet.
             </td>
           </tr>
-        ))
-      )}
-    </tbody>
-  </table>
+        ) : (
+          playerStats.map((player, idx) => (
+            <tr
+              key={player.player}
+              className={`border-b border-slate-700/50 transition-colors duration-200 ${
+                idx % 2 === 0 ? 'bg-purple-900/40' : 'bg-purple-900/30'
+              } hover:bg-purple-900/60`}
+            >
+              <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(playerStats, idx, p => p.winRate)}</td>
+              <td className="p-2 md:p-4 font-bold text-lg md:text-xl text-white">
+                {player.player} {worstShitheadPlayer === player.player && '💩'}
+              </td>
+              <td className="text-center p-2 md:p-4 text-sm md:text-base text-white">{player.gamesPlayed}</td>
+              <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+              <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
+              <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
+              <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+              <td className="text-center p-4 text-orange-400 font-bold">{player.shitheadLosses}</td>
+              <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+              <td className="text-center p-2 md:p-4 text-sm md:text-base">
+                {player.bestStreak > 0 ? (
+                  <span className="text-orange-400 font-bold">{player.bestStreak}W</span>
+                ) : (
+                  <span className="text-slate-500">-</span>
+                )}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
 </div>
-              </div>
             )}
 
 {hallView === 'none' && (
