@@ -476,7 +476,7 @@ export default function PublicView() {
         )}
 
         <div className="text-center mb-8">
-  <h1 className="w-full max-w-full text-center select-none text-[1.4rem] sm:text-[1.75rem] font-semibold tracking-[0.12em] sm:tracking-[0.16em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3 leading-tight">
+  <h1 className="w-full max-w-full text-center select-none text-[1.2rem] sm:text-[1.5rem] font-semibold tracking-[0.12em] sm:tracking-[0.16em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-3 leading-tight">
     <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
       ULTIMATE CARD CHAMPIONSHIP
     </span>
