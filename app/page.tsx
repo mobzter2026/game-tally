@@ -444,35 +444,35 @@ export default function PublicView() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {latestWinner && latestWinner.type === 'dominated' && (
-          <div className="mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis animate-pulse">
-              🌟 Flawless victory in {latestWinner.game.game_type} by {latestWinner.game.winners?.[0]} 🌟
-            </p>
-          </div>
+          <div className="mb-4 bg-gradient-to-r from-purple-900 via-fuchsia-600 to-purple-900 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(217,70,239,0.6),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-fuchsia-400/50 animate-pulse">
+  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
+    ✨ FLAWLESS VICTORY IN {latestWinner.game.game_type.toUpperCase()} BY {latestWinner.game.winners?.[0].toUpperCase()} ✨
+  </p>
+</div>
         )}
 
         {latestWinner && latestWinner.type === 'shithead' && (
-          <div className="mb-4 bg-gradient-to-r from-slate-100 via-white to-slate-100 px-4 py-2 rounded-lg shadow-lg border-2 border-amber-600 animate-pulse">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black">
-              💩 Breaking news: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1]} is the Shithead 💩
-            </p>
-          </div>
+          <div className="mb-4 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(251,191,36,0.6),inset_0_2px_8px_rgba(255,255,255,0.4)] border-2 border-amber-600 animate-pulse">
+  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis text-black tracking-wide">
+    💩 BREAKING NEWS: {latestWinner.game.losers?.[latestWinner.game.losers.length - 1].toUpperCase()} IS THE SHITHEAD 💩
+  </p>
+</div>
         )}
 
         {latestWinner && latestWinner.type === 'normal' && (
-          <div className="mb-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              🎖️ {latestWinner.game.winners?.[0]} won {latestWinner.game.game_type}. It wasn't pretty! 🎖️
-            </p>
-          </div>
+          <div className="mb-4 bg-gradient-to-r from-blue-800 via-cyan-600 to-blue-800 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(34,211,238,0.5),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-cyan-400/50 animate-pulse">
+  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
+    🎖️ {latestWinner.game.winners?.[0].toUpperCase()} WON {latestWinner.game.game_type.toUpperCase()}. IT WASN'T PRETTY! 🎖️
+  </p>
+</div>
         )}
 
         {shitheadLosingStreak && shitheadLosingStreak.streak >= 3 && (
-          <div className="mb-4 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 px-4 py-2 rounded-lg shadow-lg">
-            <p className="text-sm font-bold text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              {shitheadLosingStreak.player} is on a {shitheadLosingStreak.streak} game Shithead LOSING streak! 💩💩
-            </p>
-          </div>
+          <div className="mb-4 bg-gradient-to-r from-red-700 via-orange-600 to-red-700 px-6 py-3 rounded-2xl shadow-[0_8px_20px_rgba(239,68,68,0.6),inset_0_2px_8px_rgba(255,255,255,0.3)] border-2 border-orange-500 animate-pulse">
+  <p className="text-sm sm:text-base font-extrabold text-center whitespace-nowrap overflow-hidden text-ellipsis tracking-wide">
+    🔥 {shitheadLosingStreak.player.toUpperCase()} IS ON A {shitheadLosingStreak.streak} GAME SHITHEAD LOSING STREAK! 💩💩
+  </p>
+</div>
         )}
 
         <div className="text-center mb-8">
@@ -828,7 +828,7 @@ export default function PublicView() {
 		  {showFloatingFilter && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowFloatingFilter(false)} />
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-purple-900/95 to-purple/98 backdrop-blur-md rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-purple-700/50" style={{animation: "slideUp 0.3s ease-out"}}>
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-slate-900/95 to-black/95 backdrop-blur-md rounded-t-3xl shadow-2xl z-50 p-6 max-h-[50vh] border-t-2 border-purple-700/50" style={{animation: "slideUp 0.3s ease-out"}}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 bg-slate-300 rounded-full"></div>
               </div>
