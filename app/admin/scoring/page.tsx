@@ -22,11 +22,13 @@ export default function LiveScoringPage() {
   const supabase = createClient()
 
   const [newSession, setNewSession] = useState({
-    game: 'Monopoly',
-    date: new Date().toISOString().split('T')[0],
-    players: [] as string[],
-    threshold: 3
-  })
+  game: 'Monopoly',
+  date: new Date().toISOString().split('T')[0],
+  players: [] as string[],
+  threshold: 3,
+  team1: [] as string[],
+  team2: [] as string[]
+})
 
   const [gameStarted, setGameStarted] = useState(false)
   const [scores, setScores] = useState<Record<string, number>>({})
