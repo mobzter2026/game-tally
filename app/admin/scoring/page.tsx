@@ -51,13 +51,34 @@ const [gameComplete, setGameComplete] = useState(false)
   }, [])
 
   const togglePlayer = (player: string) => {
-    setNewSession(s => ({
+  setNewSession(s => ({
+    ...s,
+    players: s.players.includes(player)
+      ? s.players.filter(p => p !== player)
+      : [...s.players, player]
+  }))
+}
+
+const toggleTeamPlayer = (player: string, team: 'team1' | 'team2') => {
+  setNewSession(s => {
+    const currentTeam = s[team]
+    const otherTeam = team === 'team1' ? s.team2 : s.team1
+    
+    // Remove from other team if present
+    const newOtherTeam = otherTeam.filter(p => p !== player)
+    
+    // Toggle in current team (max 2 players per team)
+    const newCurrentTeam = currentTeam.includes(player)
+      ? currentTeam.filter(p => p !== player)
+      : currentTeam.length < 2 ? [...currentTeam, player] : currentTeam
+    
+    return {
       ...s,
-      players: s.players.includes(player)
-        ? s.players.filter(p => p !== player)
-        : [...s.players, player]
-    }))
-  }
+      [team]: newCurrentTeam,
+      [team === 'team1' ? 'team2' : 'team1']: newOtherTeam
+    }
+  })
+}
 
   const selectAllPlayers = () =>
     setNewSession(s => ({ ...s, players: [...PLAYERS] }))
