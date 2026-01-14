@@ -65,7 +65,7 @@ export default function LiveScoringPage() {
           game_date: newSession.date,
           players: newSession.players,
           win_threshold: newSession.threshold,
-          status: 'active'
+          status: 'in_progress'
         } as any)
         .select()
         .single()
