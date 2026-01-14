@@ -112,7 +112,25 @@ export default function LiveScoringPage() {
   }
 
   const saveGame = async () => {
-    try {
+  try {
+    if (newSession.game === 'Rung') {
+      // Save Rung game
+      const { error } = await supabase
+        .from('games')
+        .insert({
+          game_type: 'Rung',
+          game_date: newSession.date,
+          team1: newSession.team1,
+          team2: newSession.team2,
+          winning_team: results.winningTeam
+        } as any)
+      
+      if (error) {
+        alert(`Error saving game: ${error.message}`)
+        return
+      }
+    } else {
+      // Save individual game
       const { error } = await supabase
         .from('games')
         .insert({
@@ -122,30 +140,34 @@ export default function LiveScoringPage() {
           winners: results.winners,
           runners_up: results.runnersUp,
           losers: results.losers
-        })
+        } as any)
       
       if (error) {
         alert(`Error saving game: ${error.message}`)
         return
       }
-      
-      // Reset and go back to setup
-      setGameStarted(false)
-      setGameComplete(false)
-      setScores({})
-      setNewSession({
-        game: 'Monopoly',
-        date: new Date().toISOString().split('T')[0],
-        players: [],
-        threshold: 3
-      })
-      
-      alert('Game saved successfully!')
-    } catch (error) {
-      alert(`Failed to save game: ${error}`)
     }
+    
+    // Reset and go back to setup
+    setGameStarted(false)
+    setGameComplete(false)
+    setTeamSelectionMode(false)
+    setScores({})
+    setTeamScores({ team1: 0, team2: 0 })
+    setNewSession({
+      game: 'Monopoly',
+      date: new Date().toISOString().split('T')[0],
+      players: [],
+      threshold: 3,
+      team1: [],
+      team2: []
+    })
+    
+    alert('Game saved successfully!')
+  } catch (error) {
+    alert(`Failed to save game: ${error}`)
   }
-
+}
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
