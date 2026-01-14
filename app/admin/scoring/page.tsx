@@ -62,7 +62,7 @@ export default function LiveScoringPage() {
         .from('game_sessions')
         .insert({
           game: newSession.game,
-          date: newSession.date,
+          game_date: newSession.date,
           players: newSession.players,
           threshold: newSession.threshold,
           status: 'active'
