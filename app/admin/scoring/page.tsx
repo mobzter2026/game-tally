@@ -34,11 +34,12 @@ export default function LiveScoringPage() {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [gameComplete, setGameComplete] = useState(false)
   const [results, setResults] = useState<{
-    winners: string[]
-    runnersUp: string[]
-    survivors: string[]
-    losers: string[]
-  }>({ winners: [], runnersUp: [], survivors: [], losers: [] })
+  winners: string[]
+  runnersUp: string[]
+  survivors: string[]
+  losers: string[]
+  winningTeam?: number
+}>({ winners: [], runnersUp: [], survivors: [], losers: [] })
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
