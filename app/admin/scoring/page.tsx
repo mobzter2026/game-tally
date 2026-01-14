@@ -61,7 +61,7 @@ export default function LiveScoringPage() {
       const { data, error } = await supabase
         .from('game_sessions')
         .insert({
-          game: newSession.game,
+          game_type: newSession.game,
           game_date: newSession.date,
           players: newSession.players,
           threshold: newSession.threshold,
