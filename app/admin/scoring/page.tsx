@@ -31,8 +31,10 @@ export default function LiveScoringPage() {
 })
 
   const [gameStarted, setGameStarted] = useState(false)
-  const [scores, setScores] = useState<Record<string, number>>({})
-  const [gameComplete, setGameComplete] = useState(false)
+const [teamSelectionMode, setTeamSelectionMode] = useState(false)
+const [scores, setScores] = useState<Record<string, number>>({})
+const [teamScores, setTeamScores] = useState({ team1: 0, team2: 0 })
+const [gameComplete, setGameComplete] = useState(false)
   const [results, setResults] = useState<{
   winners: string[]
   runnersUp: string[]
