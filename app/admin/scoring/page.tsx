@@ -182,141 +182,279 @@ const [gameComplete, setGameComplete] = useState(false)
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 overflow-auto">
-      <div className="max-w-3xl mx-auto flex flex-col justify-start">
-        
-        {/* TITLE */}
-        <h1 className="w-full max-w-full text-center select-none whitespace-nowrap overflow-hidden text-[1.75rem] sm:text-[2.05rem] font-semibold tracking-[0.16em] sm:tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]">
-          <span className="inline-block mr-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
-          <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-            POINTS&nbsp;ROYALE
-          </span>
-          <span className="inline-block ml-2 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
-        </h1>
-        <div className="h-6" />
+  <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
+    <div className="max-w-2xl mx-auto">
+      
+      {/* TITLE */}
+      <h1 className="text-center select-none text-[1.3rem] sm:text-[1.6rem] font-semibold tracking-[0.14em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] mb-4">
+        <span className="inline-block mr-1.5 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
+        <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          POINTS ROYALE
+        </span>
+        <span className="inline-block ml-1.5 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
+      </h1>
 
-        {!gameStarted ? (
-          /* SETUP FORM */
-          <div className="rounded-xl p-6 space-y-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-            <h2 className="text-center text-2xl sm:text-3xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-              New Round
-            </h2>
+      {!gameStarted && !teamSelectionMode ? (
+        /* SETUP FORM */
+        <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+          <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            New Round
+          </h2>
 
-            {/* DATE + GAME */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Date</label>
-                <input
-                  type="date"
-                  value={newSession.date}
-                  onChange={e => setNewSession({ ...newSession, date: e.target.value })}
-                  style={{ paddingLeft: '12px' }}
-                  className="h-11 w-full font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-bold text-center mb-1">Game</label>
-                <select
-                  value={newSession.game}
-                  onChange={e => setNewSession({ ...newSession, game: e.target.value })}
-                  className="h-11 w-full text-center font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-4 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all"
-                >
-                  {SCORE_GAMES.map(g => (
-                    <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>
-                  ))}
-                </select>
-              </div>
+          {/* DATE + GAME */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-center mb-1">Date</label>
+              <input
+                type="date"
+                value={newSession.date}
+                onChange={e => setNewSession({ ...newSession, date: e.target.value })}
+                className="h-9 w-full font-bold text-sm rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all px-2"
+              />
             </div>
-
-            {/* DEAL / CLEAR + WIN THRESHOLD */}
-            <div className="flex items-center gap-3">
-              {newSession.players.length === 0 ? (
-                <Button onClick={selectAllPlayers} variant="pop" color="blue" className="flex-1 h-11">
-                  ♠ Deal All
-                </Button>
-              ) : (
-                <Button onClick={clearPlayers} variant="pop" color="red" className="flex-1 h-11">
-                  ✖ Clear Table
-                </Button>
-              )}
-              {newSession.game !== 'Blackjack' && (
-                <div className="flex gap-2 items-center">
-                  {[3, 5].map(num => (
-                    <Button
-                      key={num}
-                      onClick={() => toggleThreshold(num)}
-                      variant="frosted"
-                      color="purple"
-                      selected={newSession.threshold === num}
-                      className="w-10 h-10 rounded-full text-sm"
-                    >
-                      {num}
-                    </Button>
-                  ))}
-                </div>
-              )}
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-center mb-1">Game</label>
+              <select
+                value={newSession.game}
+                onChange={e => setNewSession({ ...newSession, game: e.target.value })}
+                className="h-9 w-full text-center text-sm font-bold rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 appearance-none px-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all"
+              >
+                {SCORE_GAMES.map(g => (
+                  <option key={g} value={g}>{GAME_EMOJIS[g]} {g}</option>
+                ))}
+              </select>
             </div>
+          </div>
 
-            {/* PLAYER SELECTION */}
-            <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+          {newSession.game !== 'Rung' && (
+            <>
+              {/* DEAL / CLEAR + WIN THRESHOLD */}
+              <div className="flex items-center gap-2">
+                {newSession.players.length === 0 ? (
+                  <Button onClick={selectAllPlayers} variant="pop" color="blue" className="flex-1 h-9 text-sm">
+                    ♠ Deal All
+                  </Button>
+                ) : (
+                  <Button onClick={clearPlayers} variant="pop" color="red" className="flex-1 h-9 text-sm">
+                    ✖ Clear
+                  </Button>
+                )}
+                {newSession.game !== 'Blackjack' && (
+                  <div className="flex gap-2 items-center">
+                    {[3, 5].map(num => (
+                      <Button
+                        key={num}
+                        onClick={() => toggleThreshold(num)}
+                        variant="frosted"
+                        color="purple"
+                        selected={newSession.threshold === num}
+                        className="w-8 h-8 rounded-full text-xs"
+                      >
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* PLAYER SELECTION */}
+              <div className="grid grid-cols-3 gap-2">
+                {PLAYERS.map(p => (
+                  <Button
+                    key={p}
+                    onClick={() => togglePlayer(p)}
+                    variant="frosted"
+                    color="purple"
+                    selected={newSession.players.includes(p)}
+                    className="h-9 text-sm font-semibold"
+                  >
+                    {p}
+                  </Button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* MADNESS BUTTON */}
+          <Button
+            onClick={startNewRound}
+            disabled={newSession.game !== 'Rung' && newSession.players.length === 0}
+            variant="frosted"
+            color="purple"
+            className={`w-full py-2.5 rounded-xl font-bold text-base ${
+              (newSession.game === 'Rung' || newSession.players.length > 0)
+                ? 'ring-2 ring-amber-400 shadow-[inset_0_0_10px_rgba(255,170,0,0.85),0_0_18px_rgba(255,170,0,0.9),0_0_32px_rgba(255,170,0,0.55)]'
+                : ''
+            }`}
+          >
+            👊 Let the Madness Begin
+          </Button>
+        </div>
+      ) : teamSelectionMode ? (
+        /* RUNG TEAM SELECTION */
+        <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+          <h2 className="text-center text-xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            Select Teams
+          </h2>
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Team 1 */}
+            <div className="space-y-2">
+              <h3 className="text-center font-bold text-sm text-blue-400">Team 1</h3>
               {PLAYERS.map(p => (
                 <Button
                   key={p}
-                  onClick={() => togglePlayer(p)}
+                  onClick={() => toggleTeamPlayer(p, 'team1')}
                   variant="frosted"
                   color="purple"
-                  selected={newSession.players.includes(p)}
-                  className="h-10 text-sm font-semibold"
+                  selected={newSession.team1.includes(p)}
+                  className="w-full h-8 text-xs font-semibold"
                 >
                   {p}
                 </Button>
               ))}
             </div>
 
-            {/* MADNESS BUTTON */}
-            <Button
-              onClick={startNewRound}
-              disabled={newSession.players.length === 0}
-              variant="frosted"
-              color="purple"
-              className={`w-full py-3 rounded-xl font-bold text-lg ${
-                newSession.players.length > 0
-                  ? 'ring-2 ring-amber-400 shadow-[inset_0_0_10px_rgba(255,170,0,0.85),0_0_18px_rgba(255,170,0,0.9),0_0_32px_rgba(255,170,0,0.55)]'
-                  : ''
-              }`}
-            >
-              👊 Let the Madness Begin
-            </Button>
+            {/* Team 2 */}
+            <div className="space-y-2">
+              <h3 className="text-center font-bold text-sm text-red-400">Team 2</h3>
+              {PLAYERS.map(p => (
+                <Button
+                  key={p}
+                  onClick={() => toggleTeamPlayer(p, 'team2')}
+                  variant="frosted"
+                  color="purple"
+                  selected={newSession.team2.includes(p)}
+                  className="w-full h-8 text-xs font-semibold"
+                >
+                  {p}
+                </Button>
+              ))}
+            </div>
           </div>
-        ) : !gameComplete ? (
-          /* LIVE SCORING */
-          <div className="rounded-xl p-6 space-y-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-            <h2 className="text-center text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-              {GAME_EMOJIS[newSession.game]} {newSession.game} - Race to {newSession.threshold}
+
+          {/* Threshold Selection */}
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xs font-bold">Race to:</span>
+            {[3, 5].map(num => (
+              <Button
+                key={num}
+                onClick={() => toggleThreshold(num)}
+                variant="frosted"
+                color="purple"
+                selected={newSession.threshold === num}
+                className="w-8 h-8 rounded-full text-xs"
+              >
+                {num}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            onClick={startRungGame}
+            variant="pop"
+            className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
+          >
+            Start Rung Game
+          </Button>
+        </div>
+      ) : !gameComplete ? (
+        newSession.game === 'Rung' ? (
+          /* RUNG TEAM SCORING */
+          <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              {GAME_EMOJIS['Rung']} Rung - Race to {newSession.threshold}
             </h2>
 
-            <div className="space-y-4">
-              {newSession.players.map(player => (
-                <div key={player} className="flex items-center justify-between bg-purple-900/50 p-4 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+            <div className="space-y-3">
+              {/* Team 1 */}
+              <div className="bg-blue-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                <div className="flex items-center justify-between">
                   <Button
-                    onClick={() => updateScore(player, -1)}
+                    onClick={() => updateTeamScore('team1', -1)}
                     variant="frosted"
                     color="red"
-                    className="w-12 h-12 text-2xl font-bold"
+                    className="w-10 h-10 text-xl font-bold"
                   >
                     −
                   </Button>
                   
                   <div className="flex-1 text-center">
-                    <div className="text-xl font-bold">{player}</div>
-                    <div className="text-3xl font-extrabold text-amber-400">{scores[player]}</div>
+                    <div className="text-sm font-bold text-blue-400">Team 1</div>
+                    <div className="text-xs">{newSession.team1.join(' + ')}</div>
+                    <div className="text-3xl font-extrabold text-amber-400 mt-1">{teamScores.team1}</div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => updateTeamScore('team1', 1)}
+                    variant="frosted"
+                    color="blue"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+
+              {/* Team 2 */}
+              <div className="bg-red-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                <div className="flex items-center justify-between">
+                  <Button
+                    onClick={() => updateTeamScore('team2', -1)}
+                    variant="frosted"
+                    color="red"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    −
+                  </Button>
+                  
+                  <div className="flex-1 text-center">
+                    <div className="text-sm font-bold text-red-400">Team 2</div>
+                    <div className="text-xs">{newSession.team2.join(' + ')}</div>
+                    <div className="text-3xl font-extrabold text-amber-400 mt-1">{teamScores.team2}</div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => updateTeamScore('team2', 1)}
+                    variant="frosted"
+                    color="blue"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* INDIVIDUAL LIVE SCORING */
+          <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              {GAME_EMOJIS[newSession.game]} {newSession.game} - {newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : `Race to ${newSession.threshold}`}
+            </h2>
+
+            <div className="space-y-2">
+              {newSession.players.map(player => (
+                <div key={player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                  <Button
+                    onClick={() => updateScore(player, -1)}
+                    variant="frosted"
+                    color="red"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    −
+                  </Button>
+                  
+                  <div className="flex-1 text-center">
+                    <div className="text-base font-bold">{player}</div>
+                    <div className="text-2xl font-extrabold text-amber-400">{scores[player]}</div>
                   </div>
                   
                   <Button
                     onClick={() => updateScore(player, 1)}
                     variant="frosted"
                     color="blue"
-                    className="w-12 h-12 text-2xl font-bold"
+                    className="w-10 h-10 text-xl font-bold"
                   >
                     +
                   </Button>
@@ -324,53 +462,57 @@ const [gameComplete, setGameComplete] = useState(false)
               ))}
             </div>
           </div>
-        ) : (
-          /* RESULTS SUMMARY */
-          <div className="rounded-xl p-6 space-y-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-            <h2 className="text-center text-3xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-              Game Complete! 🎉
-            </h2>
+        )
+      ) : (
+        /* RESULTS SUMMARY */
+        <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+          <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 'Game Complete! 🎉'}
+          </h2>
 
-            <div className="space-y-4">
-              {results.winners.length > 0 && (
-                <div className="bg-green-900/50 p-4 rounded-xl">
-                  <div className="text-lg font-bold text-green-400 mb-2">🏆 Winners</div>
-                  <div className="text-xl font-bold">{results.winners.join(', ')}</div>
+          <div className="space-y-2">
+            {results.winners.length > 0 && (
+              <div className="bg-green-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-green-400 mb-1">
+                  {newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}
                 </div>
-              )}
-              
-              {results.runnersUp.length > 0 && (
-                <div className="bg-blue-900/50 p-4 rounded-xl">
-                  <div className="text-lg font-bold text-blue-400 mb-2">🥈 Runners Up</div>
-                  <div className="text-xl font-bold">{results.runnersUp.join(', ')}</div>
+                <div className="text-base font-bold">{results.winners.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.runnersUp.length > 0 && (
+              <div className="bg-blue-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-blue-400 mb-1">🥈 Runners Up</div>
+                <div className="text-base font-bold">{results.runnersUp.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.survivors.length > 0 && (
+              <div className="bg-slate-800/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-slate-400 mb-1">🤟 Survivors</div>
+                <div className="text-base font-bold">{results.survivors.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.losers.length > 0 && (
+              <div className="bg-red-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-red-400 mb-1">
+                  {newSession.game === 'Shithead' ? '💩 THE SHITHEAD(S)' : '💀 Losers'}
                 </div>
-              )}
-              
-              {results.survivors.length > 0 && (
-                <div className="bg-slate-800/50 p-4 rounded-xl">
-                  <div className="text-lg font-bold text-slate-400 mb-2">🤟 Survivors</div>
-                  <div className="text-xl font-bold">{results.survivors.join(', ')}</div>
-                </div>
-              )}
-              
-              {results.losers.length > 0 && (
-                <div className="bg-red-900/50 p-4 rounded-xl">
-                  <div className="text-lg font-bold text-red-400 mb-2">💀 Losers</div>
-                  <div className="text-xl font-bold">{results.losers.join(', ')}</div>
-                </div>
-              )}
-            </div>
-
-            <Button
-              onClick={saveGame}
-              variant="pop"
-              className="w-full py-3 rounded-xl font-bold text-lg bg-gradient-to-br from-emerald-600 to-emerald-900"
-            >
-              💾 Save Game & Start New Round
-            </Button>
+                <div className="text-base font-bold">{results.losers.join(', ')}</div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <Button
+            onClick={saveGame}
+            variant="pop"
+            className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
+          >
+            💾 Save Game & Start New Round
+          </Button>
+        </div>
+      )}
     </div>
-  )
-}
+  </div>
+)
