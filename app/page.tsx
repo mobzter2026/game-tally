@@ -418,8 +418,8 @@ if (game.survivors?.includes(player)) return 'bg-slate-600'
     const bIsWinner = game.winners?.includes(b)
     const aIsRunner = game.runners_up?.includes(a)
     const bIsRunner = game.runners_up?.includes(b)
-    const aIsSurvivor = game.survivors?.includes(a)  // Add this
-    const bIsSurvivor = game.survivors?.includes(b)  // Add this
+    const aIsSurvivor = game.survivors?.includes(a)  // Changed from aIsSurvived
+    const bIsSurvivor = game.survivors?.includes(b)  // Changed from bIsSurvived
     const aIsLoser = game.losers?.includes(a)
     const bIsLoser = game.losers?.includes(b)
 
@@ -427,8 +427,8 @@ if (game.survivors?.includes(player)) return 'bg-slate-600'
     if (!aIsWinner && bIsWinner) return 1
     if (aIsRunner && !bIsRunner) return -1
     if (!aIsRunner && bIsRunner) return 1
-    if (aIsSurvivor && !bIsSurvivor) return -1  // Add this
-    if (!aIsSurvivor && bIsSurvivor) return 1   // Add this
+    if (aIsSurvivor && !bIsSurvivor) return -1  // Changed from aIsSurvived
+    if (!aIsSurvivor && bIsSurvivor) return 1   // Changed from bIsSurvived
     if (aIsLoser && !bIsLoser) return 1
     if (!aIsLoser && bIsLoser) return -1
 
