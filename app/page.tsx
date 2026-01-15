@@ -405,36 +405,36 @@ export default function PublicView() {
   const getPlayerBadgeColor = (game: Game, player: string) => {
     if (game.winners?.includes(player)) return 'bg-green-600'
     if (game.runners_up?.includes(player)) return 'bg-blue-600'
+if (game.survivors?.includes(player)) return 'bg-slate-600'
     if (game.losers?.includes(player)) return 'bg-red-600'
     return 'bg-slate-600'
   }
 
   const sortPlayersInGame = (game: Game) => {
-    if (!game.players_in_game) return []
+  if (!game.players_in_game) return []
 
-    return game.players_in_game.slice().sort((a, b) => {
-      const aIsWinner = game.winners?.includes(a)
-      const bIsWinner = game.winners?.includes(b)
-      const aIsRunner = game.runners_up?.includes(a)
-      const bIsRunner = game.runners_up?.includes(b)
-      const aIsSurvived = !aIsWinner && !aIsRunner && !game.losers?.includes(a)
-      const bIsSurvived = !bIsWinner && !bIsRunner && !game.losers?.includes(b)
-      const aIsLoser = game.losers?.includes(a)
-      const bIsLoser = game.losers?.includes(b)
+  return game.players_in_game.slice().sort((a, b) => {
+    const aIsWinner = game.winners?.includes(a)
+    const bIsWinner = game.winners?.includes(b)
+    const aIsRunner = game.runners_up?.includes(a)
+    const bIsRunner = game.runners_up?.includes(b)
+    const aIsSurvivor = game.survivors?.includes(a)  // Add this
+    const bIsSurvivor = game.survivors?.includes(b)  // Add this
+    const aIsLoser = game.losers?.includes(a)
+    const bIsLoser = game.losers?.includes(b)
 
-      if (aIsWinner && !bIsWinner) return -1
-      if (!aIsWinner && bIsWinner) return 1
-      if (aIsRunner && !bIsRunner) return -1
-      if (!aIsRunner && bIsRunner) return 1
-      if (aIsSurvived && !bIsSurvived) return -1
-      if (!aIsSurvived && bIsSurvived) return 1
-      if (aIsLoser && !bIsLoser) return 1
-      if (!aIsLoser && bIsLoser) return -1
+    if (aIsWinner && !bIsWinner) return -1
+    if (!aIsWinner && bIsWinner) return 1
+    if (aIsRunner && !bIsRunner) return -1
+    if (!aIsRunner && bIsRunner) return 1
+    if (aIsSurvivor && !bIsSurvivor) return -1  // Add this
+    if (!aIsSurvivor && bIsSurvivor) return 1   // Add this
+    if (aIsLoser && !bIsLoser) return 1
+    if (!aIsLoser && bIsLoser) return -1
 
-      return 0
-    })
-  }
-
+    return 0
+  })
+}
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 flex items-center justify-center">
