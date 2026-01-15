@@ -131,6 +131,11 @@ const startRungGame = () => {
       if (maxScore >= newSession.threshold) {
         calculateShitheadResults(newScores)
       }
+    } else if (newSession.game === 'Blackjack') {
+      // Blackjack: knockout mode - eliminate lowest scorer
+      if (maxScore >= newSession.threshold) {
+        calculateResults(newScores)
+      }
     } else {
       // Normal games: first to reach threshold WINS
       if (maxScore >= newSession.threshold) {
