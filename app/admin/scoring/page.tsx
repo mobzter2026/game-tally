@@ -266,8 +266,42 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
         alert(`Error saving game: ${error.message}`)
         return
       }
+      
+      // Reset to team selection for next round
+      setGameComplete(false)
+      setTeamSelectionMode(true)
+      setGameStarted(false)
+      setTeamScores({ team1: 0, team2: 0 })
+      setNewSession(s => ({
+        ...s,
+        team1: [],
+        team2: []
+      }))
+      
+      alert('Game saved! Select teams for next round.')
+      return
+    } else if (newSession.game === 'Blackjack') {
+      // BLACKJACK: Save with all players in correct positions
+      const allPlayers = [...eliminationHistory, results.winners[0]]
+      
+      const { error } = await supabase
+        .from('games')
+        .insert({
+          game_type: 'Blackjack',
+          game_date: newSession.date,
+          players_in_game: allPlayers,
+          winners: results.winners,
+          runners_up: results.runnersUp,
+          survivors: results.survivors,
+          losers: results.losers
+        } as any)
+      
+      if (error) {
+        alert(`Error saving game: ${error.message}`)
+        return
+      }
     } else {
-      // Save individual game
+      // Save other individual games
       const { error } = await supabase
         .from('games')
         .insert({
@@ -276,6 +310,7 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
           players_in_game: newSession.players,
           winners: results.winners,
           runners_up: results.runnersUp,
+          survivors: results.survivors,
           losers: results.losers
         } as any)
       
@@ -579,12 +614,21 @@ return (
     const remaining = newSession.players.filter(p => p !== player)
     
     if (remaining.length === 1) {
-      // Winner! Save all elimination order
+      // Winner! Calculate final positions based on elimination order
+      const winner = remaining[0]
+      const lastEliminated = player // This player (finished 2nd)
+      const secondLastEliminated = eliminationHistory.length > 0 
+        ? eliminationHistory[eliminationHistory.length - 1] 
+        : null // Finished 3rd
+      
+      // Everyone else eliminated before the second-to-last
+      const survivors = eliminationHistory.slice(0, -1).filter(p => p !== secondLastEliminated)
+      
       setResults({ 
-        winners: [remaining[0]], // Last player standing
-        runnersUp: newEliminationHistory.length >= 2 ? [newEliminationHistory[newEliminationHistory.length - 2]] : [], // 2nd last eliminated
-        survivors: newEliminationHistory.slice(0, -2), // Everyone else eliminated before runner-up
-        losers: [player] // Last eliminated (finished last)
+        winners: [winner],
+        runnersUp: secondLastEliminated ? [secondLastEliminated] : [lastEliminated],
+        survivors: survivors,
+        losers: [eliminationHistory[0]] // First eliminated = loser
       })
       setGameComplete(true)
     } else {
