@@ -158,25 +158,55 @@ const updateTeamScore = (team: 'team1' | 'team2', delta: number) => {
 }
 
   const calculateResults = (finalScores: Record<string, number>) => {
-    const sortedPlayers = Object.entries(finalScores)
-      .sort(([, a], [, b]) => b - a)
-    
-    const maxScore = sortedPlayers[0][1]
-    const winners = sortedPlayers.filter(([, score]) => score === maxScore).map(([player]) => player)
-    
-    const remaining = sortedPlayers.filter(([, score]) => score < maxScore)
-    const secondScore = remaining[0]?.[1] || 0
-    const runnersUp = remaining.filter(([, score]) => score === secondScore).map(([player]) => player)
-    
-    const rest = remaining.filter(([, score]) => score < secondScore)
-    const minScore = rest[rest.length - 1]?.[1] || 0
-    const losers = rest.filter(([, score]) => score === minScore).map(([player]) => player)
-    
-    const survivors = rest.filter(([, score]) => score > minScore).map(([player]) => player)
-    
-    setResults({ winners, runnersUp, survivors, losers })
-    setGameComplete(true)
-  }
+  const sortedPlayers = Object.entries(finalScores)
+    .sort(([, a], [, b]) => b - a)
+  
+  const maxScore = sortedPlayers[0][1]
+  const winners = sortedPlayers.filter(([, score]) => score === maxScore).map(([player]) => player)
+  
+  const remaining = sortedPlayers.filter(([, score]) => score < maxScore)
+  const secondScore = remaining[0]?.[1] || 0
+  const runnersUp = remaining.filter(([, score]) => score === secondScore).map(([player]) => player)
+  
+  const rest = remaining.filter(([, score]) => score < secondScore)
+  const minScore = rest[rest.length - 1]?.[1] || 0
+  const losers = rest.filter(([, score]) => score === minScore).map(([player]) => player)
+  
+  const survivors = rest.filter(([, score]) => score > minScore).map(([player]) => player)
+  
+  setResults({ winners, runnersUp, survivors, losers })
+  setGameComplete(true)
+}
+
+const calculateShitheadResults = (finalScores: Record<string, number>) => {
+  const sortedPlayers = Object.entries(finalScores)
+    .sort(([, a], [, b]) => a - b) // Sort ASCENDING (lowest first)
+  
+  const minScore = sortedPlayers[0][1]
+  const winners = sortedPlayers.filter(([, score]) => score === minScore).map(([player]) => player)
+  
+  const remaining = sortedPlayers.filter(([, score]) => score > minScore)
+  const secondScore = remaining[0]?.[1] || 0
+  const runnersUp = remaining.filter(([, score]) => score === secondScore).map(([player]) => player)
+  
+  const rest = remaining.filter(([, score]) => score > secondScore)
+  const maxScore = rest[rest.length - 1]?.[1] || 0
+  const losers = rest.filter(([, score]) => score === maxScore).map(([player]) => player) // The SHITHEAD(S)
+  
+  const survivors = rest.filter(([, score]) => score < maxScore).map(([player]) => player)
+  
+  setResults({ winners, runnersUp, survivors, losers })
+  setGameComplete(true)
+}
+
+const calculateRungResults = (finalScores: { team1: number; team2: number }) => {
+  const winningTeam = finalScores.team1 >= newSession.threshold ? 1 : 2
+  const winners = winningTeam === 1 ? newSession.team1 : newSession.team2
+  const losers = winningTeam === 1 ? newSession.team2 : newSession.team1
+  
+  setResults({ winners, runnersUp: [], survivors: [], losers, winningTeam })
+  setGameComplete(true)
+}
 
   const saveGame = async () => {
   try {
