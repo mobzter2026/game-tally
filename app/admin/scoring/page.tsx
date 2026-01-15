@@ -118,19 +118,44 @@ const startRungGame = () => {
 }
 
   const updateScore = (player: string, delta: number) => {
-    setScores(prev => {
-      const newScores = { ...prev }
-      newScores[player] = Math.max(0, newScores[player] + delta)
-      
-      // Check if anyone reached threshold
-      const maxScore = Math.max(...Object.values(newScores))
+  setScores(prev => {
+    const newScores = { ...prev }
+    newScores[player] = Math.max(0, newScores[player] + delta)
+    
+    // Check if anyone reached threshold
+    const maxScore = Math.max(...Object.values(newScores))
+    const minScore = Math.min(...Object.values(newScores))
+    
+    if (newSession.game === 'Shithead') {
+      // Shithead: first to reach threshold LOSES
+      if (maxScore >= newSession.threshold) {
+        calculateShitheadResults(newScores)
+      }
+    } else {
+      // Normal games: first to reach threshold WINS
       if (maxScore >= newSession.threshold) {
         calculateResults(newScores)
       }
-      
-      return newScores
-    })
-  }
+    }
+    
+    return newScores
+  })
+}
+
+const updateTeamScore = (team: 'team1' | 'team2', delta: number) => {
+  setTeamScores(prev => {
+    const newScores = { ...prev }
+    newScores[team] = Math.max(0, newScores[team] + delta)
+    
+    // Check if any team reached threshold
+    const maxScore = Math.max(newScores.team1, newScores.team2)
+    if (maxScore >= newSession.threshold) {
+      calculateRungResults(newScores)
+    }
+    
+    return newScores
+  })
+}
 
   const calculateResults = (finalScores: Record<string, number>) => {
     const sortedPlayers = Object.entries(finalScores)
