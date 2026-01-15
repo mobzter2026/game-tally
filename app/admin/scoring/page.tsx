@@ -305,14 +305,14 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
   }
 }
   if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
-        Loading…
-      </div>
-    )
-  }
-
   return (
+    <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
+      Loading…
+    </div>
+  )
+}
+
+return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
     <div className="max-w-2xl mx-auto">
       
@@ -561,7 +561,11 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
           /* INDIVIDUAL LIVE SCORING */
           <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-              {GAME_EMOJIS[newSession.game]} {newSession.game} - {newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : `Race to ${newSession.threshold}`}
+              {GAME_EMOJIS[newSession.game]} {newSession.game} - {
+                newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : 
+                newSession.game === 'Blackjack' ? `🃏 KNOCKOUT - ${newSession.players.length} Players Left` : 
+                `Race to ${newSession.threshold}`
+              }
             </h2>
 
             <div className="space-y-2">
@@ -592,13 +596,45 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
                 </div>
               ))}
             </div>
+
+            {/* BLACKJACK ELIMINATE BUTTON */}
+            {newSession.game === 'Blackjack' && (
+              <Button
+                onClick={() => calculateResults(scores)}
+                variant="pop"
+                color="red"
+                className="w-full py-2.5 rounded-xl font-bold text-base"
+              >
+                ⚠️ Eliminate Lowest Player
+              </Button>
+            )}
+
+            {/* OTHER GAMES - END ROUND BUTTON */}
+            {newSession.game !== 'Blackjack' && (
+              <Button
+                onClick={() => {
+                  if (newSession.game === 'Shithead') {
+                    calculateShitheadResults(scores)
+                  } else {
+                    calculateResults(scores)
+                  }
+                }}
+                variant="pop"
+                color="blue"
+                className="w-full py-2.5 rounded-xl font-bold text-base"
+              >
+                🏁 End Round
+              </Button>
+            )}
           </div>
         )
       ) : (
         /* RESULTS SUMMARY */
         <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
           <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 'Game Complete! 🎉'}
+            {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 
+             newSession.game === 'Blackjack' ? '🃏 BLACKJACK CHAMPION! 🃏' :
+             'Game Complete! 🎉'}
           </h2>
 
           <div className="space-y-2">
@@ -628,7 +664,9 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
             {results.losers.length > 0 && (
               <div className="bg-red-900/50 p-3 rounded-xl">
                 <div className="text-sm font-bold text-red-400 mb-1">
-                  {newSession.game === 'Shithead' ? '💩 THE SHITHEAD(S)' : '💀 Losers'}
+                  {newSession.game === 'Shithead' ? '💩 THE SHITHEAD(S)' : 
+                   newSession.game === 'Blackjack' ? '🃏 ELIMINATED' : 
+                   '💀 Losers'}
                 </div>
                 <div className="text-base font-bold">{results.losers.join(', ')}</div>
               </div>
