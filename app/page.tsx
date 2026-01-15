@@ -211,7 +211,7 @@ export default function PublicView() {
       }
     })
 
-    // FIX: Check for survivors in the database field
+    // FIX: Check for survivors in the database field.
     if (game.survivors && game.survivors.length > 0) {
       game.survivors.forEach(s => {
         if (stats[s]) {
