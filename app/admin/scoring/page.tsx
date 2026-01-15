@@ -158,6 +158,40 @@ const updateTeamScore = (team: 'team1' | 'team2', delta: number) => {
 }
 
   const calculateResults = (finalScores: Record<string, number>) => {
+  // BLACKJACK: Knockout mode - one loser per round
+  if (newSession.game === 'Blackjack') {
+    const sortedPlayers = Object.entries(finalScores)
+      .sort(([, a], [, b]) => a - b) // Sort ascending (lowest first)
+    
+    const minScore = sortedPlayers[0][1]
+    const eliminated = sortedPlayers.filter(([, score]) => score === minScore).map(([player]) => player)
+    
+    // Remove eliminated players from the game
+    const remainingPlayers = newSession.players.filter(p => !eliminated.includes(p))
+    
+    if (remainingPlayers.length === 1) {
+      // Game over - we have a winner!
+      setResults({ 
+        winners: remainingPlayers, 
+        runnersUp: [], 
+        survivors: [], 
+        losers: eliminated 
+      })
+      setGameComplete(true)
+    } else {
+      // Continue with remaining players
+      alert(`${eliminated.join(', ')} eliminated! ${remainingPlayers.length} players remaining.`)
+      setNewSession(s => ({ ...s, players: remainingPlayers }))
+      
+      // Reset scores for remaining players
+      const newScores: Record<string, number> = {}
+      remainingPlayers.forEach(p => { newScores[p] = 0 })
+      setScores(newScores)
+    }
+    return
+  }
+  
+  // NORMAL GAMES: Regular scoring
   const sortedPlayers = Object.entries(finalScores)
     .sort(([, a], [, b]) => b - a)
   
