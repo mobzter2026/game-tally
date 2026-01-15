@@ -178,38 +178,49 @@ export default function PublicView() {
   const filteredGames = getFilteredGames()
 
   const getPlayerStatsForGame = (gameType?: string) => {
-    const stats: any = {}
-    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+  const stats: any = {}
+  const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
 
-    activePlayers.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, survivals: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
-    })
+  activePlayers.forEach(p => {
+    stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, survivals: 0, losses: 0, weightedWins: 0, bestStreak: 0, shitheadLosses: 0 }
+  })
 
-    let individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
-    if (gameType) {
-      individualGames = individualGames.filter(g => g.game_type === gameType)
+  let individualGames = filteredGames.filter(g => g.game_type !== 'Rung')
+  if (gameType) {
+    individualGames = individualGames.filter(g => g.game_type === gameType)
+  }
+
+  individualGames.forEach(game => {
+    if (game.players_in_game) {
+      game.players_in_game.forEach(p => {
+        if (stats[p]) stats[p].gamesPlayed++
+      })
     }
 
-    individualGames.forEach(game => {
-      if (game.players_in_game) {
-        game.players_in_game.forEach(p => {
-          if (stats[p]) stats[p].gamesPlayed++
-        })
+    if (game.winners) game.winners.forEach(w => {
+      if (stats[w]) {
+        stats[w].wins++
+        stats[w].weightedWins += 1
       }
+    })
+    
+    if (game.runners_up) game.runners_up.forEach(r => {
+      if (stats[r]) {
+        stats[r].runnerUps++
+        stats[r].weightedWins += 0.4
+      }
+    })
 
-      if (game.winners) game.winners.forEach(w => {
-        if (stats[w]) {
-          stats[w].wins++
-          stats[w].weightedWins += 1
+    // FIX: Check for survivors in the database field
+    if (game.survivors && game.survivors.length > 0) {
+      game.survivors.forEach(s => {
+        if (stats[s]) {
+          stats[s].survivals++
+          stats[s].weightedWins += 0.1
         }
       })
-      if (game.runners_up) game.runners_up.forEach(r => {
-        if (stats[r]) {
-          stats[r].runnerUps++
-          stats[r].weightedWins += 0.4
-        }
-      })
-
+    } else {
+      // Fallback: Calculate survivors if not in database
       if (game.players_in_game) {
         const winners = game.winners || []
         const runnersUp = game.runners_up || []
@@ -222,46 +233,47 @@ export default function PublicView() {
           }
         })
       }
+    }
 
-      if (game.losers) game.losers.forEach(l => {
-        if (stats[l]) stats[l].losses++
+    if (game.losers) game.losers.forEach(l => {
+      if (stats[l]) stats[l].losses++
+    })
+
+    if (game.game_type === 'Shithead' && game.losers) {
+      game.losers.forEach(l => {
+        if (stats[l]) stats[l].shitheadLosses++
       })
+    }
+  })
 
-      if (game.game_type === 'Shithead' && game.losers) {
-        game.losers.forEach(l => {
-          if (stats[l]) stats[l].shitheadLosses++
-        })
+  activePlayers.forEach(player => {
+    let currentStreak = 0
+    let bestStreak = 0
+
+    const reversedGames = individualGames.slice().reverse()
+    reversedGames.forEach(game => {
+      if (game.winners?.includes(player)) {
+        currentStreak++
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak
+        }
+      } else if (game.players_in_game?.includes(player)) {
+        currentStreak = 0
       }
     })
 
-    activePlayers.forEach(player => {
-      let currentStreak = 0
-      let bestStreak = 0
+    stats[player].bestStreak = bestStreak
+  })
 
-      const reversedGames = individualGames.slice().reverse()
-      reversedGames.forEach(game => {
-        if (game.winners?.includes(player)) {
-          currentStreak++
-          if (currentStreak > bestStreak) {
-            bestStreak = currentStreak
-          }
-        } else if (game.players_in_game?.includes(player)) {
-          currentStreak = 0
-        }
-      })
-
-      stats[player].bestStreak = bestStreak
-    })
-
-    return activePlayers
-      .map(p => ({
-        player: p,
-        ...stats[p],
-        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].weightedWins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
-      }))
-      .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
-      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
-  }
+  return activePlayers
+    .map(p => ({
+      player: p,
+      ...stats[p],
+      winRate: stats[p].gamesPlayed > 0 ? ((stats[p].weightedWins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
+    }))
+    .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
+    .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
+}
 
   const getPlayerStats = () => getPlayerStatsForGame()
 
