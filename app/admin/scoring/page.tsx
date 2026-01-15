@@ -90,16 +90,32 @@ const toggleTeamPlayer = (player: string, team: 'team1' | 'team2') => {
     setNewSession(s => ({ ...s, threshold: num }))
 
   const startNewRound = () => {
-    if (newSession.players.length === 0) return
-    
-    // Initialize scores for all players
-    const initialScores: Record<string, number> = {}
-    newSession.players.forEach(player => {
-      initialScores[player] = 0
-    })
-    setScores(initialScores)
-    setGameStarted(true)
+  if (newSession.game === 'Rung') {
+    setTeamSelectionMode(true)
+    return
   }
+  
+  if (newSession.players.length === 0) return
+  
+  // Initialize scores for all players
+  const initialScores: Record<string, number> = {}
+  newSession.players.forEach(player => {
+    initialScores[player] = 0
+  })
+  setScores(initialScores)
+  setGameStarted(true)
+}
+
+const startRungGame = () => {
+  if (newSession.team1.length !== 2 || newSession.team2.length !== 2) {
+    alert('Please select 2 players for each team!')
+    return
+  }
+  
+  setTeamScores({ team1: 0, team2: 0 })
+  setTeamSelectionMode(false)
+  setGameStarted(true)
+}
 
   const updateScore = (player: string, delta: number) => {
     setScores(prev => {
