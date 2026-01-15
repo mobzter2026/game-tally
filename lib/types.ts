@@ -9,6 +9,7 @@ export interface Database {
           players_in_game: string[]
           winners: string[] | null
           runners_up: string[] | null
+          survivors: string[] | null
           losers: string[] | null
           team1: string[] | null
           team2: string[] | null
