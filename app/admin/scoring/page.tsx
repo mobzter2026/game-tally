@@ -571,32 +571,33 @@ return (
         <h3 className="text-center text-sm font-bold text-slate-300">Select Player to Eliminate</h3>
         {newSession.players.map(player => (
           <Button
-            key={player}
-            onClick={() => {
-              // Eliminate this player
-              setEliminationHistory(prev => [...prev, player])
-              const remaining = newSession.players.filter(p => p !== player)
-              
-              if (remaining.length === 1) {
-                // Winner!
-                setResults({ 
-                  winners: remaining, 
-                  runnersUp: [], 
-                  survivors: [], 
-                  losers: [...eliminationHistory, player]
-                })
-                setGameComplete(true)
-              } else {
-                // Continue game
-                setNewSession(s => ({ ...s, players: remaining }))
-              }
-            }}
-            variant="frosted"
-            color="red"
-            className="w-full h-12 text-base font-semibold"
-          >
-            ❌ {player}
-          </Button>
+  key={player}
+  onClick={() => {
+    // Eliminate this player
+    const newEliminationHistory = [...eliminationHistory, player]
+    setEliminationHistory(newEliminationHistory)
+    const remaining = newSession.players.filter(p => p !== player)
+    
+    if (remaining.length === 1) {
+      // Winner! Save all elimination order
+      setResults({ 
+        winners: [remaining[0]], // Last player standing
+        runnersUp: newEliminationHistory.length >= 2 ? [newEliminationHistory[newEliminationHistory.length - 2]] : [], // 2nd last eliminated
+        survivors: newEliminationHistory.slice(0, -2), // Everyone else eliminated before runner-up
+        losers: [player] // Last eliminated (finished last)
+      })
+      setGameComplete(true)
+    } else {
+      // Continue game
+      setNewSession(s => ({ ...s, players: remaining }))
+    }
+  }}
+  variant="frosted"
+  color="red"
+  className="w-full h-12 text-base font-semibold"
+>
+  ❌ {player}
+</Button>
         ))}
       </div>
 
