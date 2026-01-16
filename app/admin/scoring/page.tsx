@@ -205,16 +205,18 @@ const calculateResults = (finalScores: Record<string, number>) => {
   const saveGame = async () => {
     try {
       if (newSession.game === 'Rung') {
-        for (const round of rungRounds) {
-          const { error } = await supabase
-            .from('games')
-            .insert({
-              game_type: 'Rung',
-              game_date: newSession.date,
-              team1: round.team1,
-              team2: round.team2,
-              winning_team: round.winner
-            } as any)
+  for (const round of rungRounds) {
+    const allPlayers = [...round.team1, ...round.team2]
+    const { error } = await supabase
+      .from('games')
+      .insert({
+        game_type: 'Rung',
+        game_date: newSession.date,
+        players_in_game: allPlayers,
+        team1: round.team1,
+        team2: round.team2,
+        winning_team: round.winner
+      } as any)
           
           if (error) {
             alert(`Error saving round: ${error.message}`)
