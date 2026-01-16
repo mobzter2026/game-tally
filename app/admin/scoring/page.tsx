@@ -364,8 +364,7 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
   )
 }
 
-return (
-  <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
+<div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
     <div className="max-w-2xl mx-auto">
       
       {/* TITLE */}
@@ -475,13 +474,9 @@ return (
         </div>
       ) : teamSelectionMode ? (
         /* RUNG TEAM SELECTION */
-<div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-  <h2 className="text-center text-xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-    {gameStarted ? 'Change Losing Team' : 'Select Teams'}
-  </h2>
-<div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+        <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
           <h2 className="text-center text-xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-            Select Teams
+            {gameStarted ? 'Change Losing Team' : 'Select Teams'}
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
@@ -520,21 +515,9 @@ return (
             </div>
           </div>
 
-          {/* Threshold Selection */}
+          {/* Threshold Selection - Hidden for now since it's hardcoded to 5 */}
           <div className="flex items-center justify-center gap-2">
-            <span className="text-xs font-bold">Race to:</span>
-            {[3, 5].map(num => (
-              <Button
-                key={num}
-                onClick={() => toggleThreshold(num)}
-                variant="frosted"
-                color="purple"
-                selected={newSession.threshold === num}
-                className="w-8 h-8 rounded-full text-xs"
-              >
-                {num}
-              </Button>
-            ))}
+            <span className="text-xs font-bold">Race to 5</span>
           </div>
 
           <Button
@@ -546,311 +529,311 @@ return (
           </Button>
         </div>
       ) : !gameComplete ? (
-  newSession.game === 'Rung' ? (
-  /* RUNG ROUND-BY-ROUND SCORING */
-  <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-    <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-      {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
-    </h2>
+        newSession.game === 'Rung' ? (
+          /* RUNG ROUND-BY-ROUND SCORING */
+          <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
+            </h2>
 
-    {/* Current Score */}
-    <div className="grid grid-cols-2 gap-3 mb-4">
-      <div className="bg-blue-900/50 p-3 rounded-xl text-center">
-        <div className="text-xs font-bold text-blue-400">Team 1</div>
-        <div className="text-xs">{newSession.team1.join(' + ')}</div>
-        <div className="text-4xl font-extrabold text-amber-400">{teamScores.team1}</div>
-      </div>
-      <div className="bg-red-900/50 p-3 rounded-xl text-center">
-        <div className="text-xs font-bold text-red-400">Team 2</div>
-        <div className="text-xs">{newSession.team2.join(' + ')}</div>
-        <div className="text-4xl font-extrabold text-amber-400">{teamScores.team2}</div>
-      </div>
-    </div>
-
-    {/* Round Winner Buttons */}
-    <div className="space-y-2">
-      <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          onClick={() => {
-            // Team 1 wins round
-            const newScores = { ...teamScores, team1: teamScores.team1 + 1 }
-            setTeamScores(newScores)
-            
-            // Record round
-            setRungRounds(prev => [...prev, {
-              team1: newSession.team1,
-              team2: newSession.team2,
-              winner: 1
-            }])
-            
-            // Check if Team 1 won the game
-            if (newScores.team1 >= 5) {
-              setResults({
-                winners: newSession.team1,
-                runnersUp: [],
-                survivors: [],
-                losers: newSession.team2,
-                winningTeam: 1
-              })
-              setGameComplete(true)
-            } else {
-              // Team 2 lost - go to team selection for Team 2
-              setTeamSelectionMode(true)
-              setGameStarted(false)
-            }
-          }}
-          variant="frosted"
-          color="blue"
-          className="h-16 text-base font-bold"
-        >
-          Team 1 Wins Round
-        </Button>
-        
-        <Button
-          onClick={() => {
-            // Team 2 wins round
-            const newScores = { ...teamScores, team2: teamScores.team2 + 1 }
-            setTeamScores(newScores)
-            
-            // Record round
-            setRungRounds(prev => [...prev, {
-              team1: newSession.team1,
-              team2: newSession.team2,
-              winner: 2
-            }])
-            
-            // Check if Team 2 won the game
-            if (newScores.team2 >= 5) {
-              setResults({
-                winners: newSession.team2,
-                runnersUp: [],
-                survivors: [],
-                losers: newSession.team1,
-                winningTeam: 2
-              })
-              setGameComplete(true)
-            } else {
-              // Team 1 lost - go to team selection for Team 1
-              setTeamSelectionMode(true)
-              setGameStarted(false)
-            }
-          }}
-          variant="frosted"
-          color="red"
-          className="h-16 text-base font-bold"
-        >
-          Team 2 Wins Round
-        </Button>
-      </div>
-    </div>
-
-    {/* Round History */}
-    {rungRounds.length > 0 && (
-      <div className="bg-slate-900/50 p-3 rounded-xl">
-        <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
-        <div className="space-y-1 text-xs">
-          {rungRounds.map((round, idx) => (
-            <div key={idx} className="flex justify-between items-center">
-              <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
-                {round.team1.join(' + ')}
-              </span>
-              <span className="text-amber-400">vs</span>
-              <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
-                {round.team2.join(' + ')}
-              </span>
+            {/* Current Score */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-blue-900/50 p-3 rounded-xl text-center">
+                <div className="text-xs font-bold text-blue-400">Team 1</div>
+                <div className="text-xs">{newSession.team1.join(' + ')}</div>
+                <div className="text-4xl font-extrabold text-amber-400">{teamScores.team1}</div>
+              </div>
+              <div className="bg-red-900/50 p-3 rounded-xl text-center">
+                <div className="text-xs font-bold text-red-400">Team 2</div>
+                <div className="text-xs">{newSession.team2.join(' + ')}</div>
+                <div className="text-4xl font-extrabold text-amber-400">{teamScores.team2}</div>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-) : newSession.game === 'Blackjack' ? (
-    /* BLACKJACK KNOCKOUT */
-    <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-      <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-        {GAME_EMOJIS['Blackjack']} BLACKJACK - {newSession.players.length} Players Left
-      </h2>
 
-      {/* Active Players */}
-      <div className="space-y-2">
-        <h3 className="text-center text-sm font-bold text-slate-300">Select Player to Eliminate</h3>
-        {newSession.players.map(player => (
-          <Button
-  key={player}
-  onClick={() => {
-    // Eliminate This Player
-    const newHistory = [...eliminationHistory, player]
-    setEliminationHistory(newHistory)
-    
-    // Remove from active players
-    const remaining = newSession.players.filter(p => p !== player)
-    setNewSession(s => ({ ...s, players: remaining }))
-    
-    // Check if game is over (only 1 player left)
-    if (remaining.length === 1) {
-      // Calculate final positions
-      const winner = remaining[0]
-      const runnerUp = player // Last eliminated = 2nd place
-      const loser = newHistory[0] // First eliminated = last place
-      
-      // Survivors are everyone between first and last (exclude position 0 and last)
-      const survivors = newHistory.slice(1, -1) // Exclude first (loser) and last (runner-up)
-      
-      setResults({ 
-        winners: [winner],
-        runnersUp: [runnerUp],
-        survivors: survivors.length > 0 ? survivors : [],
-        losers: [loser] // First eliminated
-      })
-      setGameComplete(true)
-    }
-  }}
-  variant="frosted"
-  color="red"
-  className="w-full h-12 text-base font-semibold"
->
-  ❌ {player}
-</Button>
-        ))}
-      </div>
+            {/* Round Winner Buttons */}
+            <div className="space-y-2">
+              <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => {
+                    // Team 1 wins round
+                    const newScores = { ...teamScores, team1: teamScores.team1 + 1 }
+                    setTeamScores(newScores)
+                    
+                    // Record round
+                    setRungRounds(prev => [...prev, {
+                      team1: newSession.team1,
+                      team2: newSession.team2,
+                      winner: 1
+                    }])
+                    
+                    // Check if Team 1 won the game
+                    if (newScores.team1 >= 5) {
+                      setResults({
+                        winners: newSession.team1,
+                        runnersUp: [],
+                        survivors: [],
+                        losers: newSession.team2,
+                        winningTeam: 1
+                      })
+                      setGameComplete(true)
+                    } else {
+                      // Team 2 lost - go to team selection for Team 2
+                      setTeamSelectionMode(true)
+                      setGameStarted(false)
+                    }
+                  }}
+                  variant="frosted"
+                  color="blue"
+                  className="h-16 text-base font-bold"
+                >
+                  Team 1 Wins Round
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    // Team 2 wins round
+                    const newScores = { ...teamScores, team2: teamScores.team2 + 1 }
+                    setTeamScores(newScores)
+                    
+                    // Record round
+                    setRungRounds(prev => [...prev, {
+                      team1: newSession.team1,
+                      team2: newSession.team2,
+                      winner: 2
+                    }])
+                    
+                    // Check if Team 2 won the game
+                    if (newScores.team2 >= 5) {
+                      setResults({
+                        winners: newSession.team2,
+                        runnersUp: [],
+                        survivors: [],
+                        losers: newSession.team1,
+                        winningTeam: 2
+                      })
+                      setGameComplete(true)
+                    } else {
+                      // Team 1 lost - go to team selection for Team 1
+                      setTeamSelectionMode(true)
+                      setGameStarted(false)
+                    }
+                  }}
+                  variant="frosted"
+                  color="red"
+                  className="h-16 text-base font-bold"
+                >
+                  Team 2 Wins Round
+                </Button>
+              </div>
+            </div>
 
-      {/* Eliminated Players */}
-      {eliminationHistory.length > 0 && (
-        <div className="bg-slate-900/50 p-3 rounded-xl">
-          <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Eliminated</h3>
-          <div className="text-center text-sm text-red-400">
-            {eliminationHistory.join(', ')}
+            {/* Round History */}
+            {rungRounds.length > 0 && (
+              <div className="bg-slate-900/50 p-3 rounded-xl">
+                <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
+                <div className="space-y-1 text-xs">
+                  {rungRounds.map((round, idx) => (
+                    <div key={idx} className="flex justify-between items-center">
+                      <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
+                        {round.team1.join(' + ')}
+                      </span>
+                      <span className="text-amber-400">vs</span>
+                      <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
+                        {round.team2.join(' + ')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        ) : newSession.game === 'Blackjack' ? (
+          /* BLACKJACK KNOCKOUT */
+          <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              {GAME_EMOJIS['Blackjack']} BLACKJACK - {newSession.players.length} Players Left
+            </h2>
 
-      {/* Undo Button */}
-      {eliminationHistory.length > 0 && (
-        <Button
-          onClick={() => {
-            const lastEliminated = eliminationHistory[eliminationHistory.length - 1]
-            setEliminationHistory(prev => prev.slice(0, -1))
-            setNewSession(s => ({ ...s, players: [...s.players, lastEliminated] }))
-          }}
-          variant="frosted"
-          color="purple"
-          className="w-full py-2 rounded-xl font-bold text-sm"
-        >
-          ↩️ Undo Last Elimination
-        </Button>
-      )}
-    </div>
-  ) : (
-    /* INDIVIDUAL LIVE SCORING - Other games */
-    <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-      <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-        {GAME_EMOJIS[newSession.game]} {newSession.game} - {
-          newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : 
-          `Race to ${newSession.threshold}`
-        }
-      </h2>
-
-      <div className="space-y-2">
-        {newSession.players.map(player => (
-          <div key={player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
-            <Button
-              onClick={() => updateScore(player, -1)}
-              variant="frosted"
-              color="red"
-              className="w-10 h-10 text-xl font-bold"
-            >
-              −
-            </Button>
-            
-            <div className="flex-1 text-center">
-              <div className="text-base font-bold">{player}</div>
-              <div className="text-2xl font-extrabold text-amber-400">{scores[player]}</div>
+            {/* Active Players */}
+            <div className="space-y-2">
+              <h3 className="text-center text-sm font-bold text-slate-300">Select Player to Eliminate</h3>
+              {newSession.players.map(player => (
+                <Button
+                  key={player}
+                  onClick={() => {
+                    // Add to elimination history
+                    const newHistory = [...eliminationHistory, player]
+                    setEliminationHistory(newHistory)
+                    
+                    // Remove from active players
+                    const remaining = newSession.players.filter(p => p !== player)
+                    setNewSession(s => ({ ...s, players: remaining }))
+                    
+                    // Check if game is over (only 1 player left)
+                    if (remaining.length === 1) {
+                      // Calculate final positions
+                      const winner = remaining[0]
+                      const runnerUp = player // Last eliminated = 2nd place
+                      const loser = newHistory[0] // First eliminated = last place
+                      
+                      // Survivors are everyone between first and last (exclude position 0 and last)
+                      const survivors = newHistory.slice(1, -1)
+                      
+                      setResults({ 
+                        winners: [winner],
+                        runnersUp: [runnerUp],
+                        survivors: survivors.length > 0 ? survivors : [],
+                        losers: [loser]
+                      })
+                      setGameComplete(true)
+                    }
+                  }}
+                  variant="frosted"
+                  color="red"
+                  className="w-full h-12 text-base font-semibold"
+                >
+                  ❌ {player}
+                </Button>
+              ))}
             </div>
-            
+
+            {/* Eliminated Players */}
+            {eliminationHistory.length > 0 && (
+              <div className="bg-slate-900/50 p-3 rounded-xl">
+                <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Eliminated (in order)</h3>
+                <div className="text-center text-sm text-red-400">
+                  {eliminationHistory.join(' → ')}
+                </div>
+              </div>
+            )}
+
+            {/* Undo Button */}
+            {eliminationHistory.length > 0 && (
+              <Button
+                onClick={() => {
+                  const lastEliminated = eliminationHistory[eliminationHistory.length - 1]
+                  setEliminationHistory(prev => prev.slice(0, -1))
+                  setNewSession(s => ({ ...s, players: [...s.players, lastEliminated] }))
+                }}
+                variant="frosted"
+                color="purple"
+                className="w-full py-2 rounded-xl font-bold text-sm"
+              >
+                ↩️ Undo Last Elimination
+              </Button>
+            )}
+          </div>
+        ) : (
+          /* INDIVIDUAL LIVE SCORING - Other games */
+          <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              {GAME_EMOJIS[newSession.game]} {newSession.game} - {
+                newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : 
+                `Race to ${newSession.threshold}`
+              }
+            </h2>
+
+            <div className="space-y-2">
+              {newSession.players.map(player => (
+                <div key={player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                  <Button
+                    onClick={() => updateScore(player, -1)}
+                    variant="frosted"
+                    color="red"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    −
+                  </Button>
+                  
+                  <div className="flex-1 text-center">
+                    <div className="text-base font-bold">{player}</div>
+                    <div className="text-2xl font-extrabold text-amber-400">{scores[player]}</div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => updateScore(player, 1)}
+                    variant="frosted"
+                    color="blue"
+                    className="w-10 h-10 text-xl font-bold"
+                  >
+                    +
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {/* END ROUND BUTTON */}
             <Button
-              onClick={() => updateScore(player, 1)}
-              variant="frosted"
+              onClick={() => {
+                if (newSession.game === 'Shithead') {
+                  calculateShitheadResults(scores)
+                } else {
+                  calculateResults(scores)
+                }
+              }}
+              variant="pop"
               color="blue"
-              className="w-10 h-10 text-xl font-bold"
+              className="w-full py-2.5 rounded-xl font-bold text-base"
             >
-              +
+              🏁 End Round
             </Button>
           </div>
-        ))}
-      </div>
+        )
+      ) : (
+        /* RESULTS SUMMARY */
+        <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+          <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 
+             newSession.game === 'Blackjack' ? '🃏 BLACKJACK CHAMPION! 🃏' :
+             'Game Complete! 🎉'}
+          </h2>
 
-      {/* END ROUND BUTTON */}
-      <Button
-        onClick={() => {
-          if (newSession.game === 'Shithead') {
-            calculateShitheadResults(scores)
-          } else {
-            calculateResults(scores)
-          }
-        }}
-        variant="pop"
-        color="blue"
-        className="w-full py-2.5 rounded-xl font-bold text-base"
-      >
-        🏁 End Round
-      </Button>
-    </div>
-  )
-) : (
-  /* RESULTS SUMMARY */
-  <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-    <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-      {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 
-       newSession.game === 'Blackjack' ? '🃏 BLACKJACK CHAMPION! 🃏' :
-       'Game Complete! 🎉'}
-    </h2>
-
-    <div className="space-y-2">
-      {results.winners.length > 0 && (
-        <div className="bg-green-900/50 p-3 rounded-xl">
-          <div className="text-sm font-bold text-green-400 mb-1">
-            {newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}
+          <div className="space-y-2">
+            {results.winners.length > 0 && (
+              <div className="bg-green-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-green-400 mb-1">
+                  {newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}
+                </div>
+                <div className="text-base font-bold">{results.winners.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.runnersUp.length > 0 && (
+              <div className="bg-blue-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-blue-400 mb-1">🥈 Runners Up</div>
+                <div className="text-base font-bold">{results.runnersUp.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.survivors.length > 0 && (
+              <div className="bg-slate-800/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-slate-400 mb-1">🤟 Survivors</div>
+                <div className="text-base font-bold">{results.survivors.join(', ')}</div>
+              </div>
+            )}
+            
+            {results.losers.length > 0 && (
+              <div className="bg-red-900/50 p-3 rounded-xl">
+                <div className="text-sm font-bold text-red-400 mb-1">
+                  {newSession.game === 'Shithead' ? '💩 THE SHITHEAD(S)' : 
+                   newSession.game === 'Blackjack' ? '🃏 ELIMINATED' : 
+                   '💀 Losers'}
+                </div>
+                <div className="text-base font-bold">{results.losers.join(', ')}</div>
+              </div>
+            )}
           </div>
-          <div className="text-base font-bold">{results.winners.join(', ')}</div>
-        </div>
-      )}
-      
-      {results.runnersUp.length > 0 && (
-        <div className="bg-blue-900/50 p-3 rounded-xl">
-          <div className="text-sm font-bold text-blue-400 mb-1">🥈 Runners Up</div>
-          <div className="text-base font-bold">{results.runnersUp.join(', ')}</div>
-        </div>
-      )}
-      
-      {results.survivors.length > 0 && (
-        <div className="bg-slate-800/50 p-3 rounded-xl">
-          <div className="text-sm font-bold text-slate-400 mb-1">🤟 Survivors</div>
-          <div className="text-base font-bold">{results.survivors.join(', ')}</div>
-        </div>
-      )}
-      
-      {results.losers.length > 0 && (
-        <div className="bg-red-900/50 p-3 rounded-xl">
-          <div className="text-sm font-bold text-red-400 mb-1">
-            {newSession.game === 'Shithead' ? '💩 THE SHITHEAD(S)' : 
-             newSession.game === 'Blackjack' ? '🃏 ELIMINATED' : 
-             '💀 Losers'}
-          </div>
-          <div className="text-base font-bold">{results.losers.join(', ')}</div>
-        </div>
-      )}
-    </div>
 
-    <Button
-      onClick={saveGame}
-      variant="pop"
-      className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
-    >
-      💾 Save Game & Start New Round
-    </Button>
-  </div>
-)}
+          <Button
+            onClick={saveGame}
+            variant="pop"
+            className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
+          >
+            💾 Save Game & Start New Round
+          </Button>
+        </div>
+      )}
     </div>
   </div>
 )
