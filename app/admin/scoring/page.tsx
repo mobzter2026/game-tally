@@ -826,13 +826,14 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
           </div>
 
           <Button
-            onClick={saveGame}
-            variant="pop"
-            className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
-          >
-            💾 Save Game & Start New Round
-          </Button>
-        </div>
+      onClick={saveGame}
+      variant="pop"
+      className="w-full py-2.5 rounded-xl font-bold text-base bg-gradient-to-br from-emerald-600 to-emerald-900"
+    >
+      💾 Save Game & Start New Round
+    </Button>
+  </div>
+)}
       )}
     </div>
   </div>
