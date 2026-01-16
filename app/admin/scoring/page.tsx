@@ -547,10 +547,10 @@ return (
       ) : !gameComplete ? (
   newSession.game === 'Rung' ? (
   /* RUNG ROUND-BY-ROUND SCORING */
-  <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-  <h2 className="text-center text-xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-    {gameStarted ? 'Change Losing Team' : 'Select Teams'}
-  </h2>
+  <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+    <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+      {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
+    </h2>
 
     {/* Current Score */}
     <div className="grid grid-cols-2 gap-3 mb-4">
