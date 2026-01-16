@@ -608,32 +608,31 @@ return (
           <Button
   key={player}
   onClick={() => {
-    // Eliminate this player
-    const newEliminationHistory = [...eliminationHistory, player]
-    setEliminationHistory(newEliminationHistory)
-    const remaining = newSession.players.filter(p => p !== player)
+    // Eliminate This Player
+    const newHistory = [...eliminationHistory, player]
+    setEliminationHistory(newHistory)
     
+    // Remove from active players
+    const remaining = newSession.players.filter(p => p !== player)
+    setNewSession(s => ({ ...s, players: remaining }))
+    
+    // Check if game is over (only 1 player left)
     if (remaining.length === 1) {
-      // Winner! Calculate final positions based on elimination order
+      // Calculate final positions
       const winner = remaining[0]
-      const lastEliminated = player // This player (finished 2nd)
-      const secondLastEliminated = eliminationHistory.length > 0 
-        ? eliminationHistory[eliminationHistory.length - 1] 
-        : null // Finished 3rd
+      const runnerUp = player // Last eliminated = 2nd place
+      const loser = newHistory[0] // First eliminated = last place
       
-      // Everyone else eliminated before the second-to-last
-      const survivors = eliminationHistory.slice(0, -1).filter(p => p !== secondLastEliminated)
+      // Survivors are everyone between first and last (exclude position 0 and last)
+      const survivors = newHistory.slice(1, -1) // Exclude first (loser) and last (runner-up)
       
       setResults({ 
         winners: [winner],
-        runnersUp: secondLastEliminated ? [secondLastEliminated] : [lastEliminated],
-        survivors: survivors,
-        losers: [eliminationHistory[0]] // First eliminated = loser
+        runnersUp: [runnerUp],
+        survivors: survivors.length > 0 ? survivors : [],
+        losers: [loser] // First eliminated
       })
       setGameComplete(true)
-    } else {
-      // Continue game
-      setNewSession(s => ({ ...s, players: remaining }))
     }
   }}
   variant="frosted"
