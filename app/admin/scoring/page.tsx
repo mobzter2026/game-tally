@@ -129,6 +129,9 @@ const startRungGame = () => {
     [team2Key]: prev[team2Key] || 0
   }))
   
+  setNewSession(s => ({ ...s, threshold: 5 }))
+  setTeamScores({ team1: 0, team2: 0 })
+  setRungRounds([])
   setTeamSelectionMode(false)
   setGameStarted(true)
 }
