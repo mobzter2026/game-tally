@@ -274,7 +274,7 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
   setGameComplete(true)
 }
 
-  const saveGame = async () => {
+const saveGame = async () => {
   try {
     if (newSession.game === 'Rung') {
   // Save each round as a separate game entry
@@ -377,8 +377,8 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
 }
 const getTeamKey = (players: string[]) => players.slice().sort().join('')
 
-  if (loading) {
-  return (
+if (loading) {
+return (
     <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
       Loading…
     </div>
