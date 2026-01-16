@@ -833,7 +833,6 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
       💾 Save Game & Start New Round
     </Button>
   </div>
-)}
       )}
     </div>
   </div>
