@@ -375,6 +375,8 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
     alert(`Failed to save game: ${error}`)
   }
 }
+const getTeamKey = (players: string[]) => players.slice().sort().join('')
+
   if (loading) {
   return (
     <div className="h-screen flex items-center justify-center text-white bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950">
