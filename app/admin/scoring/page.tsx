@@ -136,7 +136,7 @@ const startRungGame = () => {
   setGameStarted(true)
 }
 
-const [rungTeamScores, setRungTeamScores] = useState<Record<string, number>>({})}
+const [rungTeamScores, setRungTeamScores] = useState<Record<string, number>>({})
 
 const getTeamKey = (players: string[]) => players.slice().sort().join('')
   
