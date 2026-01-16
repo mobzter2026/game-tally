@@ -363,8 +363,8 @@ const calculateRungResults = (finalScores: { team1: number; team2: number }) => 
     </div>
   )
 }
-
-<div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
+return (
+  <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-3 overflow-auto">
     <div className="max-w-2xl mx-auto">
       
       {/* TITLE */}
