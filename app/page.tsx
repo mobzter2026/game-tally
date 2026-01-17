@@ -556,9 +556,9 @@ export default function PublicView() {
   const overallPlayerStats = getOverallPlayerStats()
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
-  const recentGames = activeTab === 'individual'
-    ? filteredGames.slice(0, 20)  // Include ALL games (Rung + individual)
-    : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
+  const recentGames = activeTab === 'rung'
+    ? filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
+    : filteredGames.slice(0, 20)  // For 'individual' and 'recent' tabs, show all games
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 

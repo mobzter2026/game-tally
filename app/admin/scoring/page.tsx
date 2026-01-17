@@ -142,14 +142,28 @@ export default function ScoringPage() {
     const winners = sortedPlayers.filter(([, score]) => score === maxScore).map(([player]) => player)
 
     const remaining = sortedPlayers.filter(([, score]) => score < maxScore)
-    const secondHighest = remaining.length > 0 ? remaining[0][1] : -1
+    
+    if (remaining.length === 0) {
+      // Everyone won (tied for first)
+      setResults({ winners, runnersUp: [], survivors: [], losers: [] })
+      setGameComplete(true)
+      return
+    }
+
+    const minScore = remaining[remaining.length - 1][1]
+    const secondHighest = remaining[0][1]
+    
+    // If second highest score equals minimum score, everyone else lost (no runners-up or survivors)
+    if (secondHighest === minScore) {
+      const losers = remaining.map(([player]) => player)
+      setResults({ winners, runnersUp: [], survivors: [], losers })
+      setGameComplete(true)
+      return
+    }
+
     const runnersUp = remaining.filter(([, score]) => score === secondHighest).map(([player]) => player)
-
-    const restRemaining = remaining.filter(([, score]) => score < secondHighest && score > 0)
-    const minScore = sortedPlayers[sortedPlayers.length - 1][1]
-    const losers = sortedPlayers.filter(([, score]) => score === minScore && score < maxScore).map(([player]) => player)
-
-    const survivors = restRemaining.filter(([player]) => !losers.includes(player)).map(([player]) => player)
+    const losers = remaining.filter(([, score]) => score === minScore).map(([player]) => player)
+    const survivors = remaining.filter(([player]) => !runnersUp.includes(player) && !losers.includes(player)).map(([player]) => player)
 
     setResults({ winners, runnersUp, survivors, losers })
     setGameComplete(true)
