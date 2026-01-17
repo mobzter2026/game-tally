@@ -463,9 +463,15 @@ export default function ScoringPage() {
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <Button
                   onClick={() => {
-                    const newScore = teamScores.team1 + 1
+                    const team1Key = getTeamKey(newSession.team1)
+                    const newScore = (rungTeamScores[team1Key] || 0) + 1
                     
-                    setTeamScores(prev => ({ ...prev, team1: newScore }))
+                    setTeamScores(prev => ({ ...prev, team1: prev.team1 + 1 }))
+                    
+                    setRungTeamScores(prev => ({
+                      ...prev,
+                      [team1Key]: newScore
+                    }))
                     
                     setRungRounds(prev => [...prev, {
                       team1: newSession.team1,
@@ -474,18 +480,47 @@ export default function ScoringPage() {
                     }])
                     
                     if (newScore >= 5) {
+                      const team1Key = getTeamKey(newSession.team1)
+                      
+                      // Update the team scores with the new winning score
+                      const updatedTeamScores = {
+                        ...rungTeamScores,
+                        [team1Key]: newScore
+                      }
+                      
+                      // Build a map of team keys to actual player arrays
+                      const teamKeyToPlayers: Record<string, string[]> = {}
+                      rungRounds.forEach(round => {
+                        const t1Key = getTeamKey(round.team1)
+                        const t2Key = getTeamKey(round.team2)
+                        teamKeyToPlayers[t1Key] = round.team1
+                        teamKeyToPlayers[t2Key] = round.team2
+                      })
+                      // Add current teams
+                      teamKeyToPlayers[team1Key] = newSession.team1
+                      teamKeyToPlayers[getTeamKey(newSession.team2)] = newSession.team2
+                      
+                      // Sort all teams by score
+                      const allTeams = Object.entries(updatedTeamScores)
+                        .map(([key, score]) => ({
+                          teamKey: key,
+                          players: teamKeyToPlayers[key] || [],
+                          score: score
+                        }))
+                        .sort((a, b) => b.score - a.score)
+                      
+                      const winnerPlayers = newSession.team1
+                      const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+                        ? allTeams[1].players 
+                        : []
+                      
                       const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]).concat(newSession.team1, newSession.team2))]
-                      
-                      // Determine runner-up: the current losing team if they have score > 0
-                      const runnerUpPlayers = teamScores.team2 > 0 ? newSession.team2 : []
-                      
-                      // Losers are everyone who isn't a winner or runner-up
                       const loserPlayers = allPlayersInGame.filter(p => 
-                        !newSession.team1.includes(p) && !runnerUpPlayers.includes(p)
+                        !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
                       )
                       
                       setResults({
-                        winners: newSession.team1,
+                        winners: winnerPlayers,
                         runnersUp: runnerUpPlayers,
                         survivors: [],
                         losers: loserPlayers,
@@ -507,9 +542,15 @@ export default function ScoringPage() {
 
                 <Button
                   onClick={() => {
-                    const newScore = teamScores.team2 + 1
+                    const team2Key = getTeamKey(newSession.team2)
+                    const newScore = (rungTeamScores[team2Key] || 0) + 1
                     
-                    setTeamScores(prev => ({ ...prev, team2: newScore }))
+                    setTeamScores(prev => ({ ...prev, team2: prev.team2 + 1 }))
+                    
+                    setRungTeamScores(prev => ({
+                      ...prev,
+                      [team2Key]: newScore
+                    }))
                     
                     setRungRounds(prev => [...prev, {
                       team1: newSession.team1,
@@ -518,18 +559,47 @@ export default function ScoringPage() {
                     }])
                     
                     if (newScore >= 5) {
+                      const team2Key = getTeamKey(newSession.team2)
+                      
+                      // Update the team scores with the new winning score
+                      const updatedTeamScores = {
+                        ...rungTeamScores,
+                        [team2Key]: newScore
+                      }
+                      
+                      // Build a map of team keys to actual player arrays
+                      const teamKeyToPlayers: Record<string, string[]> = {}
+                      rungRounds.forEach(round => {
+                        const t1Key = getTeamKey(round.team1)
+                        const t2Key = getTeamKey(round.team2)
+                        teamKeyToPlayers[t1Key] = round.team1
+                        teamKeyToPlayers[t2Key] = round.team2
+                      })
+                      // Add current teams
+                      teamKeyToPlayers[getTeamKey(newSession.team1)] = newSession.team1
+                      teamKeyToPlayers[team2Key] = newSession.team2
+                      
+                      // Sort all teams by score
+                      const allTeams = Object.entries(updatedTeamScores)
+                        .map(([key, score]) => ({
+                          teamKey: key,
+                          players: teamKeyToPlayers[key] || [],
+                          score: score
+                        }))
+                        .sort((a, b) => b.score - a.score)
+                      
+                      const winnerPlayers = newSession.team2
+                      const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+                        ? allTeams[1].players 
+                        : []
+                      
                       const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]).concat(newSession.team1, newSession.team2))]
-                      
-                      // Determine runner-up: the current losing team if they have score > 0
-                      const runnerUpPlayers = teamScores.team1 > 0 ? newSession.team1 : []
-                      
-                      // Losers are everyone who isn't a winner or runner-up
                       const loserPlayers = allPlayersInGame.filter(p => 
-                        !newSession.team2.includes(p) && !runnerUpPlayers.includes(p)
+                        !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
                       )
                       
                       setResults({
-                        winners: newSession.team2,
+                        winners: winnerPlayers,
                         runnersUp: runnerUpPlayers,
                         survivors: [],
                         losers: loserPlayers,
