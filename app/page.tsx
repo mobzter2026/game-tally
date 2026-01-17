@@ -649,7 +649,7 @@ export default function PublicView() {
         font-bold
       "
     >
-      Rung Duo
+      Rung - Duo
     </Button>
 
     <Button
