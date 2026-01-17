@@ -1,9 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import Button from '@/components/ui/button'
-import { PLAYERS, SCORE_GAMES, GAME_EMOJIS } from '@/constants'
+import { createClient } from '@/lib/supabase/client'
+import Button from '@/Components/Button'
+
+const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
+const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Shithead', 'Blackjack', 'Rung']
+const GAME_EMOJIS: Record<string, string> = {
+  'Blackjack': '🃏',
+  'Monopoly': '🎲',
+  'Tai Ti': '🀄',
+  'Shithead': '💩',
+  'Rung': '🎭'
+}
 
 interface Session {
   game: string
@@ -23,9 +32,19 @@ export default function ScoringPage() {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [teamScores, setTeamScores] = useState({ team1: 0, team2: 0 })
   const [eliminationHistory, setEliminationHistory] = useState<string[]>([])
-  const [rungRounds, setRungRounds] = useState<Array<{ team1: string[], team2: string[], winner: 1 | 2 }>>([])
+  const [rungRounds, setRungRounds] = useState<Array<{
+    team1: string[]
+    team2: string[]
+    winner: 1 | 2
+  }>>([])
   const [rungTeamScores, setRungTeamScores] = useState<Record<string, number>>({})
-  const [results, setResults] = useState<{ winners: string[], runnersUp: string[], survivors: string[], losers: string[], winningTeam?: number }>({
+  const [results, setResults] = useState<{
+    winners: string[]
+    runnersUp: string[]
+    survivors: string[]
+    losers: string[]
+    winningTeam?: number
+  }>({
     winners: [],
     runnersUp: [],
     survivors: [],
@@ -40,24 +59,44 @@ export default function ScoringPage() {
     team2: []
   })
 
-  useEffect(() => setLoading(false), [])
+  useEffect(() => {
+    setLoading(false)
+  }, [])
 
-const togglePlayer = (player: string) => {
+  const togglePlayer = (player: string) => {
     if (newSession.players.includes(player)) {
-      setNewSession({ ...newSession, players: newSession.players.filter(p => p !== player) })
+      setNewSession({
+        ...newSession,
+        players: newSession.players.filter(p => p !== player)
+      })
     } else {
-      setNewSession({ ...newSession, players: [...newSession.players, player] })
+      setNewSession({
+        ...newSession,
+        players: [...newSession.players, player]
+      })
     }
   }
 
-  const selectAllPlayers = () => setNewSession({ ...newSession, players: [...PLAYERS] })
-  const clearPlayers = () => setNewSession({ ...newSession, players: [] })
-  const toggleThreshold = (num: number) => setNewSession({ ...newSession, threshold: num })
+  const selectAllPlayers = () => {
+    setNewSession({ ...newSession, players: [...PLAYERS] })
+  }
+
+  const clearPlayers = () => {
+    setNewSession({ ...newSession, players: [] })
+  }
+
+  const toggleThreshold = (num: number) => {
+    setNewSession({ ...newSession, threshold: num })
+  }
 
   const toggleTeamPlayer = (player: string, team: 'team1' | 'team2') => {
     const otherTeam = team === 'team1' ? 'team2' : 'team1'
+    
     if (newSession[team].includes(player)) {
-      setNewSession({ ...newSession, [team]: newSession[team].filter(p => p !== player) })
+      setNewSession({
+        ...newSession,
+        [team]: newSession[team].filter(p => p !== player)
+      })
     } else {
       setNewSession({
         ...newSession,
@@ -67,20 +106,21 @@ const togglePlayer = (player: string) => {
     }
   }
 
-  const getTeamKey = (players: string[]) => players.slice().sort().join('')
-
-const startNewRound = () => {
+  const startNewRound = () => {
     if (newSession.game === 'Rung') {
       setTeamSelectionMode(true)
       return
     }
+
     if (newSession.players.length === 0) {
       alert('Please select at least one player!')
       return
     }
 
     const initialScores: Record<string, number> = {}
-    newSession.players.forEach(p => initialScores[p] = 0)
+    newSession.players.forEach(player => {
+      initialScores[player] = 0
+    })
     setScores(initialScores)
     setGameStarted(true)
   }
@@ -90,9 +130,16 @@ const startNewRound = () => {
       alert('Please select 2 players for each team!')
       return
     }
-    const t1Key = getTeamKey(newSession.team1)
-    const t2Key = getTeamKey(newSession.team2)
-    setRungTeamScores(prev => ({ ...prev, [t1Key]: prev[t1Key] || 0, [t2Key]: prev[t2Key] || 0 }))
+    
+    const team1Key = getTeamKey(newSession.team1)
+    const team2Key = getTeamKey(newSession.team2)
+    
+    setRungTeamScores(prev => ({
+      ...prev,
+      [team1Key]: prev[team1Key] || 0,
+      [team2Key]: prev[team2Key] || 0
+    }))
+    
     setNewSession(s => ({ ...s, threshold: 5 }))
     setTeamScores({ team1: 0, team2: 0 })
     setRungRounds([])
@@ -103,117 +150,102 @@ const startNewRound = () => {
   const updateScore = (player: string, delta: number) => {
     setScores(prev => {
       const newScore = Math.max(0, (prev[player] || 0) + delta)
-      const updated = { ...prev, [player]: newScore }
-
-      if (newSession.game === 'Shithead' && newScore >= newSession.threshold) {
-        calculateShitheadResults(updated)
-      } else if (newSession.game !== 'Shithead' && newSession.game !== 'Blackjack' && newScore >= newSession.threshold) {
-        calculateResults(updated)
-      }
-
-      return updated
+      return { ...prev, [player]: newScore }
     })
   }
 
   const updateTeamScore = (team: 'team1' | 'team2', delta: number) => {
-    setTeamScores(prev => ({ ...prev, [team]: Math.max(0, prev[team] + delta) }))
+    setTeamScores(prev => ({
+      ...prev,
+      [team]: Math.max(0, prev[team] + delta)
+    }))
   }
 
-  const calculateResults = (finalScores: Record<string, number>) => {
-    const sortedPlayers = Object.entries(finalScores).sort(([, a], [, b]) => b - a)
+const calculateResults = (finalScores: Record<string, number>) => {
+    const sortedPlayers = Object.entries(finalScores)
+      .sort(([, a], [, b]) => b - a)
+
     const maxScore = sortedPlayers[0][1]
-    const winners = sortedPlayers.filter(([, s]) => s === maxScore).map(([p]) => p)
+    const winners = sortedPlayers.filter(([, score]) => score === maxScore).map(([player]) => player)
 
-    const remaining = sortedPlayers.filter(([, s]) => s < maxScore)
-    const secondHighest = remaining.length ? remaining[0][1] : -1
-    const runnersUp = remaining.filter(([, s]) => s === secondHighest).map(([p]) => p)
+    const remaining = sortedPlayers.filter(([, score]) => score < maxScore)
+    const secondHighest = remaining.length > 0 ? remaining[0][1] : -1
+    const runnersUp = remaining.filter(([, score]) => score === secondHighest).map(([player]) => player)
 
-    const restRemaining = remaining.filter(([, s]) => s < secondHighest && s > 0)
+    const restRemaining = remaining.filter(([, score]) => score < secondHighest && score > 0)
     const minScore = sortedPlayers[sortedPlayers.length - 1][1]
-    const losers = sortedPlayers.filter(([, s]) => s === minScore && s < maxScore).map(([p]) => p)
-    const survivors = restRemaining.filter(([p]) => !losers.includes(p)).map(([p]) => p)
+    const losers = sortedPlayers.filter(([, score]) => score === minScore && score < maxScore).map(([player]) => player)
+
+    const survivors = restRemaining.filter(([player]) => !losers.includes(player)).map(([player]) => player)
 
     setResults({ winners, runnersUp, survivors, losers })
     setGameComplete(true)
   }
 
   const calculateShitheadResults = (finalScores: Record<string, number>) => {
-    const sorted = Object.entries(finalScores).sort(([, a], [, b]) => a - b)
-    const minScore = sorted[0][1]
-    const maxScore = sorted[sorted.length - 1][1]
+    const sortedPlayers = Object.entries(finalScores)
+      .sort(([, a], [, b]) => a - b)
 
-    const winners = sorted.filter(([, s]) => s === minScore).map(([p]) => p)
-    const losers = sorted.filter(([, s]) => s === maxScore).map(([p]) => p)
-    const middle = sorted.filter(([, s]) => s > minScore && s < maxScore)
+    const minScore = sortedPlayers[0][1]
+    const losers = sortedPlayers.filter(([, score]) => score === minScore).map(([player]) => player)
 
-    const secondLowest = middle.length ? middle[0][1] : null
-    const runnersUp = middle.filter(([, s]) => s === secondLowest).map(([p]) => p)
-    const survivors = middle.filter(([, s]) => s !== secondLowest).map(([p]) => p)
+    const remaining = sortedPlayers.filter(([, score]) => score > minScore)
+    const secondLowest = remaining.length > 0 ? remaining[0][1] : Infinity
+    const runnersUp = remaining.filter(([, score]) => score === secondLowest).map(([player]) => player)
+
+    const restRemaining = remaining.filter(([, score]) => score > secondLowest)
+    const maxScore = sortedPlayers[sortedPlayers.length - 1][1]
+    const winners = sortedPlayers.filter(([, score]) => score === maxScore && score > minScore).map(([player]) => player)
+
+    const survivors = restRemaining.filter(([player]) => !winners.includes(player)).map(([player]) => player)
 
     setResults({ winners, runnersUp, survivors, losers })
-    setGameComplete(true)
-  }
-
-const finalizeRungResults = (winningTeam: 1 | 2) => {
-    const teamMap: Record<string, { players: string[]; wins: number }> = {}
-
-    rungRounds.forEach(round => {
-      const t1Key = getTeamKey(round.team1)
-      const t2Key = getTeamKey(round.team2)
-
-      if (!teamMap[t1Key]) teamMap[t1Key] = { players: round.team1, wins: 0 }
-      if (!teamMap[t2Key]) teamMap[t2Key] = { players: round.team2, wins: 0 }
-
-      teamMap[round.winner === 1 ? t1Key : t2Key].wins++
-    })
-
-    const sortedTeams = Object.values(teamMap).sort((a, b) => b.wins - a.wins)
-    const topWins = sortedTeams[0].wins
-    const bottomWins = sortedTeams[sortedTeams.length - 1].wins
-
-    const winners = sortedTeams.filter(t => t.wins === topWins).flatMap(t => t.players)
-    const losers = sortedTeams.filter(t => t.wins === bottomWins).flatMap(t => t.players)
-
-    const middle = sortedTeams.filter(t => t.wins > bottomWins && t.wins < topWins)
-    const secondWins = middle.length ? middle[0].wins : null
-    const runnersUp = middle.filter(t => t.wins === secondWins).flatMap(t => t.players)
-    const survivors = middle.filter(t => t.wins !== secondWins).flatMap(t => t.players)
-
-    setResults({ winners, runnersUp, survivors, losers, winningTeam })
     setGameComplete(true)
   }
 
   const saveGame = async () => {
     try {
       if (newSession.game === 'Rung') {
-        // Save each round
+        // Save each round as a separate game entry
         for (const round of rungRounds) {
           const allPlayers = [...round.team1, ...round.team2]
-          const { error } = await supabase.from('games').insert({
+          const { error } = await supabase
+            .from('games')
+            .insert({
+              game_type: 'Rung',
+              game_date: newSession.date,
+              players_in_game: allPlayers,
+              team1: round.team1,
+              team2: round.team2,
+              winning_team: round.winner
+            } as any)
+          
+          if (error) {
+            alert(`Error saving round: ${error.message}`)
+            return
+          }
+        }
+        
+        // Save the final overall result for the leaderboard
+        const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
+        const { error: finalError } = await supabase
+          .from('games')
+          .insert({
             game_type: 'Rung',
             game_date: newSession.date,
-            players_in_game: allPlayers,
-            team1: round.team1,
-            team2: round.team2,
-            winning_team: round.winner
+            players_in_game: allPlayersInGame,
+            winners: results.winners,
+            runners_up: results.runnersUp,
+            survivors: results.survivors,
+            losers: results.losers
           } as any)
-          if (error) { alert(`Error saving round: ${error.message}`); return }
+        
+        if (finalError) {
+          alert(`Error saving final results: ${finalError.message}`)
+          return
         }
-
-        // Save overall leaderboard
-        const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-        const { error: finalError } = await supabase.from('games').insert({
-          game_type: 'Rung',
-          game_date: newSession.date,
-          players_in_game: allPlayersInGame,
-          winners: results.winners,
-          runners_up: results.runnersUp,
-          survivors: results.survivors,
-          losers: results.losers
-        } as any)
-        if (finalError) { alert(`Error saving final results: ${finalError.message}`); return }
-
-        // Reset session
+        
+        // Reset everything
         setGameStarted(false)
         setGameComplete(false)
         setTeamSelectionMode(false)
@@ -221,39 +253,77 @@ const finalizeRungResults = (winningTeam: 1 | 2) => {
         setRungRounds([])
         setRungTeamScores({})
         setEliminationHistory([])
-        setNewSession({ game: 'Monopoly', date: new Date().toISOString().split('T')[0], players: [], threshold: 3, team1: [], team2: [] })
+        setNewSession({
+          game: 'Monopoly',
+          date: new Date().toISOString().split('T')[0],
+          players: [],
+          threshold: 3,
+          team1: [],
+          team2: []
+        })
+        
         alert('Rung game saved! All rounds recorded.')
         return
+      } else if (newSession.game === 'Blackjack') {
+        const allPlayers = [...eliminationHistory, results.winners[0]]
+        
+        const { error } = await supabase
+          .from('games')
+          .insert({
+            game_type: 'Blackjack',
+            game_date: newSession.date,
+            players_in_game: allPlayers,
+            winners: results.winners,
+            runners_up: results.runnersUp,
+            survivors: results.survivors,
+            losers: results.losers
+          } as any)
+        
+        if (error) {
+          alert(`Error saving game: ${error.message}`)
+          return
+        }
+      } else {
+        const { error } = await supabase
+          .from('games')
+          .insert({
+            game_type: newSession.game,
+            game_date: newSession.date,
+            players_in_game: newSession.players,
+            winners: results.winners,
+            runners_up: results.runnersUp,
+            survivors: results.survivors,
+            losers: results.losers
+          } as any)
+        
+        if (error) {
+          alert(`Error saving game: ${error.message}`)
+          return
+        }
       }
-
-      // Other games
-      const allPlayers = newSession.game === 'Blackjack' ? [...eliminationHistory, results.winners[0]] : newSession.players
-      const { error } = await supabase.from('games').insert({
-        game_type: newSession.game,
-        game_date: newSession.date,
-        players_in_game: allPlayers,
-        winners: results.winners,
-        runners_up: results.runnersUp,
-        survivors: results.survivors,
-        losers: results.losers
-      } as any)
-      if (error) { alert(`Error saving game: ${error.message}`); return }
-
-      // Reset session
+      
       setGameStarted(false)
       setGameComplete(false)
       setTeamSelectionMode(false)
       setScores({})
       setTeamScores({ team1: 0, team2: 0 })
       setEliminationHistory([])
-      setNewSession({ game: 'Monopoly', date: new Date().toISOString().split('T')[0], players: [], threshold: 3, team1: [], team2: [] })
+      setNewSession({
+        game: 'Monopoly',
+        date: new Date().toISOString().split('T')[0],
+        players: [],
+        threshold: 3,
+        team1: [],
+        team2: []
+      })
+      
       alert('Game saved successfully!')
-    } catch (err) {
-      alert(`Failed to save game: ${err}`)
+    } catch (error) {
+      alert(`Failed to save game: ${error}`)
     }
   }
 
-const getTeamKey = (players: string[]) => players.slice().sort().join('')
+  const getTeamKey = (players: string[]) => players.slice().sort().join('')
 
   if (loading) {
     return (
@@ -275,7 +345,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
           <span className="inline-block ml-1.5 drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">♠</span>
         </h1>
 
-        {/* ------------------- START NEW ROUND ------------------- */}
         {!gameStarted && !teamSelectionMode ? (
           <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
@@ -306,7 +375,7 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
               </div>
             </div>
 
-            {newSession.game !== 'Rung' && (
+{newSession.game !== 'Rung' && (
               <>
                 <div className="flex items-center gap-2">
                   {newSession.players.length === 0 ? (
@@ -318,7 +387,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
                       ✖ Clear
                     </Button>
                   )}
-
                   {newSession.game !== 'Blackjack' && (
                     <div className="flex gap-2 items-center">
                       {[3, 5].map(num => (
@@ -369,7 +437,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
             </Button>
           </div>
         ) : teamSelectionMode ? (
-          /* ------------------- TEAM SELECTION ------------------- */
           <div className="rounded-xl p-4 space-y-4 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <h2 className="text-center text-xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
               {gameStarted 
@@ -424,127 +491,172 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
             </Button>
           </div>
         ) : !gameComplete ? (
-          {/* ---------------- GAME IN PROGRESS ---------------- */}
-{!gameComplete && newSession.game === 'Rung' && (
-  <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-    <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-      {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
-    </h2>
+          newSession.game === 'Rung' ? (
+            <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+              <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+                {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
+              </h2>
 
-    <div className="grid grid-cols-2 gap-3 mb-4">
-      <div className="bg-blue-900/50 p-3 rounded-xl text-center">
-        <div className="text-xs font-bold text-blue-400">Team 1</div>
-        <div className="text-xs">{newSession.team1.join('')}</div>
-        <div className="text-4xl font-extrabold text-amber-400">
-          {rungTeamScores[getTeamKey(newSession.team1)] || 0}
-        </div>
-      </div>
-      <div className="bg-red-900/50 p-3 rounded-xl text-center">
-        <div className="text-xs font-bold text-red-400">Team 2</div>
-        <div className="text-xs">{newSession.team2.join('')}</div>
-        <div className="text-4xl font-extrabold text-amber-400">
-          {rungTeamScores[getTeamKey(newSession.team2)] || 0}
-        </div>
-      </div>
-    </div>
-
-      <div className="space-y-2">
-        <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={() => {
-              const team1Key = getTeamKey(newSession.team1)
-              const newScore = (rungTeamScores[team1Key] || 0) + 1
-
-              setRungTeamScores(prev => ({
-                ...prev,
-                [team1Key]: newScore
-              }))
-
-              setRungRounds(prev => [...prev, {
-                team1: newSession.team1,
-                team2: newSession.team2,
-                winner: 1
-              }])
-
-              if (newScore >= 5) {
-                finalizeRungResults(1)
-              }
-            }}
-            variant="frosted"
-            color="blue"
-            className="w-full h-10 text-sm font-bold"
-          >
-            Team 1 Wins
-          </Button>
-
-          <Button
-            onClick={() => {
-              const team2Key = getTeamKey(newSession.team2)
-              const newScore = (rungTeamScores[team2Key] || 0) + 1
-
-              setRungTeamScores(prev => ({
-                ...prev,
-                [team2Key]: newScore
-              }))
-
-              setRungRounds(prev => [...prev, {
-                team1: newSession.team1,
-                team2: newSession.team2,
-                winner: 2
-              }])
-
-              if (newScore >= 5) {
-                finalizeRungResults(2)
-              }
-            }}
-            variant="frosted"
-            color="red"
-            className="w-full h-10 text-sm font-bold"
-          >
-            Team 2 Wins
-          </Button>
-        </div>
-      </div>
-
-      {rungRounds.length > 0 && (
-        <div className="bg-slate-900/50 p-3 rounded-xl">
-          <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
-          <div className="space-y-1 text-xs">
-            {rungRounds.map((round, idx) => (
-              <div key={idx} className="flex justify-between items-center">
-                <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
-                  {round.team1.join('')}
-                </span>
-                <span className="text-amber-400">vs</span>
-                <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
-                  {round.team2.join('')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {Object.keys(rungTeamScores).length > 2 && (
-        <div className="bg-slate-900/50 p-3 rounded-xl">
-          <h3 className="text-center text-xs font-bold text-slate-400 mb-2">All Teams</h3>
-          <div className="space-y-1 text-xs">
-            {Object.entries(rungTeamScores)
-              .sort(([, a], [, b]) => b - a)
-              .map(([team, score]) => (
-                <div key={team} className="flex justify-between items-center">
-                  <span>{team}</span>
-                  <span className="text-amber-400 font-bold">{score}</span>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-blue-900/50 p-3 rounded-xl text-center">
+                  <div className="text-xs font-bold text-blue-400">Team 1</div>
+                  <div className="text-xs">{newSession.team1.join('')}</div>
+                  <div className="text-4xl font-extrabold text-amber-400">
+                    {rungTeamScores[getTeamKey(newSession.team1)] || 0}
+                  </div>
                 </div>
-              ))}
-          </div>
-        </div>
-      )}
-    </div>
-  ) : null
-) : null} : newSession.game === 'Blackjack' ? (
-            /* ------------------- BLACKJACK ------------------- */
+                <div className="bg-red-900/50 p-3 rounded-xl text-center">
+                  <div className="text-xs font-bold text-red-400">Team 2</div>
+                  <div className="text-xs">{newSession.team2.join('')}</div>
+                  <div className="text-4xl font-extrabold text-amber-400">
+                    {rungTeamScores[getTeamKey(newSession.team2)] || 0}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => {
+                      const team1Key = getTeamKey(newSession.team1)
+                      const newScore = (rungTeamScores[team1Key] || 0) + 1
+                      
+                      setRungTeamScores(prev => ({
+                        ...prev,
+                        [team1Key]: newScore
+                      }))
+                      
+                      setRungRounds(prev => [...prev, {
+                        team1: newSession.team1,
+                        team2: newSession.team2,
+                        winner: 1
+                      }])
+                      
+                      if (newScore >= 5) {
+                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+                          teamKey: key,
+                          players: key.match(/.{1,3}/g) || [],
+                          score: key === team1Key ? newScore : score
+                        })).sort((a, b) => b.score - a.score)
+                        
+                        const winnerPlayers = newSession.team1
+                        const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+                          ? allTeams[1].players 
+                          : []
+                        const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
+                        const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
+                        
+                        setResults({
+                          winners: winnerPlayers,
+                          runnersUp: runnerUpPlayers,
+                          survivors: survivorPlayers,
+                          losers: loserPlayers,
+                          winningTeam: 1
+                        })
+                        setGameComplete(true)
+                      } else {
+                        setTeamSelectionMode(true)
+                        setGameStarted(false)
+                        setNewSession(s => ({ ...s, team2: [] }))
+                      }
+                    }}
+                    variant="frosted"
+                    color="blue"
+                    className="h-16 text-base font-bold"
+                  >
+                    Team 1 Wins
+                  </Button>
+
+<Button
+                    onClick={() => {
+                      const team2Key = getTeamKey(newSession.team2)
+                      const newScore = (rungTeamScores[team2Key] || 0) + 1
+                      
+                      setRungTeamScores(prev => ({
+                        ...prev,
+                        [team2Key]: newScore
+                      }))
+                      
+                      setRungRounds(prev => [...prev, {
+                        team1: newSession.team1,
+                        team2: newSession.team2,
+                        winner: 2
+                      }])
+                      
+                      if (newScore >= 5) {
+                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+                          teamKey: key,
+                          players: key.match(/.{1,3}/g) || [],
+                          score: key === team2Key ? newScore : score
+                        })).sort((a, b) => b.score - a.score)
+                        
+                        const winnerPlayers = newSession.team2
+                        const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+                          ? allTeams[1].players 
+                          : []
+                        const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
+                        const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
+                        
+                        setResults({
+                          winners: winnerPlayers,
+                          runnersUp: runnerUpPlayers,
+                          survivors: survivorPlayers,
+                          losers: loserPlayers,
+                          winningTeam: 2
+                        })
+                        setGameComplete(true)
+                      } else {
+                        setTeamSelectionMode(true)
+                        setGameStarted(false)
+                        setNewSession(s => ({ ...s, team1: [] }))
+                      }
+                    }}
+                    variant="frosted"
+                    color="red"
+                    className="h-16 text-base font-bold"
+                  >
+                    Team 2 Wins
+                  </Button>
+                </div>
+              </div>
+
+              {rungRounds.length > 0 && (
+                <div className="bg-slate-900/50 p-3 rounded-xl">
+                  <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
+                  <div className="space-y-1 text-xs">
+                    {rungRounds.map((round, idx) => (
+                      <div key={idx} className="flex justify-between items-center">
+                        <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
+                          {round.team1.join('')}
+                        </span>
+                        <span className="text-amber-400">vs</span>
+                        <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
+                          {round.team2.join('')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {Object.keys(rungTeamScores).length > 2 && (
+                <div className="bg-slate-900/50 p-3 rounded-xl">
+                  <h3 className="text-center text-xs font-bold text-slate-400 mb-2">All Teams</h3>
+                  <div className="space-y-1 text-xs">
+                    {Object.entries(rungTeamScores)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([team, score]) => (
+                        <div key={team} className="flex justify-between items-center">
+                          <span>{team}</span>
+                          <span className="text-amber-400 font-bold">{score}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : newSession.game === 'Blackjack' ? (
             <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
                 {GAME_EMOJIS['Blackjack']} BLACKJACK - {newSession.players.length} Players Left
@@ -561,7 +673,7 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
                       
                       const remaining = newSession.players.filter(p => p !== player)
                       setNewSession(s => ({ ...s, players: remaining }))
-
+                      
                       if (remaining.length === 1) {
                         const winner = remaining[0]
                         const runnerUp = player
@@ -586,7 +698,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
                 ))}
               </div>
 
-              {/* Eliminated History */}
               {eliminationHistory.length > 0 && (
                 <div className="bg-slate-900/50 p-3 rounded-xl">
                   <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Eliminated (in order)</h3>
@@ -596,7 +707,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
                 </div>
               )}
 
-              {/* Undo Last Elimination */}
               {eliminationHistory.length > 0 && (
                 <Button
                   onClick={() => {
@@ -612,30 +722,51 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
                 </Button>
               )}
             </div>
-          ) : (
-            /* ------------------- REGULAR GAME / SHITHEAD ------------------- */
+) : (
             <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-                {newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : `Race to ${newSession.threshold}`}
+                {GAME_EMOJIS[newSession.game]} {newSession.game} - {
+                  newSession.game === 'Shithead' ? '1st to 3 LOSES 💩' : 
+                  `Race to ${newSession.threshold}`
+                }
               </h2>
 
               <div className="space-y-2">
                 {newSession.players.map(player => (
                   <div key={player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
-                    <Button onClick={() => updateScore(player, -1)} variant="frosted" color="red" className="w-10 h-10 text-xl font-bold">−</Button>
+                    <Button
+                      onClick={() => updateScore(player, -1)}
+                      variant="frosted"
+                      color="red"
+                      className="w-10 h-10 text-xl font-bold"
+                    >
+                      −
+                    </Button>
+                    
                     <div className="flex-1 text-center">
                       <div className="text-base font-bold">{player}</div>
                       <div className="text-2xl font-extrabold text-amber-400">{scores[player]}</div>
                     </div>
-                    <Button onClick={() => updateScore(player, 1)} variant="frosted" color="blue" className="w-10 h-10 text-xl font-bold">+</Button>
+                    
+                    <Button
+                      onClick={() => updateScore(player, 1)}
+                      variant="frosted"
+                      color="blue"
+                      className="w-10 h-10 text-xl font-bold"
+                    >
+                      +
+                    </Button>
                   </div>
                 ))}
               </div>
 
               <Button
                 onClick={() => {
-                  if (newSession.game === 'Shithead') calculateShitheadResults(scores)
-                  else calculateResults(scores)
+                  if (newSession.game === 'Shithead') {
+                    calculateShitheadResults(scores)
+                  } else {
+                    calculateResults(scores)
+                  }
                 }}
                 variant="pop"
                 color="blue"
@@ -646,7 +777,6 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
             </div>
           )
         ) : (
-          /* ------------------- GAME COMPLETE / RESULTS ------------------- */
           <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <h2 className="text-center text-xl sm:text-2xl font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
               {newSession.game === 'Shithead' ? '💩 SHITHEAD! 💩' : 
@@ -657,22 +787,27 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
             <div className="space-y-2">
               {results.winners.length > 0 && (
                 <div className="bg-green-900/50 p-3 rounded-xl">
-                  <div className="text-sm font-bold text-green-400 mb-1">{newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}</div>
+                  <div className="text-sm font-bold text-green-400 mb-1">
+                    {newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}
+                  </div>
                   <div className="text-base font-bold">{results.winners.join(', ')}</div>
                 </div>
               )}
+              
               {results.runnersUp.length > 0 && (
                 <div className="bg-blue-900/50 p-3 rounded-xl">
                   <div className="text-sm font-bold text-blue-400 mb-1">🥈 Runners Up</div>
                   <div className="text-base font-bold">{results.runnersUp.join(', ')}</div>
                 </div>
               )}
+              
               {results.survivors.length > 0 && (
                 <div className="bg-slate-800/50 p-3 rounded-xl">
                   <div className="text-sm font-bold text-slate-400 mb-1">🤟 Survivors</div>
                   <div className="text-base font-bold">{results.survivors.join(', ')}</div>
                 </div>
               )}
+              
               {results.losers.length > 0 && (
                 <div className="bg-red-900/50 p-3 rounded-xl">
                   <div className="text-sm font-bold text-red-400 mb-1">
@@ -698,3 +833,4 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
     </div>
   )
 }
+
