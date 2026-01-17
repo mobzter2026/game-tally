@@ -557,8 +557,8 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
   const recentGames = activeTab === 'individual'
-    ? filteredGames.filter(g => g.game_type !== 'Rung').slice(0, 20)
-    : filteredGames.filter(g => g.game_type === 'Rung' && g.winners && g.winners.length > 0).slice(0, 20)
+    ? filteredGames.slice(0, 20)  // Include ALL games (Rung + individual)
+    : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
@@ -819,20 +819,27 @@ export default function PublicView() {
                       No games found with selected filter
                     </div>
                   ) : (
-                    recentGames.map(game => (
-                      <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95">
-                        <div className="text-slate-300 text-base font-bold mb-2">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                    recentGames.map(game => {
+                      // Skip Rung individual rounds (only show final results)
+                      if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+                        return null
+                      }
+
+                      return (
+                        <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]">
+                          <div className="text-slate-300 text-base font-bold mb-2">
+                            {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                          </div>
+                          <div className="flex gap-1 flex-wrap">
+                            {sortPlayersInGame(game).map(player => (
+                              <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                {player}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex gap-1 flex-wrap">
-                          {sortPlayersInGame(game).map(player => (
-                            <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                              {player}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               </div>
@@ -887,79 +894,6 @@ export default function PublicView() {
                     )}
                   </tbody>
                 </table>
-              </div>
-            </div>
-
-            {/* RUNG RECENT MATCHES */}
-            <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-              <div className="flex flex-col items-center mb-4 gap-2">
-                <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-                  🎭 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT RUNG MATCHES</span>
-                </h2>
-                <p className="text-slate-400 text-sm">Duo or Die Trying!</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
-                {recentGames.length === 0 ? (
-                  <div className="col-span-2 text-center p-8 text-slate-400">
-                    No Rung matches found
-                  </div>
-                ) : (
-                  recentGames.map(game => {
-                    const winners = game.winners || []
-                    const runnersUp = game.runners_up || []
-                    const losers = game.losers || []
-                    
-                    return (
-                      <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full">
-                        <div className="text-slate-300 text-base font-bold mb-3">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                        </div>
-                        
-                        {/* Winners */}
-                        {winners.length > 0 && (
-                          <div className="mb-2">
-                            <div className="text-xs text-green-400 font-bold mb-1">🏆 Winners:</div>
-                            <div className="flex gap-1 flex-wrap">
-                              {winners.map(player => (
-                                <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                                  {player}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Runners-up */}
-                        {runnersUp.length > 0 && (
-                          <div className="mb-2">
-                            <div className="text-xs text-blue-400 font-bold mb-1">🥈 Runners-up:</div>
-                            <div className="flex gap-1 flex-wrap">
-                              {runnersUp.map(player => (
-                                <span key={player} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                                  {player}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Losers */}
-                        {losers.length > 0 && (
-                          <div>
-                            <div className="text-xs text-red-400 font-bold mb-1">💀 Losers:</div>
-                            <div className="flex gap-1 flex-wrap">
-                              {losers.map(player => (
-                                <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                                  {player}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })
-                )}
               </div>
             </div>
           </>
