@@ -42,7 +42,7 @@ const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
 export default function PublicView() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'individual' | 'rung'>('individual')
+  const [activeTab, setActiveTab] = useState<'individual' | 'rung' | 'recent'>('individual')
   const [perfectGame, setPerfectGame] = useState<Game | null>(null)
   const [shitheadLosingStreak, setShitheadLosingStreak] = useState<{player: string, streak: number} | null>(null)
   const [latestWinner, setLatestWinner] = useState<{game: Game, type: 'dominated' | 'shithead' | 'normal'} | null>(null)
@@ -611,7 +611,7 @@ export default function PublicView() {
         </div>
 
         <div className="mb-6 mt-2 flex justify-center">
-          <div className="grid grid-cols-2 gap-3 max-w-md w-full px-4">
+          <div className="grid grid-cols-3 gap-3 max-w-2xl w-full px-4">
             <Button
               onClick={() => setActiveTab('individual')}
               variant="frosted"
@@ -619,7 +619,7 @@ export default function PublicView() {
               selected={activeTab === 'individual'}
               className="px-3 py-2 text-sm sm:text-base"
             >
-              Solo Stats
+              Solo Kings
             </Button>
             <Button
               onClick={() => setActiveTab('rung')}
@@ -628,7 +628,16 @@ export default function PublicView() {
               selected={activeTab === 'rung'}
               className="px-3 py-2 text-sm sm:text-base"
             >
-              Duo Stats
+              Double Trouble
+            </Button>
+            <Button
+              onClick={() => setActiveTab('recent')}
+              variant="frosted"
+              color="purple"
+              selected={activeTab === 'recent'}
+              className="px-3 py-2 text-sm sm:text-base"
+            >
+              Recent Showdowns
             </Button>
           </div>
         </div>
@@ -799,51 +808,6 @@ export default function PublicView() {
                 </div>
               </div>
             )}
-
-            {hallView === 'none' && (
-              <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-                <div className="flex flex-col items-center mb-4 gap-2">
-                  <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-                    📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
-                  </h2>
-                  <div className="text-sm">
-                    <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
-                    <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
-                    <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Survivors</span>
-                    <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
-                  {recentGames.length === 0 ? (
-                    <div className="col-span-2 text-center p-8 text-slate-400">
-                      No games found with selected filter
-                    </div>
-                  ) : (
-                    recentGames.map(game => {
-                      // Skip Rung individual rounds (only show final results)
-                      if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
-                        return null
-                      }
-
-                      return (
-                        <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]">
-                          <div className="text-slate-300 text-base font-bold mb-2">
-                            {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                          </div>
-                          <div className="flex gap-1 flex-wrap">
-                            {sortPlayersInGame(game).map(player => (
-                              <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                                {player}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              </div>
-            )}
           </>
         )}
 
@@ -899,6 +863,51 @@ export default function PublicView() {
           </>
         )}
 
+        {activeTab === 'recent' && (
+          <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <div className="flex flex-col items-center mb-4 gap-2">
+              <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
+                📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
+              </h2>
+              <div className="text-sm">
+                <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
+                <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
+                <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Survivors</span>
+                <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
+              {recentGames.length === 0 ? (
+                <div className="col-span-2 text-center p-8 text-slate-400">
+                  No games found with selected filter
+                </div>
+              ) : (
+                recentGames.map(game => {
+                  // Skip Rung individual rounds (only show final results)
+                  if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+                    return null
+                  }
+
+                  return (
+                    <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]">
+                      <div className="text-slate-300 text-base font-bold mb-2">
+                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      </div>
+                      <div className="flex gap-1 flex-wrap">
+                        {sortPlayersInGame(game).map(player => (
+                          <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                            {player}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={() => setShowFloatingFilter(!showFloatingFilter)}
           className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-br from-purple-700/90 to-indigo-900/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] hover:scale-110 transition-all z-50 border border-purple-500/30"
@@ -951,8 +960,10 @@ export default function PublicView() {
           </>
         )}
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 space-x-4">
           <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
+          <span className="text-slate-600">|</span>
+          <a href="/user/login" className="text-slate-400 hover:text-slate-200 text-sm">User Login</a>
         </div>
       </div>
     </div>
