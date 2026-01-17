@@ -160,7 +160,8 @@ export default function ScoringPage() {
       [team]: Math.max(0, prev[team] + delta)
     }))
   }
-const calculateResults = (finalScores: Record<string, number>) => {
+
+  const calculateResults = (finalScores: Record<string, number>) => {
     const sortedPlayers = Object.entries(finalScores)
       .sort(([, a], [, b]) => b - a)
 
@@ -205,18 +206,19 @@ const calculateResults = (finalScores: Record<string, number>) => {
   const saveGame = async () => {
     try {
       if (newSession.game === 'Rung') {
-  for (const round of rungRounds) {
-    const allPlayers = [...round.team1, ...round.team2]
-    const { error } = await supabase
-      .from('games')
-      .insert({
-        game_type: 'Rung',
-        game_date: newSession.date,
-        players_in_game: allPlayers,
-        team1: round.team1,
-        team2: round.team2,
-        winning_team: round.winner
-      } as any)
+        // Save each round as a separate game entry
+        for (const round of rungRounds) {
+          const allPlayers = [...round.team1, ...round.team2]
+          const { error } = await supabase
+            .from('games')
+            .insert({
+              game_type: 'Rung',
+              game_date: newSession.date,
+              players_in_game: allPlayers,
+              team1: round.team1,
+              team2: round.team2,
+              winning_team: round.winner
+            } as any)
           
           if (error) {
             alert(`Error saving round: ${error.message}`)
@@ -224,6 +226,26 @@ const calculateResults = (finalScores: Record<string, number>) => {
           }
         }
         
+        // Save the final overall result for the leaderboard
+        const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
+        const { error: finalError } = await supabase
+          .from('games')
+          .insert({
+            game_type: 'Rung',
+            game_date: newSession.date,
+            players_in_game: allPlayersInGame,
+            winners: results.winners,
+            runners_up: results.runnersUp,
+            survivors: results.survivors,
+            losers: results.losers
+          } as any)
+        
+        if (finalError) {
+          alert(`Error saving final results: ${finalError.message}`)
+          return
+        }
+        
+        // Reset everything
         setGameStarted(false)
         setGameComplete(false)
         setTeamSelectionMode(false)
