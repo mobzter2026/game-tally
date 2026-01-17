@@ -178,7 +178,6 @@ export default function ScoringPage() {
   const saveGame = async () => {
     try {
       if (newSession.game === 'Rung') {
-        // Save each round as a separate game entry
         for (const round of rungRounds) {
           const allPlayers = [...round.team1, ...round.team2]
           const { error } = await supabase
@@ -198,7 +197,6 @@ export default function ScoringPage() {
           }
         }
         
-        // Save the final overall result for the leaderboard
         const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
         const { error: finalError } = await supabase
           .from('games')
@@ -217,7 +215,6 @@ export default function ScoringPage() {
           return
         }
         
-        // Reset everything
         setGameStarted(false)
         setGameComplete(false)
         setTeamSelectionMode(false)
@@ -558,206 +555,7 @@ export default function ScoringPage() {
             )}
           </div>
         ) : !gameComplete ? (
-<<<<<<< HEAD
           newSession.game === 'Blackjack' ? (
-=======
-          newSession.game === 'Rung' ? (
-            <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-              <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-                {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
-              </h2>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-blue-900/50 p-3 rounded-xl text-center">
-                  <div className="text-xs font-bold text-blue-400">Team 1</div>
-                  <div className="text-xs">{newSession.team1.join('')}</div>
-                  <div className="text-4xl font-extrabold text-amber-400">
-                    {rungTeamScores[getTeamKey(newSession.team1)] || 0}
-                  </div>
-                </div>
-                <div className="bg-red-900/50 p-3 rounded-xl text-center">
-                  <div className="text-xs font-bold text-red-400">Team 2</div>
-                  <div className="text-xs">{newSession.team2.join('')}</div>
-                  <div className="text-4xl font-extrabold text-amber-400">
-                    {rungTeamScores[getTeamKey(newSession.team2)] || 0}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    onClick={() => {
-  const team1Key = getTeamKey(newSession.team1)
-  const newScore = (rungTeamScores[team1Key] || 0) + 1
-  
-  setRungTeamScores(prev => ({
-    ...prev,
-    [team1Key]: newScore
-  }))
-  
-  setRungRounds(prev => [...prev, {
-    team1: newSession.team1,
-    team2: newSession.team2,
-    winner: 1
-  }])
-  
-  if (newScore >= 5) {
-    // Build a map of team keys to actual player arrays
-    const teamKeyToPlayers: Record<string, string[]> = {}
-    rungRounds.forEach(round => {
-      const t1Key = getTeamKey(round.team1)
-      const t2Key = getTeamKey(round.team2)
-      teamKeyToPlayers[t1Key] = round.team1
-      teamKeyToPlayers[t2Key] = round.team2
-    })
-    // Add current teams
-    teamKeyToPlayers[team1Key] = newSession.team1
-    teamKeyToPlayers[getTeamKey(newSession.team2)] = newSession.team2
-    
-    const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-      teamKey: key,
-      players: teamKeyToPlayers[key] || [],
-      score: key === team1Key ? newScore : score
-    })).sort((a, b) => b.score - a.score)
-    
-    const winnerPlayers: string[] = newSession.team1
-    const runnerUpPlayers: string[] = allTeams.length >= 2 && allTeams[1].score > 0 
-      ? allTeams[1].players 
-      : []
-    
-    const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-    const loserPlayers: string[] = allPlayersInGame.filter(p => 
-      !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
-    )
-    
-    setResults({
-      winners: winnerPlayers,
-      runnersUp: runnerUpPlayers,
-      survivors: [],
-      losers: loserPlayers,
-      winningTeam: 1
-    })
-    setGameComplete(true)
-  } else {
-    setTeamSelectionMode(true)
-    setGameStarted(false)
-    setNewSession(s => ({ ...s, team2: [] }))
-  }
-}}
-                    variant="frosted"
-                    color="blue"
-                    className="h-16 text-base font-bold"
-                  >
-                    Team 1 Wins
-                  </Button>
-
-<Button
-                    onClick={() => {
-  const team2Key = getTeamKey(newSession.team2)
-  const newScore = (rungTeamScores[team2Key] || 0) + 1
-  
-  setRungTeamScores(prev => ({
-    ...prev,
-    [team2Key]: newScore
-  }))
-  
-  setRungRounds(prev => [...prev, {
-    team1: newSession.team1,
-    team2: newSession.team2,
-    winner: 2
-  }])
-  
-  if (newScore >= 5) {
-    // Build a map of team keys to actual player arrays
-    const teamKeyToPlayers: Record<string, string[]> = {}
-    rungRounds.forEach(round => {
-      const t1Key = getTeamKey(round.team1)
-      const t2Key = getTeamKey(round.team2)
-      teamKeyToPlayers[t1Key] = round.team1
-      teamKeyToPlayers[t2Key] = round.team2
-    })
-    // Add current teams
-    teamKeyToPlayers[getTeamKey(newSession.team1)] = newSession.team1
-    teamKeyToPlayers[team2Key] = newSession.team2
-    
-    const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-      teamKey: key,
-      players: teamKeyToPlayers[key] || [],
-      score: key === team2Key ? newScore : score
-    })).sort((a, b) => b.score - a.score)
-    
-    const winnerPlayers: string[] = newSession.team2
-    const runnerUpPlayers: string[] = allTeams.length >= 2 && allTeams[1].score > 0 
-      ? allTeams[1].players 
-      : []
-    
-    const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-    const loserPlayers: string[] = allPlayersInGame.filter(p => 
-      !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
-    )
-    
-    setResults({
-      winners: winnerPlayers,
-      runnersUp: runnerUpPlayers,
-      survivors: [],
-      losers: loserPlayers,
-      winningTeam: 2
-    })
-    setGameComplete(true)
-  } else {
-    setTeamSelectionMode(true)
-    setGameStarted(false)
-    setNewSession(s => ({ ...s, team1: [] }))
-  }
-}}
-                    variant="frosted"
-                    color="red"
-                    className="h-16 text-base font-bold"
-                  >
-                    Team 2 Wins
-                  </Button>
-                </div>
-              </div>
-
-              {rungRounds.length > 0 && (
-                <div className="bg-slate-900/50 p-3 rounded-xl">
-                  <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
-                  <div className="space-y-1 text-xs">
-                    {rungRounds.map((round, idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
-                          {round.team1.join('')}
-                        </span>
-                        <span className="text-amber-400">vs</span>
-                        <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
-                          {round.team2.join('')}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {Object.keys(rungTeamScores).length > 2 && (
-                <div className="bg-slate-900/50 p-3 rounded-xl">
-                  <h3 className="text-center text-xs font-bold text-slate-400 mb-2">All Teams</h3>
-                  <div className="space-y-1 text-xs">
-                    {Object.entries(rungTeamScores)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([team, score]) => (
-                        <div key={team} className="flex justify-between items-center">
-                          <span>{team}</span>
-                          <span className="text-amber-400 font-bold">{score}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : newSession.game === 'Blackjack' ? (
->>>>>>> b2509e39655237b176963f95f9e09e9a6ea7ffd9
             <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
                 {GAME_EMOJIS['Blackjack']} BLACKJACK - {newSession.players.length} Players Left
