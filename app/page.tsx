@@ -611,7 +611,7 @@ export default function PublicView() {
         </div>
 
 <div className="mb-6 mt-2 flex justify-center">
-  <div className="flex gap-3 max-w-2xl w-full px-4 justify-center">
+  <div className="flex gap-2 max-w-2xl w-full px-4 justify-center">
     <Button
       onClick={() => setActiveTab('individual')}
       variant="frosted"
@@ -620,11 +620,12 @@ export default function PublicView() {
       className="
         flex-1
         min-w-[90px]
-        px-4
-        py-3
-        text-sm
-        sm:text-base
+        px-3
+        py-2.5
+        text-xs
+        sm:text-sm
         whitespace-nowrap
+        text-left
         bg-gradient-to-b
         from-purple-500
         to-purple-700
@@ -643,11 +644,12 @@ export default function PublicView() {
       className="
         flex-1
         min-w-[110px]
-        px-4
-        py-3
-        text-sm
-        sm:text-base
+        px-3
+        py-2.5
+        text-xs
+        sm:text-sm
         whitespace-nowrap
+        text-left
         bg-gradient-to-b
         from-purple-500
         to-purple-700
@@ -666,11 +668,12 @@ export default function PublicView() {
       className="
         flex-1
         min-w-[130px]
-        px-4
-        py-3
-        text-sm
-        sm:text-base
+        px-3
+        py-2.5
+        text-xs
+        sm:text-sm
         whitespace-nowrap
+        text-left
         bg-gradient-to-b
         from-purple-500
         to-purple-700
