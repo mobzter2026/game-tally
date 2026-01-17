@@ -336,15 +336,28 @@ export default function ScoringPage() {
             </h2>
 
             <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-bold text-center mb-1">Date</label>
-                <input
-                  type="date"
-                  value={newSession.date}
-                  onChange={e => setNewSession({ ...newSession, date: e.target.value })}
-                  className="h-9 w-full font-bold text-sm rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all px-2"
-                />
-              </div>
+<div className="flex-1">
+  <label className="block text-xs font-bold text-center mb-1">Date</label>
+  <input
+    type="date"
+    value={newSession.date}
+    onChange={e => setNewSession({ ...newSession, date: e.target.value })}
+    className="
+      h-9
+      w-full
+      font-bold
+      text-sm
+      rounded-lg
+      bg-gradient-to-b from-purple-700 via-purple-900 to-blue-900
+      text-center
+      tabular-nums
+      shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]
+      transition-all
+      px-0
+    "
+  />
+</div>
+
               <div className="flex-1">
                 <label className="block text-xs font-bold text-center mb-1">Game</label>
                 <select
