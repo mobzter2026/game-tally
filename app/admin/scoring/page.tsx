@@ -425,29 +425,28 @@ const getTeamKey = (players: string[]) => players.slice().sort().join('')
           </div>
         ) : !gameComplete ? (
           {/* ---------------- GAME IN PROGRESS ---------------- */}
-{!gameComplete ? (
-  newSession.game === 'Rung' ? (
-    <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-      <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-        {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
-      </h2>
+{!gameComplete && newSession.game === 'Rung' && (
+  <div className="rounded-xl p-4 space-y-3 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+    <h2 className="text-center text-lg font-extrabold uppercase tracking-wider select-none bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+      {GAME_EMOJIS['Rung']} Rung - First to 5 Wins
+    </h2>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-blue-900/50 p-3 rounded-xl text-center">
-          <div className="text-xs font-bold text-blue-400">Team 1</div>
-          <div className="text-xs">{newSession.team1.join('')}</div>
-          <div className="text-4xl font-extrabold text-amber-400">
-            {rungTeamScores[getTeamKey(newSession.team1)] || 0}
-          </div>
-        </div>
-        <div className="bg-red-900/50 p-3 rounded-xl text-center">
-          <div className="text-xs font-bold text-red-400">Team 2</div>
-          <div className="text-xs">{newSession.team2.join('')}</div>
-          <div className="text-4xl font-extrabold text-amber-400">
-            {rungTeamScores[getTeamKey(newSession.team2)] || 0}
-          </div>
+    <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="bg-blue-900/50 p-3 rounded-xl text-center">
+        <div className="text-xs font-bold text-blue-400">Team 1</div>
+        <div className="text-xs">{newSession.team1.join('')}</div>
+        <div className="text-4xl font-extrabold text-amber-400">
+          {rungTeamScores[getTeamKey(newSession.team1)] || 0}
         </div>
       </div>
+      <div className="bg-red-900/50 p-3 rounded-xl text-center">
+        <div className="text-xs font-bold text-red-400">Team 2</div>
+        <div className="text-xs">{newSession.team2.join('')}</div>
+        <div className="text-4xl font-extrabold text-amber-400">
+          {rungTeamScores[getTeamKey(newSession.team2)] || 0}
+        </div>
+      </div>
+    </div>
 
       <div className="space-y-2">
         <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
