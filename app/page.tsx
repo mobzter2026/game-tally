@@ -176,7 +176,8 @@ export default function PublicView() {
   }
 
   const filteredGames = getFilteredGames()
-const getPlayerStatsForGame = (gameType?: string) => {
+
+  const getPlayerStatsForGame = (gameType?: string) => {
     const stats: any = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
 
@@ -272,7 +273,7 @@ const getPlayerStatsForGame = (gameType?: string) => {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.weightedWins - a.weightedWins)
   }
 
-  // NEW: Get overall player stats INCLUDING Rung games
+  // Get overall player stats INCLUDING Rung games
   const getOverallPlayerStats = () => {
     const stats: any = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
@@ -412,7 +413,7 @@ const getPlayerStatsForGame = (gameType?: string) => {
     return worstPlayer?.player || null
   }
 
-const getRungTeamStats = () => {
+  const getRungTeamStats = () => {
     const teamStats: any = {}
 
     const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
@@ -444,70 +445,6 @@ const getRungTeamStats = () => {
         winRate: stats.gamesPlayed > 0 ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(0) : '0'
       }))
       .filter(t => t.gamesPlayed >= MIN_GAMES_FOR_RANKING)
-      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
-  }
-
-  const getRungPlayerStats = () => {
-    const stats: any = {}
-    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
-
-    activePlayers.forEach(p => {
-      stats[p] = { gamesPlayed: 0, wins: 0, runnerUps: 0, losses: 0, recentResults: [] as string[] }
-    })
-
-    const rungLeaderboardGames = filteredGames.filter(g => 
-      g.game_type === 'Rung' && 
-      g.winners && 
-      g.winners.length > 0
-    )
-
-    rungLeaderboardGames.forEach(game => {
-      if (game.players_in_game) {
-        game.players_in_game.forEach(p => {
-          if (stats[p]) stats[p].gamesPlayed++
-        })
-      }
-
-      if (game.winners) {
-        game.winners.forEach(w => {
-          if (stats[w]) {
-            stats[w].wins++
-            stats[w].recentResults.push('W')
-          }
-        })
-      }
-
-      if (game.runners_up) {
-        game.runners_up.forEach(r => {
-          if (stats[r]) {
-            stats[r].runnerUps++
-            stats[r].recentResults.push('R')
-          }
-        })
-      }
-
-      if (game.losers) {
-        game.losers.forEach(l => {
-          if (stats[l]) {
-            stats[l].losses++
-            stats[l].recentResults.push('L')
-          }
-        })
-      }
-    })
-
-    activePlayers.forEach(player => {
-      // Keep only last 10 results and reverse to show most recent first
-      stats[player].recentResults = stats[player].recentResults.slice(0, 10).reverse()
-    })
-
-    return activePlayers
-      .map(p => ({
-        player: p,
-        ...stats[p],
-        winRate: stats[p].gamesPlayed > 0 ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) : '0'
-      }))
-      .filter(p => p.gamesPlayed >= MIN_GAMES_FOR_RANKING)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate) || b.wins - a.wins)
   }
 
@@ -619,14 +556,13 @@ const getRungTeamStats = () => {
   const overallPlayerStats = getOverallPlayerStats()
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
-  const rungPlayerStats = getRungPlayerStats()
   const recentGames = activeTab === 'individual'
     ? filteredGames.filter(g => g.game_type !== 'Rung').slice(0, 20)
-    : filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
+    : filteredGames.filter(g => g.game_type === 'Rung' && g.winners && g.winners.length > 0).slice(0, 20)
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
-return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
         {latestWinner && latestWinner.type === 'dominated' && (
@@ -806,7 +742,7 @@ return (
                   </div>
                 </div>
 
-<div className="overflow-x-auto backdrop-blur-sm">
+                <div className="overflow-x-auto backdrop-blur-sm">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.1)]">
@@ -954,59 +890,82 @@ return (
               </div>
             </div>
 
-            {/* RUNG SOLO LEADERBOARD */}
-            <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Solo Leaderboard</h2>
-                <p className="text-slate-400 text-sm mt-1">Individual Performance Stats</p>
+            {/* RUNG RECENT MATCHES */}
+            <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+              <div className="flex flex-col items-center mb-4 gap-2">
+                <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
+                  🎭 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT RUNG MATCHES</span>
+                </h2>
+                <p className="text-slate-400 text-sm">Duo or Die Trying!</p>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700 bg-slate-900">
-                      <th className="text-center p-4 w-20">Rank</th>
-                      <th className="text-left p-4">Player</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Win Rate</th>
-                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Recent</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rungPlayerStats.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="text-center p-8 text-slate-400">
-                          No Rung games played yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      rungPlayerStats.map((player, idx) => (
-                        <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= rungPlayerStats.length - 3 ? 'bg-purple-900/15' : '')}`}>
-                          <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(rungPlayerStats, idx, (p) => p.winRate)}</td>
-                          <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
-                            {player.player}
-                          </td>
-                          <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
-                          <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                          <td className="text-center p-4 text-blue-400 font-bold">{player.runnerUps}</td>
-                          <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                          <td className="text-center p-2 md:p-4">
-                            {renderRecentResults(player.recentResults)}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
+                {recentGames.length === 0 ? (
+                  <div className="col-span-2 text-center p-8 text-slate-400">
+                    No Rung matches found
+                  </div>
+                ) : (
+                  recentGames.map(game => {
+                    const winners = game.winners || []
+                    const runnersUp = game.runners_up || []
+                    const losers = game.losers || []
+                    
+                    return (
+                      <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full">
+                        <div className="text-slate-300 text-base font-bold mb-3">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        </div>
+                        
+                        {/* Winners */}
+                        {winners.length > 0 && (
+                          <div className="mb-2">
+                            <div className="text-xs text-green-400 font-bold mb-1">🏆 Winners:</div>
+                            <div className="flex gap-1 flex-wrap">
+                              {winners.map(player => (
+                                <span key={player} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                                  {player}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Runners-up */}
+                        {runnersUp.length > 0 && (
+                          <div className="mb-2">
+                            <div className="text-xs text-blue-400 font-bold mb-1">🥈 Runners-up:</div>
+                            <div className="flex gap-1 flex-wrap">
+                              {runnersUp.map(player => (
+                                <span key={player} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                                  {player}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Losers */}
+                        {losers.length > 0 && (
+                          <div>
+                            <div className="text-xs text-red-400 font-bold mb-1">💀 Losers:</div>
+                            <div className="flex gap-1 flex-wrap">
+                              {losers.map(player => (
+                                <span key={player} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                                  {player}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </div>
           </>
         )}
 
-<button
+        <button
           onClick={() => setShowFloatingFilter(!showFloatingFilter)}
           className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-br from-purple-700/90 to-indigo-900/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.4),inset_0_2px_6px_rgba(255,255,255,0.25)] hover:scale-110 transition-all z-50 border border-purple-500/30"
         >
@@ -1065,4 +1024,3 @@ return (
     </div>
   )
 }
-
