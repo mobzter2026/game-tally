@@ -227,18 +227,18 @@ export default function ScoringPage() {
         }
         
         // Save the final overall result for the leaderboard
-        const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-        const { error: finalError } = await supabase
-          .from('games')
-          .insert({
-            game_type: 'Rung',
-            game_date: newSession.date,
-            players_in_game: allPlayersInGame,
-            winners: results.winners,
-            runners_up: results.runnersUp,
-            survivors: results.survivors,
-            losers: results.losers
-          } as any)
+const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
+const { error: finalError } = await supabase
+  .from('games')
+  .insert({
+    game_type: 'Rung',
+    game_date: newSession.date,
+    players_in_game: allPlayersInGame,
+    winners: results.winners,
+    runners_up: results.runnersUp,
+    survivors: results.survivors,
+    losers: results.losers
+  } as any)
         
         if (finalError) {
           alert(`Error saving final results: ${finalError.message}`)
@@ -517,103 +517,108 @@ export default function ScoringPage() {
                 <h3 className="text-center text-sm font-bold text-slate-300">Who Won This Round?</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    onClick={() => {
-                      const team1Key = getTeamKey(newSession.team1)
-                      const newScore = (rungTeamScores[team1Key] || 0) + 1
-                      
-                      setRungTeamScores(prev => ({
-                        ...prev,
-                        [team1Key]: newScore
-                      }))
-                      
-                      setRungRounds(prev => [...prev, {
-                        team1: newSession.team1,
-                        team2: newSession.team2,
-                        winner: 1
-                      }])
-                      
-                      if (newScore >= 5) {
-                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-                          team: key,
-                          score: key === team1Key ? newScore : score
-                        })).sort((a, b) => b.score - a.score)
-                        
-                        const winner = newSession.team1
-                        const runnerUp = allTeams.length >= 2 && allTeams[1].score > 0 
-                          ? allTeams[1].team.match(/.{1,3}/g) || [] 
-                          : []
-                        const survivors = allTeams.slice(2).filter(t => t.score > 0).map(t => t.team)
-                        const losers = allTeams.filter(t => t.score === 0).map(t => t.team)
-                        
-                        setResults({
-                          winners: winner,
-                          runnersUp: runnerUp,
-                          survivors: survivors,
-                          losers: losers,
-                          winningTeam: 1
-                        })
-                        setGameComplete(true)
-                      } else {
-                        setTeamSelectionMode(true)
-                        setGameStarted(false)
-                        setNewSession(s => ({ ...s, team2: [] }))
-                      }
-                    }}
-                    variant="frosted"
-                    color="blue"
-                    className="h-16 text-base font-bold"
-                  >
-                    Team 1 Wins
-                  </Button>
+  onClick={() => {
+    const team1Key = getTeamKey(newSession.team1)
+    const newScore = (rungTeamScores[team1Key] || 0) + 1
+    
+    setRungTeamScores(prev => ({
+      ...prev,
+      [team1Key]: newScore
+    }))
+    
+    setRungRounds(prev => [...prev, {
+      team1: newSession.team1,
+      team2: newSession.team2,
+      winner: 1
+    }])
+    
+    if (newScore >= 5) {
+      const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+        teamKey: key,
+        players: key.match(/.{1,3}/g) || [],
+        score: key === team1Key ? newScore : score
+      })).sort((a, b) => b.score - a.score)
+      
+      // Flatten team arrays to individual players
+      const winnerPlayers = newSession.team1
+      const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+        ? allTeams[1].players 
+        : []
+      const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
+      const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
+      
+      setResults({
+        winners: winnerPlayers,
+        runnersUp: runnerUpPlayers,
+        survivors: survivorPlayers,
+        losers: loserPlayers,
+        winningTeam: 1
+      })
+      setGameComplete(true)
+    } else {
+      setTeamSelectionMode(true)
+      setGameStarted(false)
+      setNewSession(s => ({ ...s, team2: [] }))
+    }
+  }}
+  variant="frosted"
+  color="blue"
+  className="h-16 text-base font-bold"
+>
+  Team 1 Wins
+</Button>
+
 <Button
-                    onClick={() => {
-                      const team2Key = getTeamKey(newSession.team2)
-                      const newScore = (rungTeamScores[team2Key] || 0) + 1
-                      
-                      setRungTeamScores(prev => ({
-                        ...prev,
-                        [team2Key]: newScore
-                      }))
-                      
-                      setRungRounds(prev => [...prev, {
-                        team1: newSession.team1,
-                        team2: newSession.team2,
-                        winner: 2
-                      }])
-                      
-                      if (newScore >= 5) {
-                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-                          team: key,
-                          score: key === team2Key ? newScore : score
-                        })).sort((a, b) => b.score - a.score)
-                        
-                        const winner = newSession.team2
-                        const runnerUp = allTeams.length >= 2 && allTeams[1].score > 0 
-                          ? allTeams[1].team.match(/.{1,3}/g) || [] 
-                          : []
-                        const survivors = allTeams.slice(2).filter(t => t.score > 0).map(t => t.team)
-                        const losers = allTeams.filter(t => t.score === 0).map(t => t.team)
-                        
-                        setResults({
-                          winners: winner,
-                          runnersUp: runnerUp,
-                          survivors: survivors,
-                          losers: losers,
-                          winningTeam: 2
-                        })
-                        setGameComplete(true)
-                      } else {
-                        setTeamSelectionMode(true)
-                        setGameStarted(false)
-                        setNewSession(s => ({ ...s, team1: [] }))
-                      }
-                    }}
-                    variant="frosted"
-                    color="red"
-                    className="h-16 text-base font-bold"
-                  >
-                    Team 2 Wins
-                  </Button>
+  onClick={() => {
+    const team2Key = getTeamKey(newSession.team2)
+    const newScore = (rungTeamScores[team2Key] || 0) + 1
+    
+    setRungTeamScores(prev => ({
+      ...prev,
+      [team2Key]: newScore
+    }))
+    
+    setRungRounds(prev => [...prev, {
+      team1: newSession.team1,
+      team2: newSession.team2,
+      winner: 2
+    }])
+    
+    if (newScore >= 5) {
+      const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+        teamKey: key,
+        players: key.match(/.{1,3}/g) || [],
+        score: key === team2Key ? newScore : score
+      })).sort((a, b) => b.score - a.score)
+      
+      // Flatten team arrays to individual players
+      const winnerPlayers = newSession.team2
+      const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+        ? allTeams[1].players 
+        : []
+      const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
+      const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
+      
+      setResults({
+        winners: winnerPlayers,
+        runnersUp: runnerUpPlayers,
+        survivors: survivorPlayers,
+        losers: loserPlayers,
+        winningTeam: 2
+      })
+      setGameComplete(true)
+    } else {
+      setTeamSelectionMode(true)
+      setGameStarted(false)
+      setNewSession(s => ({ ...s, team1: [] }))
+    }
+  }}
+  variant="frosted"
+  color="red"
+  className="h-16 text-base font-bold"
+>
+  Team 2 Wins
+</Button>
                 </div>
               </div>
 
