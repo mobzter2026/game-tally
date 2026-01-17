@@ -611,36 +611,66 @@ export default function PublicView() {
         </div>
 
 <div className="mb-6 mt-2 flex justify-center">
-  <div className="flex gap-2 max-w-2xl w-full px-4 justify-center">
-<Button
-  onClick={() => setActiveTab('individual')}
-  variant="frosted"
-  color="purple"
-  selected={activeTab === 'individual'}
-  className="w-36 px-3 py-2 text-sm sm:text-base whitespace-nowrap"
->
-  Solo Kings
-</Button>
+  <div className="flex gap-2 max-w-full px-2 justify-center">
+    <Button
+      onClick={() => setActiveTab('individual')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'individual'}
+      className="
+        flex-1
+        min-w-[80px] sm:min-w-[90px]
+        px-2
+        py-1.5
+        text-xs sm:text-sm
+        whitespace-nowrap
+        text-left
+        text-white
+        font-bold
+      "
+    >
+      Solo Kings
+    </Button>
 
-<Button
-  onClick={() => setActiveTab('rung')}
-  variant="frosted"
-  color="purple"
-  selected={activeTab === 'rung'}
-  className="w-44 px-3 py-2 text-sm sm:text-base whitespace-nowrap"
->
-  Double Trouble
-</Button>
+    <Button
+      onClick={() => setActiveTab('rung')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'rung'}
+      className="
+        flex-1
+        min-w-[100px] sm:min-w-[110px]
+        px-2
+        py-1.5
+        text-xs sm:text-sm
+        whitespace-nowrap
+        text-left
+        text-white
+        font-bold
+      "
+    >
+      Double Trouble
+    </Button>
 
-<Button
-  onClick={() => setActiveTab('recent')}
-  variant="frosted"
-  color="purple"
-  selected={activeTab === 'recent'}
-  className="w-52 px-3 py-2 text-sm sm:text-base whitespace-nowrap"
->
-  Recent Showdowns
-</Button>
+    <Button
+      onClick={() => setActiveTab('recent')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'recent'}
+      className="
+        flex-1
+        min-w-[110px] sm:min-w-[130px]
+        px-2
+        py-1.5
+        text-xs sm:text-sm
+        whitespace-nowrap
+        text-left
+        text-white
+        font-bold
+      "
+    >
+      Recent Showdowns
+    </Button>
   </div>
 </div>
 
