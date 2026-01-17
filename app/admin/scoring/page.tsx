@@ -534,9 +534,21 @@ const calculateResults = (finalScores: Record<string, number>) => {
   }])
   
   if (newScore >= 5) {
+    // Build a map of team keys to actual player arrays
+    const teamKeyToPlayers: Record<string, string[]> = {}
+    rungRounds.forEach(round => {
+      const t1Key = getTeamKey(round.team1)
+      const t2Key = getTeamKey(round.team2)
+      teamKeyToPlayers[t1Key] = round.team1
+      teamKeyToPlayers[t2Key] = round.team2
+    })
+    // Add current teams
+    teamKeyToPlayers[team1Key] = newSession.team1
+    teamKeyToPlayers[getTeamKey(newSession.team2)] = newSession.team2
+    
     const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
       teamKey: key,
-      players: key.match(/.{1,3}/g) || [],
+      players: teamKeyToPlayers[key] || [],
       score: key === team1Key ? newScore : score
     })).sort((a, b) => b.score - a.score)
     
@@ -588,9 +600,21 @@ const calculateResults = (finalScores: Record<string, number>) => {
   }])
   
   if (newScore >= 5) {
+    // Build a map of team keys to actual player arrays
+    const teamKeyToPlayers: Record<string, string[]> = {}
+    rungRounds.forEach(round => {
+      const t1Key = getTeamKey(round.team1)
+      const t2Key = getTeamKey(round.team2)
+      teamKeyToPlayers[t1Key] = round.team1
+      teamKeyToPlayers[t2Key] = round.team2
+    })
+    // Add current teams
+    teamKeyToPlayers[getTeamKey(newSession.team1)] = newSession.team1
+    teamKeyToPlayers[team2Key] = newSession.team2
+    
     const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
       teamKey: key,
-      players: key.match(/.{1,3}/g) || [],
+      players: teamKeyToPlayers[key] || [],
       score: key === team2Key ? newScore : score
     })).sort((a, b) => b.score - a.score)
     
