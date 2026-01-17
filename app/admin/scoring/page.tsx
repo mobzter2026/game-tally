@@ -475,11 +475,18 @@ export default function ScoringPage() {
                     
                     if (newScore >= 5) {
                       const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]).concat(newSession.team1, newSession.team2))]
-                      const loserPlayers: string[] = allPlayersInGame.filter(p => !newSession.team1.includes(p))
+                      
+                      // Determine runner-up: the current losing team if they have score > 0
+                      const runnerUpPlayers = teamScores.team2 > 0 ? newSession.team2 : []
+                      
+                      // Losers are everyone who isn't a winner or runner-up
+                      const loserPlayers = allPlayersInGame.filter(p => 
+                        !newSession.team1.includes(p) && !runnerUpPlayers.includes(p)
+                      )
                       
                       setResults({
                         winners: newSession.team1,
-                        runnersUp: [],
+                        runnersUp: runnerUpPlayers,
                         survivors: [],
                         losers: loserPlayers,
                         winningTeam: 1
@@ -512,11 +519,18 @@ export default function ScoringPage() {
                     
                     if (newScore >= 5) {
                       const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]).concat(newSession.team1, newSession.team2))]
-                      const loserPlayers: string[] = allPlayersInGame.filter(p => !newSession.team2.includes(p))
+                      
+                      // Determine runner-up: the current losing team if they have score > 0
+                      const runnerUpPlayers = teamScores.team1 > 0 ? newSession.team1 : []
+                      
+                      // Losers are everyone who isn't a winner or runner-up
+                      const loserPlayers = allPlayersInGame.filter(p => 
+                        !newSession.team2.includes(p) && !runnerUpPlayers.includes(p)
+                      )
                       
                       setResults({
                         winners: newSession.team2,
-                        runnersUp: [],
+                        runnersUp: runnerUpPlayers,
                         survivors: [],
                         losers: loserPlayers,
                         winningTeam: 2
