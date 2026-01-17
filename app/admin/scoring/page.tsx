@@ -37,6 +37,7 @@ export default function ScoringPage() {
     team2: string[]
     winner: 1 | 2
   }>>([])
+  const [rungTeamScores, setRungTeamScores] = useState<Record<string, number>>({})
   const [results, setResults] = useState<{
     winners: string[]
     runnersUp: string[]
@@ -220,6 +221,7 @@ export default function ScoringPage() {
         setTeamSelectionMode(false)
         setTeamScores({ team1: 0, team2: 0 })
         setRungRounds([])
+        setRungTeamScores({})
         setEliminationHistory([])
         setNewSession({
           game: 'Monopoly',
