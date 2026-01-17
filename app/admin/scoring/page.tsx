@@ -157,20 +157,20 @@ export default function ScoringPage() {
 
   const calculateShitheadResults = (finalScores: Record<string, number>) => {
     const sortedPlayers = Object.entries(finalScores)
-      .sort(([, a], [, b]) => a - b)
+      .sort(([, a], [, b]) => a - b)  // Sort ascending (lowest to highest)
 
     const minScore = sortedPlayers[0][1]
-    const losers = sortedPlayers.filter(([, score]) => score === minScore).map(([player]) => player)
+    const winners = sortedPlayers.filter(([, score]) => score === minScore).map(([player]) => player)
 
     const remaining = sortedPlayers.filter(([, score]) => score > minScore)
     const secondLowest = remaining.length > 0 ? remaining[0][1] : Infinity
     const runnersUp = remaining.filter(([, score]) => score === secondLowest).map(([player]) => player)
 
-    const restRemaining = remaining.filter(([, score]) => score > secondLowest)
     const maxScore = sortedPlayers[sortedPlayers.length - 1][1]
-    const winners = sortedPlayers.filter(([, score]) => score === maxScore && score > minScore).map(([player]) => player)
-
-    const survivors = restRemaining.filter(([player]) => !winners.includes(player)).map(([player]) => player)
+    const losers = sortedPlayers.filter(([, score]) => score === maxScore && score > minScore).map(([player]) => player)
+    
+    const restRemaining = remaining.filter(([, score]) => score > secondLowest && score < maxScore)
+    const survivors = restRemaining.map(([player]) => player)
 
     setResults({ winners, runnersUp, survivors, losers })
     setGameComplete(true)
@@ -415,9 +415,9 @@ export default function ScoringPage() {
             <div className="bg-slate-900/40 p-3 rounded-lg text-center space-y-1">
               <div className="text-xs font-bold text-slate-400">Current Score</div>
               <div className="flex justify-center gap-4 text-2xl font-extrabold">
-                <span className="text-blue-400">{teamScores.team1}</span>
+                <span className="text-blue-400">{newSession.team1.length === 2 ? (rungTeamScores[getTeamKey(newSession.team1)] || 0) : '-'}</span>
                 <span className="text-slate-500">-</span>
-                <span className="text-red-400">{teamScores.team2}</span>
+                <span className="text-red-400">{newSession.team2.length === 2 ? (rungTeamScores[getTeamKey(newSession.team2)] || 0) : '-'}</span>
               </div>
             </div>
 
@@ -628,12 +628,12 @@ export default function ScoringPage() {
                 <h3 className="text-center text-xs font-bold text-slate-400 mb-2">Round History</h3>
                 <div className="space-y-1 text-xs">
                   {rungRounds.map((round, idx) => (
-                    <div key={idx} className="flex justify-between items-center">
-                      <span className={round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
+                    <div key={idx} className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                      <span className={`text-right ${round.winner === 1 ? 'text-blue-400 font-bold' : 'text-slate-400'}`}>
                         {round.team1.join(' & ')}
                       </span>
-                      <span className="text-amber-400">vs</span>
-                      <span className={round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}>
+                      <span className="text-amber-400 px-2">vs</span>
+                      <span className={`text-left ${round.winner === 2 ? 'text-red-400 font-bold' : 'text-slate-400'}`}>
                         {round.team2.join(' & ')}
                       </span>
                     </div>
