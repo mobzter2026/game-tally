@@ -669,7 +669,7 @@ export default function PublicView() {
         font-bold
       "
     >
-      Recents
+      Recent Games
     </Button>
   </div>
 </div>
