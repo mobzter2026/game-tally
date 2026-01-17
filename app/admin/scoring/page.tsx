@@ -519,48 +519,55 @@ const calculateResults = (finalScores: Record<string, number>) => {
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     onClick={() => {
-                      const team1Key = getTeamKey(newSession.team1)
-                      const newScore = (rungTeamScores[team1Key] || 0) + 1
-                      
-                      setRungTeamScores(prev => ({
-                        ...prev,
-                        [team1Key]: newScore
-                      }))
-                      
-                      setRungRounds(prev => [...prev, {
-                        team1: newSession.team1,
-                        team2: newSession.team2,
-                        winner: 1
-                      }])
-                      
-                      if (newScore >= 5) {
-                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-                          teamKey: key,
-                          players: key.match(/.{1,3}/g) || [],
-                          score: key === team1Key ? newScore : score
-                        })).sort((a, b) => b.score - a.score)
-                        
-                        const winnerPlayers = newSession.team1
-                        const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
-                          ? allTeams[1].players 
-                          : []
-                        const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
-                        const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
-                        
-                        setResults({
-                          winners: winnerPlayers,
-                          runnersUp: runnerUpPlayers,
-                          survivors: survivorPlayers,
-                          losers: loserPlayers,
-                          winningTeam: 1
-                        })
-                        setGameComplete(true)
-                      } else {
-                        setTeamSelectionMode(true)
-                        setGameStarted(false)
-                        setNewSession(s => ({ ...s, team2: [] }))
-                      }
-                    }}
+  const team1Key = getTeamKey(newSession.team1)
+  const newScore = (rungTeamScores[team1Key] || 0) + 1
+  
+  setRungTeamScores(prev => ({
+    ...prev,
+    [team1Key]: newScore
+  }))
+  
+  setRungRounds(prev => [...prev, {
+    team1: newSession.team1,
+    team2: newSession.team2,
+    winner: 1
+  }])
+  
+  if (newScore >= 5) {
+    const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+      teamKey: key,
+      players: key.match(/.{1,3}/g) || [],
+      score: key === team1Key ? newScore : score
+    })).sort((a, b) => b.score - a.score)
+    
+    // Winners: Team 1
+    const winnerPlayers = newSession.team1
+    
+    // Runners up: Second place team (if they have any wins)
+    const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+      ? allTeams[1].players 
+      : []
+    
+    // Losers: Everyone else who played (excluding winners and runners up)
+    const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
+    const loserPlayers = allPlayersInGame.filter(p => 
+      !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
+    )
+    
+    setResults({
+      winners: winnerPlayers,
+      runnersUp: runnerUpPlayers,
+      survivors: [], // No survivors in Rung - just win/runnerup/loss
+      losers: loserPlayers,
+      winningTeam: 1
+    })
+    setGameComplete(true)
+  } else {
+    setTeamSelectionMode(true)
+    setGameStarted(false)
+    setNewSession(s => ({ ...s, team2: [] }))
+  }
+}}
                     variant="frosted"
                     color="blue"
                     className="h-16 text-base font-bold"
@@ -570,48 +577,55 @@ const calculateResults = (finalScores: Record<string, number>) => {
 
 <Button
                     onClick={() => {
-                      const team2Key = getTeamKey(newSession.team2)
-                      const newScore = (rungTeamScores[team2Key] || 0) + 1
-                      
-                      setRungTeamScores(prev => ({
-                        ...prev,
-                        [team2Key]: newScore
-                      }))
-                      
-                      setRungRounds(prev => [...prev, {
-                        team1: newSession.team1,
-                        team2: newSession.team2,
-                        winner: 2
-                      }])
-                      
-                      if (newScore >= 5) {
-                        const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
-                          teamKey: key,
-                          players: key.match(/.{1,3}/g) || [],
-                          score: key === team2Key ? newScore : score
-                        })).sort((a, b) => b.score - a.score)
-                        
-                        const winnerPlayers = newSession.team2
-                        const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
-                          ? allTeams[1].players 
-                          : []
-                        const survivorPlayers = allTeams.slice(2).filter(t => t.score > 0).flatMap(t => t.players)
-                        const loserPlayers = allTeams.filter(t => t.score === 0).flatMap(t => t.players)
-                        
-                        setResults({
-                          winners: winnerPlayers,
-                          runnersUp: runnerUpPlayers,
-                          survivors: survivorPlayers,
-                          losers: loserPlayers,
-                          winningTeam: 2
-                        })
-                        setGameComplete(true)
-                      } else {
-                        setTeamSelectionMode(true)
-                        setGameStarted(false)
-                        setNewSession(s => ({ ...s, team1: [] }))
-                      }
-                    }}
+  const team2Key = getTeamKey(newSession.team2)
+  const newScore = (rungTeamScores[team2Key] || 0) + 1
+  
+  setRungTeamScores(prev => ({
+    ...prev,
+    [team2Key]: newScore
+  }))
+  
+  setRungRounds(prev => [...prev, {
+    team1: newSession.team1,
+    team2: newSession.team2,
+    winner: 2
+  }])
+  
+  if (newScore >= 5) {
+    const allTeams = Object.entries(rungTeamScores).map(([key, score]) => ({
+      teamKey: key,
+      players: key.match(/.{1,3}/g) || [],
+      score: key === team2Key ? newScore : score
+    })).sort((a, b) => b.score - a.score)
+    
+    // Winners: Team 2
+    const winnerPlayers = newSession.team2
+    
+    // Runners up: Second place team (if they have any wins)
+    const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+      ? allTeams[1].players 
+      : []
+    
+    // Losers: Everyone else who played (excluding winners and runners up)
+    const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
+    const loserPlayers = allPlayersInGame.filter(p => 
+      !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
+    )
+    
+    setResults({
+      winners: winnerPlayers,
+      runnersUp: runnerUpPlayers,
+      survivors: [], // No survivors in Rung - just win/runnerup/loss
+      losers: loserPlayers,
+      winningTeam: 2
+    })
+    setGameComplete(true)
+  } else {
+    setTeamSelectionMode(true)
+    setGameStarted(false)
+    setNewSession(s => ({ ...s, team1: [] }))
+  }
+}}
                     variant="frosted"
                     color="red"
                     className="h-16 text-base font-bold"
@@ -790,14 +804,18 @@ const calculateResults = (finalScores: Record<string, number>) => {
                   <div className="text-sm font-bold text-green-400 mb-1">
                     {newSession.game === 'Shithead' ? '🏆 Champions' : '🏆 Winners'}
                   </div>
-                  <div className="text-base font-bold">{results.winners.join(', ')}</div>
+                  <div className="text-base font-bold">
+  {Array.isArray(results.winners) ? results.winners.join(' & ') : results.winners}
+</div>
                 </div>
               )}
               
               {results.runnersUp.length > 0 && (
                 <div className="bg-blue-900/50 p-3 rounded-xl">
                   <div className="text-sm font-bold text-blue-400 mb-1">🥈 Runners Up</div>
-                  <div className="text-base font-bold">{results.runnersUp.join(', ')}</div>
+                  <div className="text-base font-bold">
+  {Array.isArray(results.runnersUp) ? results.runnersUp.join(' & ') : results.runnersUp}
+</div>
                 </div>
               )}
               
