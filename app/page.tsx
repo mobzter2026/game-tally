@@ -610,37 +610,70 @@ export default function PublicView() {
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">"{QUOTES[currentQuote]}"</p>
         </div>
 
-        <div className="mb-6 mt-2 flex justify-center">
-          <div className="grid grid-cols-3 gap-3 max-w-2xl w-full px-4">
-            <Button
-              onClick={() => setActiveTab('individual')}
-              variant="frosted"
-              color="purple"
-              selected={activeTab === 'individual'}
-              className="px-3 py-2 text-sm sm:text-base"
-            >
-              Solo Kings
-            </Button>
-            <Button
-              onClick={() => setActiveTab('rung')}
-              variant="frosted"
-              color="purple"
-              selected={activeTab === 'rung'}
-              className="px-3 py-2 text-sm sm:text-base"
-            >
-              Double Trouble
-            </Button>
-            <Button
-              onClick={() => setActiveTab('recent')}
-              variant="frosted"
-              color="purple"
-              selected={activeTab === 'recent'}
-              className="px-3 py-2 text-sm sm:text-base"
-            >
-              Recent Showdowns
-            </Button>
-          </div>
-        </div>
+<div className="mb-6 mt-2 flex justify-center">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full px-4">
+    <Button
+      onClick={() => setActiveTab('individual')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'individual'}
+      className="
+        w-full
+        px-5
+        py-3
+        text-sm
+        sm:text-base
+        whitespace-nowrap
+        bg-gradient-to-b
+        from-purple-500
+        to-purple-700
+      "
+    >
+      Solo Kings
+    </Button>
+
+    <Button
+      onClick={() => setActiveTab('rung')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'rung'}
+      className="
+        w-full
+        px-5
+        py-3
+        text-sm
+        sm:text-base
+        whitespace-nowrap
+        bg-gradient-to-b
+        from-purple-500
+        to-purple-700
+      "
+    >
+      Double Trouble
+    </Button>
+
+    <Button
+      onClick={() => setActiveTab('recent')}
+      variant="frosted"
+      color="purple"
+      selected={activeTab === 'recent'}
+      className="
+        w-full
+        px-5
+        py-3
+        text-sm
+        sm:text-base
+        whitespace-nowrap
+        bg-gradient-to-b
+        from-purple-500
+        to-purple-700
+      "
+    >
+      Recent Showdowns
+    </Button>
+  </div>
+</div>
+
 
         {activeTab === 'individual' && (
           <>
