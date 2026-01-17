@@ -540,24 +540,20 @@ const calculateResults = (finalScores: Record<string, number>) => {
       score: key === team1Key ? newScore : score
     })).sort((a, b) => b.score - a.score)
     
-    // Winners: Team 1
-    const winnerPlayers = newSession.team1
-    
-    // Runners up: Second place team (if they have any wins)
-    const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+    const winnerPlayers: string[] = newSession.team1
+    const runnerUpPlayers: string[] = allTeams.length >= 2 && allTeams[1].score > 0 
       ? allTeams[1].players 
       : []
     
-    // Losers: Everyone else who played (excluding winners and runners up)
     const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-    const loserPlayers = allPlayersInGame.filter(p => 
+    const loserPlayers: string[] = allPlayersInGame.filter(p => 
       !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
     )
     
     setResults({
       winners: winnerPlayers,
       runnersUp: runnerUpPlayers,
-      survivors: [], // No survivors in Rung - just win/runnerup/loss
+      survivors: [],
       losers: loserPlayers,
       winningTeam: 1
     })
@@ -598,24 +594,20 @@ const calculateResults = (finalScores: Record<string, number>) => {
       score: key === team2Key ? newScore : score
     })).sort((a, b) => b.score - a.score)
     
-    // Winners: Team 2
-    const winnerPlayers = newSession.team2
-    
-    // Runners up: Second place team (if they have any wins)
-    const runnerUpPlayers = allTeams.length >= 2 && allTeams[1].score > 0 
+    const winnerPlayers: string[] = newSession.team2
+    const runnerUpPlayers: string[] = allTeams.length >= 2 && allTeams[1].score > 0 
       ? allTeams[1].players 
       : []
     
-    // Losers: Everyone else who played (excluding winners and runners up)
     const allPlayersInGame = [...new Set(rungRounds.flatMap(r => [...r.team1, ...r.team2]))]
-    const loserPlayers = allPlayersInGame.filter(p => 
+    const loserPlayers: string[] = allPlayersInGame.filter(p => 
       !winnerPlayers.includes(p) && !runnerUpPlayers.includes(p)
     )
     
     setResults({
       winners: winnerPlayers,
       runnersUp: runnerUpPlayers,
-      survivors: [], // No survivors in Rung - just win/runnerup/loss
+      survivors: [],
       losers: loserPlayers,
       winningTeam: 2
     })
