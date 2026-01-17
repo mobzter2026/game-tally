@@ -142,28 +142,14 @@ export default function ScoringPage() {
     const winners = sortedPlayers.filter(([, score]) => score === maxScore).map(([player]) => player)
 
     const remaining = sortedPlayers.filter(([, score]) => score < maxScore)
-    
-    if (remaining.length === 0) {
-      // Everyone won (tied for first)
-      setResults({ winners, runnersUp: [], survivors: [], losers: [] })
-      setGameComplete(true)
-      return
-    }
-
-    const minScore = remaining[remaining.length - 1][1]
-    const secondHighest = remaining[0][1]
-    
-    // If second highest score equals minimum score, everyone else lost (no runners-up or survivors)
-    if (secondHighest === minScore) {
-      const losers = remaining.map(([player]) => player)
-      setResults({ winners, runnersUp: [], survivors: [], losers })
-      setGameComplete(true)
-      return
-    }
-
+    const secondHighest = remaining.length > 0 ? remaining[0][1] : -1
     const runnersUp = remaining.filter(([, score]) => score === secondHighest).map(([player]) => player)
-    const losers = remaining.filter(([, score]) => score === minScore).map(([player]) => player)
-    const survivors = remaining.filter(([player]) => !runnersUp.includes(player) && !losers.includes(player)).map(([player]) => player)
+
+    const restRemaining = remaining.filter(([, score]) => score < secondHighest && score > 0)
+    const minScore = sortedPlayers[sortedPlayers.length - 1][1]
+    const losers = sortedPlayers.filter(([, score]) => score === minScore && score < maxScore).map(([player]) => player)
+
+    const survivors = restRemaining.filter(([player]) => !losers.includes(player)).map(([player]) => player)
 
     setResults({ winners, runnersUp, survivors, losers })
     setGameComplete(true)
@@ -335,6 +321,7 @@ export default function ScoringPage() {
               New Round
             </h2>
 
+            <div className="flex gap-3">
               <div className="flex-1">
                 <label className="block text-xs font-bold text-center mb-1">Date</label>
                 <input
@@ -344,7 +331,6 @@ export default function ScoringPage() {
                   className="h-9 w-full font-bold text-sm rounded-lg bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 text-center shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all px-2"
                 />
               </div>
-
               <div className="flex-1">
                 <label className="block text-xs font-bold text-center mb-1">Game</label>
                 <select
