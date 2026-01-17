@@ -619,7 +619,7 @@ export default function PublicView() {
               selected={activeTab === 'individual'}
               className="px-3 py-2 text-sm sm:text-base"
             >
-              🎴 Solo Games
+              Solo Stats
             </Button>
             <Button
               onClick={() => setActiveTab('rung')}
@@ -628,7 +628,7 @@ export default function PublicView() {
               selected={activeTab === 'rung'}
               className="px-3 py-2 text-sm sm:text-base"
             >
-              🎭 Rung
+              Duo Stats
             </Button>
           </div>
         </div>
