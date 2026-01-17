@@ -484,8 +484,9 @@ export default function ScoringPage() {
                         losers: loserPlayers,
                         winningTeam: 1
                       })
-                      setGameComplete(true)
                       setTeamSelectionMode(false)
+                      setGameStarted(true)
+                      setGameComplete(true)
                     } else {
                       setNewSession(s => ({ ...s, team2: [] }))
                     }
@@ -520,8 +521,9 @@ export default function ScoringPage() {
                         losers: loserPlayers,
                         winningTeam: 2
                       })
-                      setGameComplete(true)
                       setTeamSelectionMode(false)
+                      setGameStarted(true)
+                      setGameComplete(true)
                     } else {
                       setNewSession(s => ({ ...s, team1: [] }))
                     }
