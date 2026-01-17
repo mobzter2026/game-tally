@@ -649,7 +649,7 @@ export default function PublicView() {
         font-bold
       "
     >
-      Double Trouble
+      Rung Duo
     </Button>
 
     <Button
@@ -669,7 +669,7 @@ export default function PublicView() {
         font-bold
       "
     >
-      Recent Showdowns
+      Recents
     </Button>
   </div>
 </div>
