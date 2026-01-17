@@ -336,15 +336,15 @@ export default function ScoringPage() {
             </h2>
 
             <div className="flex gap-3">
-<div className="flex-1">
-  <label className="block text-xs font-bold text-center mb-1">Date</label>
+<div className="flex-1 flex flex-col items-center">
+  <label className="block text-xs font-bold mb-1 text-center">Date</label>
   <input
     type="date"
     value={newSession.date}
     onChange={e => setNewSession({ ...newSession, date: e.target.value })}
     className="
       h-9
-      w-full
+      w-40
       font-bold
       text-sm
       rounded-lg
@@ -357,6 +357,7 @@ export default function ScoringPage() {
     "
   />
 </div>
+
 
               <div className="flex-1">
                 <label className="block text-xs font-bold text-center mb-1">Game</label>
