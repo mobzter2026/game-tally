@@ -344,7 +344,7 @@ export default function ScoringPage() {
     onChange={e => setNewSession({ ...newSession, date: e.target.value })}
     className="
       h-9
-      w-40
+      w-36
       font-bold
       text-sm
       rounded-lg
@@ -354,10 +354,10 @@ export default function ScoringPage() {
       shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]
       transition-all
       px-0
+      appearance-none
     "
   />
 </div>
-
 
               <div className="flex-1">
                 <label className="block text-xs font-bold text-center mb-1">Game</label>
