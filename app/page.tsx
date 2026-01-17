@@ -611,15 +611,16 @@ export default function PublicView() {
         </div>
 
 <div className="mb-6 mt-2 flex justify-center">
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full px-4">
+  <div className="flex gap-3 max-w-2xl w-full px-4 justify-center">
     <Button
       onClick={() => setActiveTab('individual')}
       variant="frosted"
       color="purple"
       selected={activeTab === 'individual'}
       className="
-        w-full
-        px-5
+        flex-1
+        min-w-[90px]
+        px-4
         py-3
         text-sm
         sm:text-base
@@ -627,6 +628,8 @@ export default function PublicView() {
         bg-gradient-to-b
         from-purple-500
         to-purple-700
+        text-white
+        font-bold
       "
     >
       Solo Kings
@@ -638,8 +641,9 @@ export default function PublicView() {
       color="purple"
       selected={activeTab === 'rung'}
       className="
-        w-full
-        px-5
+        flex-1
+        min-w-[110px]
+        px-4
         py-3
         text-sm
         sm:text-base
@@ -647,6 +651,8 @@ export default function PublicView() {
         bg-gradient-to-b
         from-purple-500
         to-purple-700
+        text-white
+        font-bold
       "
     >
       Double Trouble
@@ -658,8 +664,9 @@ export default function PublicView() {
       color="purple"
       selected={activeTab === 'recent'}
       className="
-        w-full
-        px-5
+        flex-1
+        min-w-[130px]
+        px-4
         py-3
         text-sm
         sm:text-base
@@ -667,6 +674,8 @@ export default function PublicView() {
         bg-gradient-to-b
         from-purple-500
         to-purple-700
+        text-white
+        font-bold
       "
     >
       Recent Showdowns
