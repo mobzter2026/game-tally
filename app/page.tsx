@@ -963,30 +963,22 @@ export default function PublicView() {
                   const gameRounds = rungRounds[game.id] || []
                   
                   return (
-                    <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]">
-                      <div className="flex justify-between items-center mb-2">
+                    <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
+                      <div className="flex justify-between items-start mb-3">
                         <div className="text-slate-300 text-base font-bold">
                           {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         {isOngoingRung && (
-                          <div className="flex items-center gap-2">
-                            <span className="bg-amber-500 text-black px-2 py-1 rounded text-xs font-bold animate-pulse">
-                              🎭 ONGOING
-                            </span>
-                            <button
-                              onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
-                              className="text-blue-400 hover:text-blue-300 text-sm transition-colors font-bold"
-                            >
-                              {expandedGame === game.id ? '▲ Collapse' : '▼ Expand'}
-                            </button>
-                          </div>
+                          <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 text-black px-3 py-1.5 rounded-lg text-xs font-black tracking-wider shadow-[0_4px_12px_rgba(251,191,36,0.6),inset_0_2px_4px_rgba(255,255,255,0.4)] animate-pulse">
+                            🎭 ONGOING
+                          </span>
                         )}
                       </div>
 
                       {game.game_type === 'Rung' && isOngoingRung ? (
                         <>
                           {/* Show current round */}
-                          <div className="flex gap-2 flex-wrap items-center mb-2">
+                          <div className="flex gap-2 flex-wrap items-center mb-3">
                             <div className="flex gap-1">
                               {game.team1?.map(p => (
                                 <span key={p} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-blue-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
@@ -1003,6 +995,16 @@ export default function PublicView() {
                               ))}
                             </div>
                           </div>
+
+                          {/* Premium Expand Button */}
+                          {isOngoingRung && (
+                            <button
+                              onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
+                              className="w-full mt-3 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 hover:from-cyan-400 hover:via-blue-400 hover:to-cyan-400 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(59,130,246,0.5),inset_0_2px_4px_rgba(255,255,255,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
+                            </button>
+                          )}
 
                           {/* Expandable round history */}
                           {expandedGame === game.id && (
