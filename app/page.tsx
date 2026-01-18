@@ -1049,68 +1049,68 @@ export default function PublicView() {
 
                       {game.game_type === 'Rung' && isOngoingRung ? (
                         <>
-                          {/* Show first-to-5 set standings with real-time winners */}
+                          {/* Show first-to-5 session standings with ALL teams */}
                           {(() => {
-                            const { team1Wins, team2Wins } = calculateRungWinners(game.game_date, game.team1!, game.team2!)
-                            const isComplete = team1Wins >= 5 || team2Wins >= 5
-                            
-                            // Determine winners, runners up, and display order
-                            let winners: string[] = []
-                            let runnersUp: string[] = []
-                            let allPlayers: string[] = []
-                            
-                            if (isComplete) {
-                              winners = team1Wins >= 5 ? game.team1! : game.team2!
-                              runnersUp = team1Wins >= 5 ? game.team2! : game.team1!
-                              allPlayers = [...winners, ...runnersUp]
-                            } else {
-                              // Ongoing - show leading team first
-                              if (team1Wins > team2Wins) {
-                                allPlayers = [...game.team1!, ...game.team2!]
-                              } else if (team2Wins > team1Wins) {
-                                allPlayers = [...game.team2!, ...game.team1!]
-                              } else {
-                                // Tied
-                                allPlayers = [...game.team1!, ...game.team2!]
-                              }
+                            // Get all rounds for this session
+                            const sessionRounds = games.filter(g => 
+                              g.game_type === 'Rung' && 
+                              g.game_date === game.game_date &&
+                              g.winning_team !== null &&
+                              g.team1 && g.team2
+                            )
+
+                            // Track wins for each unique team pairing
+                            const teamWins: Record<string, number> = {}
+                            const allTeams = new Set<string>()
+
+                            sessionRounds.forEach(round => {
+                              const team1Key = round.team1!.slice().sort().join('&')
+                              const team2Key = round.team2!.slice().sort().join('&')
+                              
+                              allTeams.add(team1Key)
+                              allTeams.add(team2Key)
+                              
+                              if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                              if (!teamWins[team2Key]) teamWins[team2Key] = 0
+                              
+                              if (round.winning_team === 1) teamWins[team1Key]++
+                              else if (round.winning_team === 2) teamWins[team2Key]++
+                            })
+
+                            // Sort teams by wins
+                            const sortedTeams = Array.from(allTeams).sort((a, b) => 
+                              (teamWins[b] || 0) - (teamWins[a] || 0)
+                            )
+
+                            // Categorize teams
+                            const winners = sortedTeams.filter(t => teamWins[t] >= 5)
+                            const maxWins = Math.max(...sortedTeams.map(t => teamWins[t] || 0))
+                            const runners = winners.length > 0 
+                              ? sortedTeams.filter(t => teamWins[t] < 5 && teamWins[t] === maxWins && maxWins < 5)
+                              : sortedTeams.filter(t => teamWins[t] === maxWins)
+                            const survivors = sortedTeams.filter(t => 
+                              !winners.includes(t) && !runners.includes(t) && teamWins[t] > 0
+                            )
+                            const losers = sortedTeams.filter(t => teamWins[t] === 0)
+
+                            const renderTeamBadges = (teams: string[], colorClass: string) => {
+                              return teams.map(teamKey => {
+                                const players = teamKey.split('&')
+                                return players.map(p => (
+                                  <span key={`${teamKey}-${p}`} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                    {p}
+                                  </span>
+                                ))
+                              })
                             }
                             
                             return (
-                              <>
-                                <div className="flex gap-1 flex-wrap mb-3">
-                                  {allPlayers.map(p => {
-                                    let colorClass = 'bg-slate-600' // grey/survivor default
-                                    
-                                    if (isComplete) {
-                                      if (winners.includes(p)) colorClass = 'bg-green-600'
-                                      else if (runnersUp.includes(p)) colorClass = 'bg-red-600'
-                                    } else {
-                                      // Ongoing game
-                                      const isTeam1 = game.team1!.includes(p)
-                                      const isTeam2 = game.team2!.includes(p)
-                                      
-                                      if (team1Wins > team2Wins) {
-                                        colorClass = isTeam1 ? 'bg-green-600' : 'bg-red-600'
-                                      } else if (team2Wins > team1Wins) {
-                                        colorClass = isTeam2 ? 'bg-green-600' : 'bg-red-600'
-                                      } else {
-                                        colorClass = 'bg-blue-600' // tied
-                                      }
-                                    }
-                                    
-                                    return (
-                                      <span key={p} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                                        {p}
-                                      </span>
-                                    )
-                                  })}
-                                </div>
-                                {!isComplete && (
-                                  <div className="text-center text-amber-400 font-bold text-sm mb-3">
-                                    {game.team1!.join(' & ')}: {team1Wins} - {team2Wins} :{game.team2!.join(' & ')}
-                                  </div>
-                                )}
-                              </>
+                              <div className="flex gap-1 flex-wrap mb-3">
+                                {renderTeamBadges(winners, 'bg-green-600')}
+                                {renderTeamBadges(runners, 'bg-blue-600')}
+                                {renderTeamBadges(survivors, 'bg-slate-600')}
+                                {renderTeamBadges(losers, 'bg-red-600')}
+                              </div>
                             )
                           })()}
 
@@ -1124,44 +1124,57 @@ export default function PublicView() {
                             </button>
                           )}
 
-                          {/* Expandable round history */}
+                          {/* Expandable round history - Recent first */}
                           {expandedGame === game.id && (
                             <div className="mt-3 bg-slate-900/50 p-4 rounded-lg">
-                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Rounds</h4>
+                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Most Recent First)</h4>
                               {gameRounds.length === 0 ? (
                                 <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
                               ) : (
                                 <div className="space-y-2">
-                                  {gameRounds.map((round, idx) => (
-                                    <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
-                                      <div className="text-xs text-slate-400 mb-2 text-center">
-                                        Round {idx + 1} • {new Date(round.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                      </div>
-                                      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
-                                        <div className="text-right">
-                                          <div className={`inline-flex gap-1 ${round.winning_team === 1 ? 'opacity-100' : 'opacity-50'}`}>
-                                            {round.team1?.map((p: string) => (
-                                              <span key={p} className={`${round.winning_team === 1 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
-                                                {p}
-                                              </span>
-                                            ))}
+                                  {(() => {
+                                    // Calculate running scores for each team
+                                    const teamScores: Record<string, number> = {}
+                                    const reversedRounds = [...gameRounds].reverse() // Most recent first
+                                    
+                                    // Initialize scores by going through all rounds
+                                    gameRounds.forEach(round => {
+                                      const team1Key = round.team1!.slice().sort().join('&')
+                                      const team2Key = round.team2!.slice().sort().join('&')
+                                      if (!teamScores[team1Key]) teamScores[team1Key] = 0
+                                      if (!teamScores[team2Key]) teamScores[team2Key] = 0
+                                      if (round.winning_team === 1) teamScores[team1Key]++
+                                      else if (round.winning_team === 2) teamScores[team2Key]++
+                                    })
+
+                                    return reversedRounds.map((round, idx) => {
+                                      const team1Key = round.team1!.slice().sort().join('&')
+                                      const team2Key = round.team2!.slice().sort().join('&')
+                                      const team1Score = teamScores[team1Key]
+                                      const team2Score = teamScores[team2Key]
+
+                                      return (
+                                        <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
+                                          <div className="text-xs text-slate-400 mb-2 text-center">
+                                            {new Date(round.created_at).toLocaleDateString()} • {new Date(round.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                          </div>
+                                          <div className="flex items-center justify-center gap-3 text-sm font-bold">
+                                            <div className={`flex items-center gap-2 ${round.winning_team === 1 ? 'text-green-400' : 'text-slate-400'}`}>
+                                              <span>{round.team1!.join(' & ')}</span>
+                                              <span className="text-amber-400">({team1Score})</span>
+                                            </div>
+                                            <span className="text-amber-400">vs</span>
+                                            <div className={`flex items-center gap-2 ${round.winning_team === 2 ? 'text-green-400' : 'text-slate-400'}`}>
+                                              <span>{round.team2!.join(' & ')}</span>
+                                              <span className="text-amber-400">({team2Score})</span>
+                                            </div>
                                           </div>
                                         </div>
-                                        <span className="text-amber-400 font-bold text-sm">vs</span>
-                                        <div className="text-left">
-                                          <div className={`inline-flex gap-1 ${round.winning_team === 2 ? 'opacity-100' : 'opacity-50'}`}>
-                                            {round.team2?.map((p: string) => (
-                                              <span key={p} className={`${round.winning_team === 2 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
-                                                {p}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                                      )
+                                    })
+                                  })()}
                                   <div className="text-center text-amber-400 text-sm font-bold mt-3 pt-3 border-t border-slate-700">
-                                    Total Rounds: {gameRounds.length}
+                                    Total Matches: {gameRounds.length}
                                   </div>
                                 </div>
                               )}
