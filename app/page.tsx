@@ -559,7 +559,7 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
   
-  // Group Rung games by matchup for Recent Games tab
+  // Group Rung games by session (detect when 5 wins reached)
   const getGroupedRecentGames = () => {
     const allGames = activeTab === 'rung'
       ? filteredGames.filter(g => g.game_type === 'Rung')
@@ -570,27 +570,70 @@ export default function PublicView() {
       return allGames.slice(0, 20)
     }
 
-    // Group Rung games by date and matchup
+    // Group Rung games into sessions
     const grouped: Game[] = []
-    const seenRungMatchups = new Set<string>()
+    const rungGames = allGames.filter(g => g.game_type === 'Rung' && g.team1 && g.team2)
+    
+    // Group by date first
+    const gamesByDate: Record<string, Game[]> = {}
+    rungGames.forEach(game => {
+      if (!gamesByDate[game.game_date]) {
+        gamesByDate[game.game_date] = []
+      }
+      gamesByDate[game.game_date].push(game)
+    })
 
-    allGames.forEach(game => {
-      if (game.game_type === 'Rung' && game.team1 && game.team2) {
-        // Create unique key for this matchup
-        const teams = [game.team1.slice().sort().join(','), game.team2.slice().sort().join(',')].sort().join('|')
-        const matchupKey = `${game.game_date}|${teams}`
-        
-        if (!seenRungMatchups.has(matchupKey)) {
-          seenRungMatchups.add(matchupKey)
-          grouped.push(game)
+    // For each date, detect sessions (session ends when team hits 5 wins)
+    Object.keys(gamesByDate).sort().reverse().forEach(date => {
+      const gamesOnDate = gamesByDate[date].sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
+
+      let sessionStart = 0
+      const teamWins: Record<string, number> = {}
+
+      gamesOnDate.forEach((game, idx) => {
+        const team1Key = game.team1!.slice().sort().join('&')
+        const team2Key = game.team2!.slice().sort().join('&')
+
+        if (!teamWins[team1Key]) teamWins[team1Key] = 0
+        if (!teamWins[team2Key]) teamWins[team2Key] = 0
+
+        // Increment win for winning team
+        if (game.winning_team === 1) teamWins[team1Key]++
+        else if (game.winning_team === 2) teamWins[team2Key]++
+
+        // Check if any team reached 5 wins (session complete)
+        const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
+
+        // If session complete OR last game, add this session
+        if (sessionComplete || idx === gamesOnDate.length - 1) {
+          // Add the first game of this session as the representative
+          grouped.push(gamesOnDate[sessionStart])
+          
+          // If session complete and not the last game, start new session
+          if (sessionComplete && idx < gamesOnDate.length - 1) {
+            sessionStart = idx + 1
+            // Reset team wins for new session
+            Object.keys(teamWins).forEach(key => teamWins[key] = 0)
+          }
         }
-      } else {
-        // Non-Rung games always show
+      })
+    })
+
+    // Add non-Rung games
+    allGames.forEach(game => {
+      if (game.game_type !== 'Rung') {
         grouped.push(game)
       }
     })
 
-    return grouped.slice(0, 20)
+    // Sort by date descending
+    return grouped.sort((a, b) => {
+      const dateCompare = new Date(b.game_date).getTime() - new Date(a.game_date).getTime()
+      if (dateCompare !== 0) return dateCompare
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }).slice(0, 20)
   }
 
   const recentGames = getGroupedRecentGames()
@@ -598,7 +641,7 @@ export default function PublicView() {
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
   const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[]) => {
-    // Fetch all Rung games from the same date with these teams
+    // Fetch ALL Rung games from this date
     const { data } = await supabase
       .from('games')
       .select('*')
@@ -608,18 +651,37 @@ export default function PublicView() {
       .order('created_at', { ascending: true })
 
     if (data) {
-      // Filter to only rounds that match the current matchup
-      const matchingRounds = (data as Game[]).filter(round => {
-        const roundTeam1 = round.team1?.slice().sort().join(',')
-        const roundTeam2 = round.team2?.slice().sort().join(',')
-        const currentTeam1 = team1.slice().sort().join(',')
-        const currentTeam2 = team2.slice().sort().join(',')
-        
-        return (roundTeam1 === currentTeam1 && roundTeam2 === currentTeam2) ||
-               (roundTeam1 === currentTeam2 && roundTeam2 === currentTeam1)
-      })
+      const allRounds = data as Game[]
       
-      return matchingRounds
+      // Find which session the current game belongs to by detecting 5-win boundaries
+      const sessions: Game[][] = []
+      let currentSession: Game[] = []
+      const teamWins: Record<string, number> = {}
+
+      allRounds.forEach((round, idx) => {
+        const team1Key = round.team1!.slice().sort().join('&')
+        const team2Key = round.team2!.slice().sort().join('&')
+
+        if (!teamWins[team1Key]) teamWins[team1Key] = 0
+        if (!teamWins[team2Key]) teamWins[team2Key] = 0
+
+        currentSession.push(round)
+
+        if (round.winning_team === 1) teamWins[team1Key]++
+        else if (round.winning_team === 2) teamWins[team2Key]++
+
+        // Check if session complete (someone hit 5 wins)
+        const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
+
+        if (sessionComplete || idx === allRounds.length - 1) {
+          sessions.push([...currentSession])
+          currentSession = []
+          Object.keys(teamWins).forEach(key => teamWins[key] = 0)
+        }
+      })
+
+      // Return the last session (most recent ongoing or completed session)
+      return sessions[sessions.length - 1] || []
     }
     return []
   }
@@ -1049,18 +1111,49 @@ export default function PublicView() {
 
                       {game.game_type === 'Rung' && isOngoingRung ? (
                         <>
-                          {/* Show first-to-5 session standings with ALL teams */}
+                          {/* Show first-to-5 session standings with ALL teams in THIS session */}
                           {(() => {
-                            // Get all rounds for this session
-                            const sessionRounds = games.filter(g => 
+                            // Get all rounds for this DATE
+                            const allRoundsOnDate = games.filter(g => 
                               g.game_type === 'Rung' && 
                               g.game_date === game.game_date &&
                               g.winning_team !== null &&
                               g.team1 && g.team2
+                            ).sort((a, b) => 
+                              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                             )
 
-                            // Track wins for each unique team pairing
+                            // Find which session this game belongs to
+                            let sessionRounds: Game[] = []
+                            let currentSessionStart = 0
                             const teamWins: Record<string, number> = {}
+
+                            for (let i = 0; i < allRoundsOnDate.length; i++) {
+                              const round = allRoundsOnDate[i]
+                              const team1Key = round.team1!.slice().sort().join('&')
+                              const team2Key = round.team2!.slice().sort().join('&')
+
+                              if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                              if (!teamWins[team2Key]) teamWins[team2Key] = 0
+
+                              if (round.winning_team === 1) teamWins[team1Key]++
+                              else if (round.winning_team === 2) teamWins[team2Key]++
+
+                              // Check if this is our target game
+                              if (round.id === game.id || i === allRoundsOnDate.length - 1 || Object.values(teamWins).some(wins => wins >= 5)) {
+                                sessionRounds = allRoundsOnDate.slice(currentSessionStart, i + 1)
+                                break
+                              }
+
+                              // Session ended, reset for next session
+                              if (Object.values(teamWins).some(wins => wins >= 5)) {
+                                currentSessionStart = i + 1
+                                Object.keys(teamWins).forEach(key => teamWins[key] = 0)
+                              }
+                            }
+
+                            // Calculate standings for THIS session only
+                            const sessionTeamWins: Record<string, number> = {}
                             const allTeams = new Set<string>()
 
                             sessionRounds.forEach(round => {
@@ -1070,28 +1163,28 @@ export default function PublicView() {
                               allTeams.add(team1Key)
                               allTeams.add(team2Key)
                               
-                              if (!teamWins[team1Key]) teamWins[team1Key] = 0
-                              if (!teamWins[team2Key]) teamWins[team2Key] = 0
+                              if (!sessionTeamWins[team1Key]) sessionTeamWins[team1Key] = 0
+                              if (!sessionTeamWins[team2Key]) sessionTeamWins[team2Key] = 0
                               
-                              if (round.winning_team === 1) teamWins[team1Key]++
-                              else if (round.winning_team === 2) teamWins[team2Key]++
+                              if (round.winning_team === 1) sessionTeamWins[team1Key]++
+                              else if (round.winning_team === 2) sessionTeamWins[team2Key]++
                             })
 
                             // Sort teams by wins
                             const sortedTeams = Array.from(allTeams).sort((a, b) => 
-                              (teamWins[b] || 0) - (teamWins[a] || 0)
+                              (sessionTeamWins[b] || 0) - (sessionTeamWins[a] || 0)
                             )
 
                             // Categorize teams
-                            const winners = sortedTeams.filter(t => teamWins[t] >= 5)
-                            const maxWins = Math.max(...sortedTeams.map(t => teamWins[t] || 0))
+                            const winners = sortedTeams.filter(t => sessionTeamWins[t] >= 5)
+                            const maxWins = Math.max(...sortedTeams.map(t => sessionTeamWins[t] || 0))
                             const runners = winners.length > 0 
-                              ? sortedTeams.filter(t => teamWins[t] < 5 && teamWins[t] === maxWins && maxWins < 5)
-                              : sortedTeams.filter(t => teamWins[t] === maxWins)
+                              ? sortedTeams.filter(t => sessionTeamWins[t] < 5 && sessionTeamWins[t] === maxWins && maxWins < 5)
+                              : sortedTeams.filter(t => sessionTeamWins[t] === maxWins)
                             const survivors = sortedTeams.filter(t => 
-                              !winners.includes(t) && !runners.includes(t) && teamWins[t] > 0
+                              !winners.includes(t) && !runners.includes(t) && sessionTeamWins[t] > 0
                             )
-                            const losers = sortedTeams.filter(t => teamWins[t] === 0)
+                            const losers = sortedTeams.filter(t => sessionTeamWins[t] === 0)
 
                             const renderTeamBadges = (teams: string[], colorClass: string) => {
                               return teams.map(teamKey => {
