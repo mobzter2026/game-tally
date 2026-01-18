@@ -190,7 +190,7 @@ export default function ScoringPage() {
     setGameComplete(true)
   }
 
-  const saveGame = async () => {
+const saveGame = async () => {
     try {
       if (newSession.game === 'Rung') {
         for (const round of rungRounds) {
@@ -222,7 +222,10 @@ export default function ScoringPage() {
             winners: results.winners,
             runners_up: results.runnersUp,
             survivors: results.survivors,
-            losers: results.losers
+            losers: results.losers,
+            team1: null,
+            team2: null,
+            winning_team: null
           } as any)
         
         if (finalError) {
