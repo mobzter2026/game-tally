@@ -564,6 +564,46 @@ export default function PublicView() {
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
+  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[]) => {
+    // Fetch all Rung games from the same date with these teams
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('game_type', 'Rung')
+      .eq('game_date', gameDate)
+      .not('winning_team', 'is', null)
+      .order('created_at', { ascending: true })
+
+    if (data) {
+      // Filter to only rounds that match the current matchup
+      const matchingRounds = data.filter(round => {
+        const roundTeam1 = round.team1?.slice().sort().join(',')
+        const roundTeam2 = round.team2?.slice().sort().join(',')
+        const currentTeam1 = team1.slice().sort().join(',')
+        const currentTeam2 = team2.slice().sort().join(',')
+        
+        return (roundTeam1 === currentTeam1 && roundTeam2 === currentTeam2) ||
+               (roundTeam1 === currentTeam2 && roundTeam2 === currentTeam1)
+      })
+      
+      return matchingRounds
+    }
+    return []
+  }
+
+  const toggleExpandGame = async (gameId: string, gameDate: string, team1: string[], team2: string[]) => {
+    if (expandedGame === gameId) {
+      setExpandedGame(null)
+    } else {
+      setExpandedGame(gameId)
+      // Fetch rounds if not already cached
+      if (!rungRounds[gameId]) {
+        const rounds = await fetchRungRounds(gameDate, team1, team2)
+        setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-2 sm:p-4 font-mono overflow-x-hidden pb-24">
       <div className="max-w-7xl mx-auto mt-4 px-2">
@@ -897,46 +937,6 @@ export default function PublicView() {
             </div>
           </>
         )}
-
-  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[]) => {
-    // Fetch all Rung games from the same date with these teams
-    const { data } = await supabase
-      .from('games')
-      .select('*')
-      .eq('game_type', 'Rung')
-      .eq('game_date', gameDate)
-      .not('winning_team', 'is', null)
-      .order('created_at', { ascending: true })
-
-    if (data) {
-      // Filter to only rounds that match the current matchup
-      const matchingRounds = data.filter(round => {
-        const roundTeam1 = round.team1?.slice().sort().join(',')
-        const roundTeam2 = round.team2?.slice().sort().join(',')
-        const currentTeam1 = team1.slice().sort().join(',')
-        const currentTeam2 = team2.slice().sort().join(',')
-        
-        return (roundTeam1 === currentTeam1 && roundTeam2 === currentTeam2) ||
-               (roundTeam1 === currentTeam2 && roundTeam2 === currentTeam1)
-      })
-      
-      return matchingRounds
-    }
-    return []
-  }
-
-  const toggleExpandGame = async (gameId: string, gameDate: string, team1: string[], team2: string[]) => {
-    if (expandedGame === gameId) {
-      setExpandedGame(null)
-    } else {
-      setExpandedGame(gameId)
-      // Fetch rounds if not already cached
-      if (!rungRounds[gameId]) {
-        const rounds = await fetchRungRounds(gameDate, team1, team2)
-        setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
-      }
-    }
-  }
 
         {activeTab === 'recent' && (
           <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
