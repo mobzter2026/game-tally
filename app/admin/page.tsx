@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Game } from '@/lib/types'
+import Button from '@/Components/Button'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 
@@ -12,7 +13,7 @@ const GAME_EMOJIS: Record<string, string> = {
   'Monopoly': '🎲',
   'Tai Ti': '🀄',
   'Shithead': '💩',
-  'Rung': '🎴'
+  'Rung': '🎭'
 }
 
 export default function AdminDashboard() {
@@ -29,6 +30,7 @@ export default function AdminDashboard() {
     winners: [] as string[],
     runnersUp: [] as string[],
     losers: [] as string[],
+    survivors: [] as string[],
     team1: [] as string[],
     team2: [] as string[],
     winningTeam: 1
@@ -78,14 +80,13 @@ export default function AdminDashboard() {
     router.push('/admin/login')
   }
 
-  // Fixed TypeScript-safe toggle function
   const toggleArrayItem = (
-    key: 'players' | 'winners' | 'runnersUp' | 'losers' | 'team1' | 'team2',
+    key: 'players' | 'winners' | 'runnersUp' | 'losers' | 'survivors' | 'team1' | 'team2',
     player: string,
     max?: number
   ) => {
     const arr = newGame[key]
-    if (!Array.isArray(arr)) return // safety check
+    if (!Array.isArray(arr)) return
 
     if (arr.includes(player)) {
       setNewGame({ ...newGame, [key]: arr.filter(p => p !== player) })
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
       const gameData: any = {
         game_type: newGame.type,
         game_date: newGame.date,
-        players_in_game: [],
+        players_in_game: [...newGame.team1, ...newGame.team2],
         team1: newGame.team1,
         team2: newGame.team2,
         winning_team: newGame.winningTeam,
@@ -141,6 +142,7 @@ export default function AdminDashboard() {
         players_in_game: newGame.players,
         winners: newGame.winners.length > 0 ? newGame.winners : null,
         runners_up: newGame.runnersUp.length > 0 ? newGame.runnersUp : null,
+        survivors: newGame.survivors.length > 0 ? newGame.survivors : null,
         losers: newGame.losers.length > 0 ? newGame.losers : null,
         created_by: user?.email,
         created_at: new Date().toISOString()
@@ -155,12 +157,13 @@ export default function AdminDashboard() {
     }
 
     setNewGame({
-      type: 'Blackjack',
+      type: '',
       date: new Date().toISOString().split('T')[0],
       players: [],
       winners: [],
       runnersUp: [],
       losers: [],
+      survivors: [],
       team1: [],
       team2: [],
       winningTeam: 1
@@ -178,40 +181,51 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-2xl">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 flex items-center justify-center">
+        <div className="text-white text-2xl font-mono">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
-      <div className="max-w-6xl mx-auto mt-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 font-mono">
+      <div className="max-w-7xl mx-auto mt-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-slate-400 mb-4">Manage game results</p>
-          <div className="flex gap-2 justify-center">
-            <a href="/admin/scoring" className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 rounded">🎯 Live Scoring</a>
-            <a href="/" className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 rounded">View Leaderboard</a>
-            <button onClick={handleSignOut} className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 rounded">Sign Out</button>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            Admin Dashboard
+          </h1>
+          <p className="text-slate-300 mb-4 text-sm">Manage game results</p>
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Button onClick={() => router.push('/admin/scoring')} variant="pop" color="blue" className="px-4 py-2 text-sm">
+              🎯 Live Scoring
+            </Button>
+            <Button onClick={() => router.push('/')} variant="pop" color="purple" className="px-4 py-2 text-sm">
+              📊 View Leaderboard
+            </Button>
+            <Button onClick={handleSignOut} variant="pop" color="red" className="px-4 py-2 text-sm">
+              🚪 Sign Out
+            </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Add Game Form */}
-          <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
-            <h2 className="text-2xl font-bold mb-4">Add New Game</h2>
-            <p className="text-sm text-slate-400 mb-4">💡 Tip: For round-based games, use Live Scoring for better tracking</p>
+          <div className="rounded-xl p-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              Add New Game
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">💡 Tip: For round-based games, use Live Scoring for better tracking</p>
+            
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block mb-2 text-sm">Game Type</label>
+                  <label className="block mb-2 text-xs font-bold">Game Type</label>
                   <select
                     value={newGame.type}
                     onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg"
+                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold"
                   >
- 		    <option value="" disabled>Select a game</option>
+                    <option value="" disabled>Select a game</option>
                     {Object.entries(GAME_EMOJIS).map(([gameType, emoji]) => (
                       <option key={gameType} value={gameType}>
                         {emoji} {gameType}
@@ -220,136 +234,223 @@ export default function AdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm">Date</label>
+                  <label className="block mb-2 text-xs font-bold">Date</label>
                   <input
                     type="date"
                     value={newGame.date}
                     onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
-                    className="w-full p-3 bg-violet-900/80 rounded-lg"
+                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
               </div>
 
-              {/* Rung Teams */}
               {newGame.type === 'Rung' ? (
                 <>
-                  {['team1', 'team2'].map((teamKey, idx) => (
-                    <div key={teamKey} className="flex justify-between items-center flex-1">
-                      <label className="block mb-2 text-sm">Team {idx + 1} (Max 2 players)</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {PLAYERS.map(p => (
-                          <button
-                            key={p}
-                            onClick={() => toggleArrayItem(teamKey as 'team1' | 'team2', p, 2)}
-                            className={`px-2 py-1 text-sm rounded ${
-                              newGame[teamKey as 'team1' | 'team2'].includes(p)
-                                ? teamKey === 'team1' ? 'bg-blue-600' : 'bg-purple-600'
-                                : 'bg-violet-900/80'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
+                  <div>
+                    <label className="block mb-2 text-xs font-bold">Team 1 (Max 2 players)</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
+                        <Button
+                          key={p}
+                          onClick={() => toggleArrayItem('team1', p, 2)}
+                          variant="frosted"
+                          color="purple"
+                          selected={newGame.team1.includes(p)}
+                          className="px-3 py-1.5 text-xs"
+                        >
+                          {p}
+                        </Button>
+                      ))}
                     </div>
-                  ))}
-                  <div className="flex justify-between items-center flex-1">
-                    <label className="block mb-2 text-sm">Winning Team</label>
-                    <div className="flex gap-4">
-                      {[1,2].map(n => (
-                        <button
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-xs font-bold">Team 2 (Max 2 players)</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
+                        <Button
+                          key={p}
+                          onClick={() => toggleArrayItem('team2', p, 2)}
+                          variant="frosted"
+                          color="purple"
+                          selected={newGame.team2.includes(p)}
+                          className="px-3 py-1.5 text-xs"
+                        >
+                          {p}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-xs font-bold">Winning Team</label>
+                    <div className="flex gap-2">
+                      {[1, 2].map(n => (
+                        <Button
                           key={n}
                           onClick={() => setNewGame({ ...newGame, winningTeam: n })}
-                          className={`flex-1 py-2 rounded ${newGame.winningTeam === n ? 'bg-green-600' : 'bg-violet-900/80'}`}
+                          variant="frosted"
+                          color={newGame.winningTeam === n ? 'blue' : 'purple'}
+                          selected={newGame.winningTeam === n}
+                          className="flex-1 py-2 text-sm"
                         >
                           Team {n}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  {/* Players */}
-                  <div className="mb-4">
+                  <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-semibold">Players in Game</label>
+                      <label className="text-xs font-bold">Players in Game</label>
                       <div className="flex gap-2">
-                        <button type="button" onClick={selectAllPlayers} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs">Select All</button>
-                        {newGame.players.length > 0 && <button type="button" onClick={clearPlayers} className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs">Clear</button>}
+                        <Button onClick={selectAllPlayers} variant="pop" color="blue" className="px-2 py-1 text-xs">
+                          Select All
+                        </Button>
+                        {newGame.players.length > 0 && (
+                          <Button onClick={clearPlayers} variant="pop" color="red" className="px-2 py-1 text-xs">
+                            Clear
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                       {PLAYERS.map(p => (
-                        <button
+                        <Button
                           key={p}
                           onClick={() => toggleArrayItem('players', p)}
-                          className={`px-2 py-1 text-sm rounded ${newGame.players.includes(p) ? 'bg-purple-600' : 'bg-violet-900/80'}`}
+                          variant="frosted"
+                          color="purple"
+                          selected={newGame.players.includes(p)}
+                          className="px-3 py-1.5 text-xs"
                         >
                           {p}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Winners / Runners-up / Losers */}
-                  {['winners', 'runnersUp', 'losers'].map((roleKey, idx) => (
-                    <div key={roleKey} className="mb-4">
-                      <label className="block mb-2 text-sm font-semibold">{roleKey === 'winners' ? 'Winners' : roleKey === 'runnersUp' ? 'Runners-up' : 'Losers'}</label>
+                  {['winners', 'runnersUp', 'survivors', 'losers'].map(roleKey => (
+                    <div key={roleKey}>
+                      <label className="block mb-2 text-xs font-bold">
+                        {roleKey === 'winners' ? '🏆 Winners' : 
+                         roleKey === 'runnersUp' ? '🥈 Runners-up' : 
+                         roleKey === 'survivors' ? '🤟 Survivors' :
+                         '💀 Losers'}
+                      </label>
                       <div className="flex gap-2 flex-wrap">
-                        {newGame.players.map(p => (
-                          <button
-                            key={p}
-                            onClick={() => toggleArrayItem(roleKey as 'winners' | 'runnersUp' | 'losers', p)}
-                            className={`px-2 py-1 text-sm rounded ${
-                              roleKey === 'winners' && newGame.winners.includes(p) ? 'bg-green-600' :
-                              roleKey === 'runnersUp' && newGame.runnersUp.includes(p) ? 'bg-blue-600' :
-                              roleKey === 'losers' && newGame.losers.includes(p) ? 'bg-red-600' : 'bg-violet-900/80'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
+                        {newGame.players.length === 0 ? (
+                          <p className="text-xs text-slate-500">Select players first</p>
+                        ) : (
+                          newGame.players.map(p => (
+                            <Button
+                              key={p}
+                              onClick={() => toggleArrayItem(roleKey as any, p)}
+                              variant="frosted"
+                              color={
+                                roleKey === 'winners' && newGame.winners.includes(p) ? 'blue' :
+                                roleKey === 'runnersUp' && newGame.runnersUp.includes(p) ? 'blue' :
+                                roleKey === 'survivors' && newGame.survivors.includes(p) ? 'purple' :
+                                roleKey === 'losers' && newGame.losers.includes(p) ? 'red' :
+                                'purple'
+                              }
+                              selected={
+                                (roleKey === 'winners' && newGame.winners.includes(p)) ||
+                                (roleKey === 'runnersUp' && newGame.runnersUp.includes(p)) ||
+                                (roleKey === 'survivors' && newGame.survivors.includes(p)) ||
+                                (roleKey === 'losers' && newGame.losers.includes(p))
+                              }
+                              className="px-3 py-1.5 text-xs"
+                            >
+                              {p}
+                            </Button>
+                          ))
+                        )}
                       </div>
                     </div>
                   ))}
                 </>
               )}
 
-              <button onClick={addGame} className="w-full bg-fuchsia-700 hover:bg-fuchsia-800 py-3 rounded font-bold">
-                Add Game
-              </button>
+              <Button 
+                onClick={addGame} 
+                variant="pop"
+                className="w-full py-3 text-base font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+                disabled={newGame.type === ''}
+              >
+                ➕ Add Game
+              </Button>
             </div>
           </div>
 
           {/* Recent Games */}
-          <div className="bg-violet-950/30 rounded-xl border-2 border-white/50 p-6">
-            <h2 className="text-2xl font-bold mb-4">Recent Games</h2>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          <div className="rounded-xl p-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+              Recent Games
+            </h2>
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {games.slice(0, 20).map(game => (
-                <div key={game.id} className="bg-violet-900/80 rounded p-3 border border-fuchsia-500/40">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex justify-between items-center flex-1">
-                      <div className="font-bold">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
-                      <div className="text-sm text-slate-400">
-                        {new Date(game.game_date).toLocaleDateString()}
+                <div key={game.id} className="bg-purple-900/50 rounded-xl p-4 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-base mb-1">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
+                      <div className="text-xs text-slate-400">
+                        {new Date(game.game_date).toLocaleDateString()} 
+                        {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                       </div>
                     </div>
-                    <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300">Delete</button>
+                    <Button 
+                      onClick={() => deleteGame(game.id)} 
+                      variant="pop"
+                      color="red"
+                      className="px-3 py-1.5 text-xs"
+                    >
+                      🗑️ Delete
+                    </Button>
                   </div>
 
-                  {/* Display game players */}
                   {game.game_type === 'Rung' ? (
-                    <div className="flex gap-1 flex-wrap items-center">
-                      {game.winning_team === 1 ? game.team1?.map(p => <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>) : game.team2?.map(p => <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>)}
-                      <span className="text-slate-400 px-2">vs</span>
-                      {game.winning_team === 1 ? game.team2?.map(p => <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>) : game.team1?.map(p => <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>)}
+                    <div className="flex gap-2 flex-wrap items-center text-sm">
+                      <div className="flex gap-1">
+                        {(game.winning_team === 1 ? game.team1 : game.team2)?.map(p => (
+                          <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-amber-400 font-bold">vs</span>
+                      <div className="flex gap-1">
+                        {(game.winning_team === 1 ? game.team2 : game.team1)?.map(p => (
+                          <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex gap-1 flex-wrap">
-                      {game.winners?.map(p => <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>)}
-                      {game.runners_up?.map(p => <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>)}
-                      {game.losers?.map(p => <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">{p}</span>)}
+                      {game.winners?.map(p => (
+                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                          {p}
+                        </span>
+                      ))}
+                      {game.runners_up?.map(p => (
+                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                          {p}
+                        </span>
+                      ))}
+                      {game.survivors?.map(p => (
+                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                          {p}
+                        </span>
+                      ))}
+                      {game.losers?.map(p => (
+                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                          {p}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
