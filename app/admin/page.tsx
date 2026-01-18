@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [newGame, setNewGame] = useState({
     type: '',
     date: new Date().toISOString().split('T')[0],
+    time: new Date().toTimeString().slice(0, 5), // HH:MM format
     players: [] as string[],
     winners: [] as string[],
     runnersUp: [] as string[],
@@ -103,6 +104,9 @@ export default function AdminDashboard() {
   const clearPlayers = () => setNewGame({ ...newGame, players: [] })
 
   const addGame = async () => {
+    // Create timestamp from date and time
+    const timestamp = new Date(`${newGame.date}T${newGame.time}:00`).toISOString()
+
     if (newGame.type === 'Rung') {
       if (newGame.team1.length === 0 || newGame.team2.length === 0) {
         alert('Please select players for both teams')
@@ -121,7 +125,7 @@ export default function AdminDashboard() {
         team2: newGame.team2,
         winning_team: newGame.winningTeam,
         created_by: user?.email,
-        created_at: new Date().toISOString()
+        created_at: timestamp
       }
 
       const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -145,7 +149,7 @@ export default function AdminDashboard() {
         survivors: newGame.survivors.length > 0 ? newGame.survivors : null,
         losers: newGame.losers.length > 0 ? newGame.losers : null,
         created_by: user?.email,
-        created_at: new Date().toISOString()
+        created_at: timestamp
       }
 
       const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -159,6 +163,7 @@ export default function AdminDashboard() {
     setNewGame({
       type: '',
       date: new Date().toISOString().split('T')[0],
+      time: new Date().toTimeString().slice(0, 5),
       players: [],
       winners: [],
       runnersUp: [],
@@ -239,6 +244,15 @@ export default function AdminDashboard() {
                     type="date"
                     value={newGame.date}
                     onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
+                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-xs font-bold">Time</label>
+                  <input
+                    type="time"
+                    value={newGame.time}
+                    onChange={(e) => setNewGame({ ...newGame, time: e.target.value })}
                     className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
@@ -393,9 +407,16 @@ export default function AdminDashboard() {
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {games.slice(0, 20).map(game => (
                 <div key={game.id} className="bg-purple-900/50 rounded-xl p-4 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
-                  <div className="flex justify-between items-center mb-3">
-  <div className="flex items-center gap-4 flex-1">
-    <div className="font-bold text-base">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
+                  <div className="flex justify-between items-start mb-3">
+  <div className="flex flex-col gap-2 flex-1">
+    <div className="flex items-center gap-3">
+      <div className="font-bold text-base">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
+      {game.game_type === 'Rung' && game.team1 && game.team2 && (!game.winners || game.winners.length === 0) && (
+        <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 text-black px-3 py-1 rounded-lg text-xs font-black tracking-wider shadow-[0_4px_12px_rgba(251,191,36,0.6),inset_0_2px_4px_rgba(255,255,255,0.4)] animate-pulse">
+          🎭 ONGOING
+        </span>
+      )}
+    </div>
     <div className="text-xs text-slate-400">
       {new Date(game.game_date).toLocaleDateString()} 
       {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
