@@ -558,9 +558,42 @@ export default function PublicView() {
   const overallPlayerStats = getOverallPlayerStats()
   const playerStats = getPlayerStats()
   const rungTeamStats = getRungTeamStats()
-  const recentGames = activeTab === 'rung'
-    ? filteredGames.filter(g => g.game_type === 'Rung').slice(0, 20)
-    : filteredGames.slice(0, 20)  // For 'individual' and 'recent' tabs, show all games
+  
+  // Group Rung games by matchup for Recent Games tab
+  const getGroupedRecentGames = () => {
+    const allGames = activeTab === 'rung'
+      ? filteredGames.filter(g => g.game_type === 'Rung')
+      : filteredGames
+
+    // For non-Rung games or non-recent tab, return as is
+    if (activeTab !== 'recent') {
+      return allGames.slice(0, 20)
+    }
+
+    // Group Rung games by date and matchup
+    const grouped: Game[] = []
+    const seenRungMatchups = new Set<string>()
+
+    allGames.forEach(game => {
+      if (game.game_type === 'Rung' && game.team1 && game.team2) {
+        // Create unique key for this matchup
+        const teams = [game.team1.slice().sort().join(','), game.team2.slice().sort().join(',')].sort().join('|')
+        const matchupKey = `${game.game_date}|${teams}`
+        
+        if (!seenRungMatchups.has(matchupKey)) {
+          seenRungMatchups.add(matchupKey)
+          grouped.push(game)
+        }
+      } else {
+        // Non-Rung games always show
+        grouped.push(game)
+      }
+    })
+
+    return grouped.slice(0, 20)
+  }
+
+  const recentGames = getGroupedRecentGames()
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
@@ -602,6 +635,44 @@ export default function PublicView() {
         setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
       }
     }
+  }
+
+  const calculateRungWinners = (gameDate: string, team1: string[], team2: string[]) => {
+    // Get all rounds for this matchup
+    const allRounds = games.filter(g => 
+      g.game_type === 'Rung' && 
+      g.game_date === gameDate &&
+      g.winning_team !== null &&
+      g.team1 && g.team2
+    ).filter(round => {
+      const roundTeam1 = round.team1?.slice().sort().join(',')
+      const roundTeam2 = round.team2?.slice().sort().join(',')
+      const currentTeam1 = team1.slice().sort().join(',')
+      const currentTeam2 = team2.slice().sort().join(',')
+      
+      return (roundTeam1 === currentTeam1 && roundTeam2 === currentTeam2) ||
+             (roundTeam1 === currentTeam2 && roundTeam2 === currentTeam1)
+    })
+
+    // Count wins
+    let team1Wins = 0
+    let team2Wins = 0
+
+    allRounds.forEach(round => {
+      const roundTeam1 = round.team1?.slice().sort().join(',')
+      const currentTeam1 = team1.slice().sort().join(',')
+      const isTeam1First = roundTeam1 === currentTeam1
+
+      if (isTeam1First) {
+        if (round.winning_team === 1) team1Wins++
+        else if (round.winning_team === 2) team2Wins++
+      } else {
+        if (round.winning_team === 1) team2Wins++
+        else if (round.winning_team === 2) team1Wins++
+      }
+    })
+
+    return { team1Wins, team2Wins, totalRounds: allRounds.length }
   }
 
   return (
@@ -965,42 +1036,53 @@ export default function PublicView() {
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
                       <div className="flex justify-between items-start mb-3">
-                        <div className="text-slate-300 text-base font-bold">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        <div className="flex flex-col gap-2 flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="font-bold text-base">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
+                            {isOngoingRung && (
+                              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
+                                ONGOING
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {new Date(game.game_date).toLocaleDateString()} 
+                            {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                          </div>
                         </div>
-                        {isOngoingRung && (
-                          <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-400 text-black px-3 py-1.5 rounded-lg text-xs font-black tracking-wider shadow-[0_4px_12px_rgba(251,191,36,0.6),inset_0_2px_4px_rgba(255,255,255,0.4)] animate-pulse">
-                            🎭 ONGOING
-                          </span>
-                        )}
                       </div>
 
                       {game.game_type === 'Rung' && isOngoingRung ? (
                         <>
-                          {/* Show current round */}
-                          <div className="flex gap-2 flex-wrap items-center mb-3">
-                            <div className="flex gap-1">
-                              {game.team1?.map(p => (
-                                <span key={p} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-blue-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
-                                  {p}
-                                </span>
-                              ))}
-                            </div>
-                            <span className="text-amber-400 font-bold">vs</span>
-                            <div className="flex gap-1">
-                              {game.team2?.map(p => (
-                                <span key={p} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
-                                  {p}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
+                          {/* Show current standings with real-time winners */}
+                          {(() => {
+                            const { team1Wins, team2Wins } = calculateRungWinners(game.game_date, game.team1!, game.team2!)
+                            return (
+                              <div className="flex gap-2 flex-wrap items-center mb-3">
+                                <div className="flex gap-1">
+                                  {game.team1?.map(p => (
+                                    <span key={p} className={`${team1Wins > team2Wins ? 'bg-green-600' : team1Wins === team2Wins ? 'bg-blue-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
+                                      {p}
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="text-amber-400 font-bold text-sm">{team1Wins} - {team2Wins}</span>
+                                <div className="flex gap-1">
+                                  {game.team2?.map(p => (
+                                    <span key={p} className={`${team2Wins > team1Wins ? 'bg-green-600' : team1Wins === team2Wins ? 'bg-blue-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
+                                      {p}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )
+                          })()}
 
-                          {/* Premium Expand Button */}
+                          {/* Premium Expand Button - Darker */}
                           {isOngoingRung && (
                             <button
                               onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
-                              className="w-full mt-3 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 hover:from-cyan-400 hover:via-blue-400 hover:to-cyan-400 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(59,130,246,0.5),inset_0_2px_4px_rgba(255,255,255,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                              className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(29,78,216,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                               {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
                             </button>
@@ -1008,24 +1090,41 @@ export default function PublicView() {
 
                           {/* Expandable round history */}
                           {expandedGame === game.id && (
-                            <div className="mt-3 bg-slate-900/50 p-3 rounded-lg">
-                              <h4 className="text-xs font-bold text-slate-400 mb-2 text-center">Round History</h4>
+                            <div className="mt-3 bg-slate-900/50 p-4 rounded-lg">
+                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Rounds</h4>
                               {gameRounds.length === 0 ? (
                                 <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
                               ) : (
-                                <div className="space-y-1">
+                                <div className="space-y-2">
                                   {gameRounds.map((round, idx) => (
-                                    <div key={round.id} className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs">
-                                      <span className={`text-right ${round.winning_team === 1 ? 'text-green-400 font-bold' : 'text-slate-400'}`}>
-                                        {round.team1?.join(' & ')}
-                                      </span>
-                                      <span className="text-amber-400 px-2">vs</span>
-                                      <span className={`text-left ${round.winning_team === 2 ? 'text-green-400 font-bold' : 'text-slate-400'}`}>
-                                        {round.team2?.join(' & ')}
-                                      </span>
+                                    <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
+                                      <div className="text-xs text-slate-400 mb-2 text-center">
+                                        Round {idx + 1} • {new Date(round.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                      </div>
+                                      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+                                        <div className="text-right">
+                                          <div className={`inline-flex gap-1 ${round.winning_team === 1 ? 'opacity-100' : 'opacity-50'}`}>
+                                            {round.team1?.map(p => (
+                                              <span key={p} className={`${round.winning_team === 1 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
+                                                {p}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <span className="text-amber-400 font-bold text-sm">vs</span>
+                                        <div className="text-left">
+                                          <div className={`inline-flex gap-1 ${round.winning_team === 2 ? 'opacity-100' : 'opacity-50'}`}>
+                                            {round.team2?.map(p => (
+                                              <span key={p} className={`${round.winning_team === 2 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
+                                                {p}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   ))}
-                                  <div className="text-center text-amber-400 text-xs font-bold mt-2">
+                                  <div className="text-center text-amber-400 text-sm font-bold mt-3 pt-3 border-t border-slate-700">
                                     Total Rounds: {gameRounds.length}
                                   </div>
                                 </div>
