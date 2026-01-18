@@ -393,23 +393,21 @@ export default function AdminDashboard() {
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {games.slice(0, 20).map(game => (
                 <div key={game.id} className="bg-purple-900/50 rounded-xl p-4 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="font-bold text-base mb-1">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
-                      <div className="text-xs text-slate-400">
-                        {new Date(game.game_date).toLocaleDateString()} 
-                        {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={() => deleteGame(game.id)} 
-                      variant="pop"
-                      color="red"
-                      className="px-3 py-1.5 text-xs"
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
+                  <div className="flex justify-between items-center mb-3">
+  <div className="flex items-center gap-4 flex-1">
+    <div className="font-bold text-base">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
+    <div className="text-xs text-slate-400">
+      {new Date(game.game_date).toLocaleDateString()} 
+      {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+    </div>
+  </div>
+  <button 
+    onClick={() => deleteGame(game.id)} 
+    className="text-red-400 hover:text-red-300 text-sm transition-colors"
+  >
+    🗑️ Delete
+  </button>
+</div>
 
                   {game.game_type === 'Rung' ? (
                     <div className="flex gap-2 flex-wrap items-center text-sm">
