@@ -403,7 +403,7 @@ export default function AdminDashboard() {
   </div>
   <button 
     onClick={() => deleteGame(game.id)} 
-    className="text-red-400 hover:text-red-300 text-sm transition-colors"
+    className="text-white-400 hover:text-white-300 text-sm transition-colors"
   >
     🗑️ Delete
   </button>
