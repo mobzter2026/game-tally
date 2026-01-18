@@ -576,7 +576,7 @@ export default function PublicView() {
 
     if (data) {
       // Filter to only rounds that match the current matchup
-      const matchingRounds = data.filter(round => {
+      const matchingRounds = (data as Game[]).filter(round => {
         const roundTeam1 = round.team1?.slice().sort().join(',')
         const roundTeam2 = round.team2?.slice().sort().join(',')
         const currentTeam1 = team1.slice().sort().join(',')
