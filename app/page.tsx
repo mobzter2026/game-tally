@@ -51,6 +51,8 @@ export default function PublicView() {
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const [currentQuote, setCurrentQuote] = useState(0)
+  const [expandedGame, setExpandedGame] = useState<string | null>(null)
+  const [rungRounds, setRungRounds] = useState<Record<string, any[]>>({})
   const supabase = createClient()
 
   useEffect(() => {
@@ -896,6 +898,46 @@ export default function PublicView() {
           </>
         )}
 
+  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[]) => {
+    // Fetch all Rung games from the same date with these teams
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('game_type', 'Rung')
+      .eq('game_date', gameDate)
+      .not('winning_team', 'is', null)
+      .order('created_at', { ascending: true })
+
+    if (data) {
+      // Filter to only rounds that match the current matchup
+      const matchingRounds = data.filter(round => {
+        const roundTeam1 = round.team1?.slice().sort().join(',')
+        const roundTeam2 = round.team2?.slice().sort().join(',')
+        const currentTeam1 = team1.slice().sort().join(',')
+        const currentTeam2 = team2.slice().sort().join(',')
+        
+        return (roundTeam1 === currentTeam1 && roundTeam2 === currentTeam2) ||
+               (roundTeam1 === currentTeam2 && roundTeam2 === currentTeam1)
+      })
+      
+      return matchingRounds
+    }
+    return []
+  }
+
+  const toggleExpandGame = async (gameId: string, gameDate: string, team1: string[], team2: string[]) => {
+    if (expandedGame === gameId) {
+      setExpandedGame(null)
+    } else {
+      setExpandedGame(gameId)
+      // Fetch rounds if not already cached
+      if (!rungRounds[gameId]) {
+        const rounds = await fetchRungRounds(gameDate, team1, team2)
+        setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
+      }
+    }
+  }
+
         {activeTab === 'recent' && (
           <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="flex flex-col items-center mb-4 gap-2">
@@ -916,23 +958,123 @@ export default function PublicView() {
                 </div>
               ) : (
                 recentGames.map(game => {
-                  // Skip Rung individual rounds (only show final results)
-                  if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
-                    return null
-                  }
-
+                  // Check if this is an ongoing Rung game (has team1/team2 but no winners)
+                  const isOngoingRung = game.game_type === 'Rung' && game.team1 && game.team2 && (!game.winners || game.winners.length === 0)
+                  const gameRounds = rungRounds[game.id] || []
+                  
                   return (
                     <div key={game.id} className="rounded-xl p-5 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]">
-                      <div className="text-slate-300 text-base font-bold mb-2">
-                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-slate-300 text-base font-bold">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} {game.created_at && `• ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        </div>
+                        {isOngoingRung && (
+                          <div className="flex items-center gap-2">
+                            <span className="bg-amber-500 text-black px-2 py-1 rounded text-xs font-bold animate-pulse">
+                              🎭 ONGOING
+                            </span>
+                            <button
+                              onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
+                              className="text-blue-400 hover:text-blue-300 text-sm transition-colors font-bold"
+                            >
+                              {expandedGame === game.id ? '▲ Collapse' : '▼ Expand'}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {sortPlayersInGame(game).map(player => (
-                          <span key={player} className={`${getPlayerBadgeColor(game, player)} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                            {player}
-                          </span>
-                        ))}
-                      </div>
+
+                      {game.game_type === 'Rung' && isOngoingRung ? (
+                        <>
+                          {/* Show current round */}
+                          <div className="flex gap-2 flex-wrap items-center mb-2">
+                            <div className="flex gap-1">
+                              {game.team1?.map(p => (
+                                <span key={p} className={`${game.winning_team === 1 ? 'bg-green-600' : 'bg-blue-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-amber-400 font-bold">vs</span>
+                            <div className="flex gap-1">
+                              {game.team2?.map(p => (
+                                <span key={p} className={`${game.winning_team === 2 ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Expandable round history */}
+                          {expandedGame === game.id && (
+                            <div className="mt-3 bg-slate-900/50 p-3 rounded-lg">
+                              <h4 className="text-xs font-bold text-slate-400 mb-2 text-center">Round History</h4>
+                              {gameRounds.length === 0 ? (
+                                <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
+                              ) : (
+                                <div className="space-y-1">
+                                  {gameRounds.map((round, idx) => (
+                                    <div key={round.id} className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs">
+                                      <span className={`text-right ${round.winning_team === 1 ? 'text-green-400 font-bold' : 'text-slate-400'}`}>
+                                        {round.team1?.join(' & ')}
+                                      </span>
+                                      <span className="text-amber-400 px-2">vs</span>
+                                      <span className={`text-left ${round.winning_team === 2 ? 'text-green-400 font-bold' : 'text-slate-400'}`}>
+                                        {round.team2?.join(' & ')}
+                                      </span>
+                                    </div>
+                                  ))}
+                                  <div className="text-center text-amber-400 text-xs font-bold mt-2">
+                                    Total Rounds: {gameRounds.length}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      ) : game.game_type === 'Rung' && !isOngoingRung ? (
+                        /* Completed Rung game - show final results */
+                        <div className="flex gap-1 flex-wrap">
+                          {game.winners?.map(p => (
+                            <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.runners_up?.map(p => (
+                            <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.losers?.map(p => (
+                            <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        /* Regular games */
+                        <div className="flex gap-1 flex-wrap">
+                          {game.winners?.map(p => (
+                            <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.runners_up?.map(p => (
+                            <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.survivors?.map(p => (
+                            <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.losers?.map(p => (
+                            <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )
                 })
