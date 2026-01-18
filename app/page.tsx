@@ -1035,46 +1035,82 @@ export default function PublicView() {
                   
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex flex-col gap-2 flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className="font-bold text-base">{GAME_EMOJIS[game.game_type]} {game.game_type}</div>
-                            {isOngoingRung && (
-                              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
-                                ONGOING
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs text-slate-400">
-                            {new Date(game.game_date).toLocaleDateString()} 
-                            {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                          </div>
+                      <div className="mb-3">
+                        <div className="font-bold text-base text-slate-300 mb-1">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()} 
+                          {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
+                        {isOngoingRung && (
+                          <div className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
+                            ONGOING
+                          </div>
+                        )}
                       </div>
 
                       {game.game_type === 'Rung' && isOngoingRung ? (
                         <>
-                          {/* Show current standings with real-time winners */}
+                          {/* Show first-to-5 set standings with real-time winners */}
                           {(() => {
                             const { team1Wins, team2Wins } = calculateRungWinners(game.game_date, game.team1!, game.team2!)
+                            const isComplete = team1Wins >= 5 || team2Wins >= 5
+                            
+                            // Determine winners, runners up, and display order
+                            let winners: string[] = []
+                            let runnersUp: string[] = []
+                            let allPlayers: string[] = []
+                            
+                            if (isComplete) {
+                              winners = team1Wins >= 5 ? game.team1! : game.team2!
+                              runnersUp = team1Wins >= 5 ? game.team2! : game.team1!
+                              allPlayers = [...winners, ...runnersUp]
+                            } else {
+                              // Ongoing - show leading team first
+                              if (team1Wins > team2Wins) {
+                                allPlayers = [...game.team1!, ...game.team2!]
+                              } else if (team2Wins > team1Wins) {
+                                allPlayers = [...game.team2!, ...game.team1!]
+                              } else {
+                                // Tied
+                                allPlayers = [...game.team1!, ...game.team2!]
+                              }
+                            }
+                            
                             return (
-                              <div className="flex gap-2 flex-wrap items-center mb-3">
-                                <div className="flex gap-1">
-                                  {game.team1?.map(p => (
-                                    <span key={p} className={`${team1Wins > team2Wins ? 'bg-green-600' : team1Wins === team2Wins ? 'bg-blue-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
-                                      {p}
-                                    </span>
-                                  ))}
+                              <>
+                                <div className="flex gap-1 flex-wrap mb-3">
+                                  {allPlayers.map(p => {
+                                    let colorClass = 'bg-slate-600' // grey/survivor default
+                                    
+                                    if (isComplete) {
+                                      if (winners.includes(p)) colorClass = 'bg-green-600'
+                                      else if (runnersUp.includes(p)) colorClass = 'bg-red-600'
+                                    } else {
+                                      // Ongoing game
+                                      const isTeam1 = game.team1!.includes(p)
+                                      const isTeam2 = game.team2!.includes(p)
+                                      
+                                      if (team1Wins > team2Wins) {
+                                        colorClass = isTeam1 ? 'bg-green-600' : 'bg-red-600'
+                                      } else if (team2Wins > team1Wins) {
+                                        colorClass = isTeam2 ? 'bg-green-600' : 'bg-red-600'
+                                      } else {
+                                        colorClass = 'bg-blue-600' // tied
+                                      }
+                                    }
+                                    
+                                    return (
+                                      <span key={p} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                        {p}
+                                      </span>
+                                    )
+                                  })}
                                 </div>
-                                <span className="text-amber-400 font-bold text-sm">{team1Wins} - {team2Wins}</span>
-                                <div className="flex gap-1">
-                                  {game.team2?.map(p => (
-                                    <span key={p} className={`${team2Wins > team1Wins ? 'bg-green-600' : team1Wins === team2Wins ? 'bg-blue-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]`}>
-                                      {p}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
+                                {!isComplete && (
+                                  <div className="text-center text-amber-400 font-bold text-sm mb-3">
+                                    {game.team1!.join(' & ')}: {team1Wins} - {team2Wins} :{game.team2!.join(' & ')}
+                                  </div>
+                                )}
+                              </>
                             )
                           })()}
 
