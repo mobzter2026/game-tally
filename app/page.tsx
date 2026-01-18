@@ -1104,7 +1104,7 @@ export default function PublicView() {
                                       <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
                                         <div className="text-right">
                                           <div className={`inline-flex gap-1 ${round.winning_team === 1 ? 'opacity-100' : 'opacity-50'}`}>
-                                            {round.team1?.map(p => (
+                                            {round.team1?.map((p: string) => (
                                               <span key={p} className={`${round.winning_team === 1 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
                                                 {p}
                                               </span>
@@ -1114,7 +1114,7 @@ export default function PublicView() {
                                         <span className="text-amber-400 font-bold text-sm">vs</span>
                                         <div className="text-left">
                                           <div className={`inline-flex gap-1 ${round.winning_team === 2 ? 'opacity-100' : 'opacity-50'}`}>
-                                            {round.team2?.map(p => (
+                                            {round.team2?.map((p: string) => (
                                               <span key={p} className={`${round.winning_team === 2 ? 'bg-green-600' : 'bg-slate-600'} text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_2px_4px_rgba(0,0,0,0.3)]`}>
                                                 {p}
                                               </span>
