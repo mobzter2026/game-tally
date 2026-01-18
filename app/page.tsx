@@ -1217,34 +1217,28 @@ export default function PublicView() {
                             </button>
                           )}
 
-                          {/* Expandable round history - Recent first */}
+                          {/* Expandable round history - Chronological order */}
                           {expandedGame === game.id && (
                             <div className="mt-3 bg-slate-900/50 p-4 rounded-lg">
-                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Most Recent First)</h4>
+                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Chronological)</h4>
                               {gameRounds.length === 0 ? (
                                 <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
                               ) : (
                                 <div className="space-y-2">
                                   {(() => {
-                                    // Calculate running scores for each team
                                     const teamScores: Record<string, number> = {}
-                                    const reversedRounds = [...gameRounds].reverse() // Most recent first
-                                    
-                                    // Initialize scores by going through all rounds
-                                    gameRounds.forEach(round => {
+
+                                    // Go through rounds chronologically
+                                    return gameRounds.map((round) => {
                                       const team1Key = round.team1!.slice().sort().join('&')
                                       const team2Key = round.team2!.slice().sort().join('&')
+                                      
                                       if (!teamScores[team1Key]) teamScores[team1Key] = 0
                                       if (!teamScores[team2Key]) teamScores[team2Key] = 0
+                                      
+                                      // Add win to the winning team
                                       if (round.winning_team === 1) teamScores[team1Key]++
                                       else if (round.winning_team === 2) teamScores[team2Key]++
-                                    })
-
-                                    return reversedRounds.map((round, idx) => {
-                                      const team1Key = round.team1!.slice().sort().join('&')
-                                      const team2Key = round.team2!.slice().sort().join('&')
-                                      const team1Score = teamScores[team1Key]
-                                      const team2Score = teamScores[team2Key]
 
                                       return (
                                         <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
@@ -1254,12 +1248,12 @@ export default function PublicView() {
                                           <div className="flex items-center justify-center gap-3 text-sm font-bold">
                                             <div className={`flex items-center gap-2 ${round.winning_team === 1 ? 'text-green-400' : 'text-slate-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
-                                              <span className="text-amber-400">({team1Score})</span>
+                                              <span className="text-amber-400">({teamScores[team1Key]})</span>
                                             </div>
                                             <span className="text-amber-400">vs</span>
                                             <div className={`flex items-center gap-2 ${round.winning_team === 2 ? 'text-green-400' : 'text-slate-400'}`}>
+                                              <span className="text-amber-400">({teamScores[team2Key]})</span>
                                               <span>{round.team2!.join(' & ')}</span>
-                                              <span className="text-amber-400">({team2Score})</span>
                                             </div>
                                           </div>
                                         </div>
