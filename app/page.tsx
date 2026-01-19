@@ -1099,7 +1099,7 @@ export default function PublicView() {
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
                       <div className="mb-3">
                         <div className="font-bold text-base text-slate-300 mb-1">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type}
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
                           {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         {isOngoingRung && (
@@ -1242,14 +1242,14 @@ export default function PublicView() {
 
                                       return (
                                         <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
-                                          <div className="flex items-center justify-center gap-3 text-sm font-bold">
-                                            <div className={`flex items-center gap-2 ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
+                                          <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center text-sm font-bold">
+                                            <div className={`text-right ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
-                                              <span className="text-amber-400">({teamScores[team1Key]})</span>
+                                              <span className="text-amber-400 ml-2">({teamScores[team1Key]})</span>
                                             </div>
-                                            <span className="text-amber-400">vs</span>
-                                            <div className={`flex items-center gap-2 ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
-                                              <span className="text-amber-400">({teamScores[team2Key]})</span>
+                                            <span className="text-amber-400 text-center px-2">vs</span>
+                                            <div className={`text-left ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
+                                              <span className="text-amber-400 mr-2">({teamScores[team2Key]})</span>
                                               <span>{round.team2!.join(' & ')}</span>
                                             </div>
                                           </div>
