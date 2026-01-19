@@ -569,7 +569,7 @@ export default function AdminDashboard() {
                           ) : (
                             <div className="space-y-2">
                               {(rungRounds[game.id] || []).map((round: Game, idx: number) => {
-                                const teamScores: Record<string, number> = ({} as Record<string, number>)
+                                const teamScores = {} as Record<string, number>
                                 // Calculate progressive scores
                                 (rungRounds[game.id] || []).slice(0, idx + 1).forEach((r: Game) => {
                                   const t1 = r.team1!.slice().sort().join('&')
