@@ -1185,8 +1185,9 @@ export default function PublicView() {
                               }
                             }
 
-                            // Calculate standings for THIS session only
+                            // Calculate standings for THIS session - track team pairings
                             const sessionTeamWins: Record<string, number> = {}
+                            const playerBestTeam: Record<string, { team: string, wins: number }> = {}
                             const allTeams = new Set<string>()
 
                             sessionRounds.forEach(round => {
@@ -1203,39 +1204,80 @@ export default function PublicView() {
                               else if (round.winning_team === 2) sessionTeamWins[team2Key]++
                             })
 
-                            // Sort teams by wins
-                            const sortedTeams = Array.from(allTeams).sort((a, b) => 
-                              (sessionTeamWins[b] || 0) - (sessionTeamWins[a] || 0)
-                            )
+                            // For each player, find their best-performing team
+                            const allPlayers = new Set<string>()
+                            allTeams.forEach(teamKey => {
+                              teamKey.split('&').forEach(p => allPlayers.add(p))
+                            })
 
-                            // Categorize teams
-                            const winners = sortedTeams.filter(t => sessionTeamWins[t] >= 5)
-                            const maxWins = Math.max(...sortedTeams.map(t => sessionTeamWins[t] || 0))
-                            const runners = winners.length > 0 
-                              ? sortedTeams.filter(t => sessionTeamWins[t] < 5 && sessionTeamWins[t] === maxWins && maxWins < 5)
-                              : sortedTeams.filter(t => sessionTeamWins[t] === maxWins)
-                            const survivors = sortedTeams.filter(t => 
-                              !winners.includes(t) && !runners.includes(t) && sessionTeamWins[t] > 0
-                            )
-                            const losers = sortedTeams.filter(t => sessionTeamWins[t] === 0)
-
-                            const renderTeamBadges = (teams: string[], colorClass: string) => {
-                              return teams.map(teamKey => {
-                                const players = teamKey.split('&')
-                                return players.map(p => (
-                                  <span key={`${teamKey}-${p}`} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                                    {p}
-                                  </span>
-                                ))
+                            allPlayers.forEach(player => {
+                              let bestWins = -1
+                              let bestTeam = ''
+                              
+                              allTeams.forEach(teamKey => {
+                                if (teamKey.split('&').includes(player)) {
+                                  const wins = sessionTeamWins[teamKey] || 0
+                                  if (wins > bestWins) {
+                                    bestWins = wins
+                                    bestTeam = teamKey
+                                  }
+                                }
                               })
+                              
+                              if (bestTeam) {
+                                playerBestTeam[player] = { team: bestTeam, wins: bestWins }
+                              }
+                            })
+
+                            // Sort players by their best team's performance
+                            const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
+                              (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
+                            )
+
+                            // Categorize players based on their best team performance
+                            const maxWins = Math.max(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
+                            const minWins = Math.min(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
+                            
+                            const sessionComplete = maxWins >= 5
+                            const winners = sessionComplete
+                              ? sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
+                              : sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) === maxWins)
+                            
+                            let runners: string[] = []
+                            if (sessionComplete && winners.length > 0) {
+                              const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+                              if (nonWinners.length > 0) {
+                                const secondMax = Math.max(...nonWinners.map(p => playerBestTeam[p]?.wins || 0))
+                                runners = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === secondMax)
+                              }
+                            }
+                            
+                            const survivors = sortedPlayers.filter(p => 
+                              !winners.includes(p) && 
+                              !runners.includes(p) && 
+                              (playerBestTeam[p]?.wins || 0) > minWins
+                            )
+                            
+                            const losers = sortedPlayers.filter(p => 
+                              (playerBestTeam[p]?.wins || 0) === minWins && 
+                              !winners.includes(p) &&
+                              !runners.includes(p)
+                            )
+
+                            const renderPlayerBadges = (players: string[], colorClass: string) => {
+                              return players.map(p => (
+                                <span key={p} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                  {p}
+                                </span>
+                              ))
                             }
                             
                             return (
                               <div className="flex gap-1 flex-wrap mb-3">
-                                {renderTeamBadges(winners, 'bg-green-600')}
-                                {renderTeamBadges(runners, 'bg-blue-600')}
-                                {renderTeamBadges(survivors, 'bg-slate-600')}
-                                {renderTeamBadges(losers, 'bg-red-600')}
+                                {renderPlayerBadges(winners, 'bg-green-600')}
+                                {renderPlayerBadges(runners, 'bg-blue-600')}
+                                {renderPlayerBadges(survivors, 'bg-slate-600')}
+                                {renderPlayerBadges(losers, 'bg-red-600')}
                               </div>
                             )
                           })()}
