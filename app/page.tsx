@@ -1238,10 +1238,15 @@ export default function PublicView() {
                             const maxWins = Math.max(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
                             const minWins = Math.min(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
                             
+                            console.log('Player best teams:', playerBestTeam)
+                            console.log('Max wins:', maxWins, 'Min wins:', minWins)
+                            
                             const sessionComplete = maxWins >= 5
                             const winners = sessionComplete
                               ? sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
                               : sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) === maxWins)
+                            
+                            console.log('Winners:', winners)
                             
                             let runners: string[] = []
                             if (sessionComplete && winners.length > 0) {
@@ -1252,17 +1257,23 @@ export default function PublicView() {
                               }
                             }
                             
+                            console.log('Runners:', runners)
+                            
                             const survivors = sortedPlayers.filter(p => 
                               !winners.includes(p) && 
                               !runners.includes(p) && 
                               (playerBestTeam[p]?.wins || 0) > minWins
                             )
                             
+                            console.log('Survivors:', survivors)
+                            
                             const losers = sortedPlayers.filter(p => 
                               (playerBestTeam[p]?.wins || 0) === minWins && 
                               !winners.includes(p) &&
                               !runners.includes(p)
                             )
+                            
+                            console.log('Losers:', losers)
 
                             const renderPlayerBadges = (players: string[], colorClass: string) => {
                               return players.map(p => (
