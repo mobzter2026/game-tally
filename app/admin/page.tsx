@@ -20,6 +20,9 @@ export default function AdminDashboard() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [editingGame, setEditingGame] = useState<string | null>(null)
+  const [editDate, setEditDate] = useState('')
+  const [editTime, setEditTime] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -180,6 +183,38 @@ export default function AdminDashboard() {
   const deleteGame = async (id: string) => {
     if (confirm('Are you sure you want to delete this game?')) {
       await supabase.from('games').delete().eq('id', id)
+      fetchGames()
+    }
+  }
+
+  const startEditingGame = (game: Game) => {
+    setEditingGame(game.id)
+    setEditDate(game.game_date)
+    setEditTime(game.created_at ? new Date(game.created_at).toTimeString().slice(0, 5) : '00:00')
+  }
+
+  const cancelEditing = () => {
+    setEditingGame(null)
+    setEditDate('')
+    setEditTime('')
+  }
+
+  const saveGameDateTime = async (gameId: string) => {
+    const timestamp = new Date(`${editDate}T${editTime}:00`).toISOString()
+    
+    const { error } = await supabase
+      .from('games')
+      .update({ 
+        game_date: editDate,
+        created_at: timestamp
+      })
+      .eq('id', gameId)
+
+    if (error) {
+      console.error('Error updating game:', error)
+      alert('Error updating game')
+    } else {
+      setEditingGame(null)
       fetchGames()
     }
   }
@@ -418,8 +453,44 @@ export default function AdminDashboard() {
       )}
     </div>
     <div className="text-xs text-slate-400">
-      {new Date(game.game_date).toLocaleDateString()} 
-      {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+      {editingGame === game.id ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={editDate}
+            onChange={(e) => setEditDate(e.target.value)}
+            className="p-1 bg-purple-700 rounded text-xs text-white"
+          />
+          <input
+            type="time"
+            value={editTime}
+            onChange={(e) => setEditTime(e.target.value)}
+            className="p-1 bg-purple-700 rounded text-xs text-white"
+          />
+          <button
+            onClick={() => saveGameDateTime(game.id)}
+            className="text-green-400 hover:text-green-300 font-bold text-xs"
+          >
+            ✓ Save
+          </button>
+          <button
+            onClick={cancelEditing}
+            className="text-red-400 hover:text-red-300 font-bold text-xs"
+          >
+            ✗ Cancel
+          </button>
+        </div>
+      ) : (
+        <div 
+          onClick={() => startEditingGame(game)}
+          className="cursor-pointer hover:text-slate-200 transition-colors"
+          title="Click to edit date/time"
+        >
+          {new Date(game.game_date).toLocaleDateString()} 
+          {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+          <span className="ml-2 text-xs opacity-50">✏️</span>
+        </div>
+      )}
     </div>
   </div>
   <button 
