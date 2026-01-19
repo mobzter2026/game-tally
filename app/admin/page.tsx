@@ -131,16 +131,6 @@ export default function AdminDashboard() {
     ).slice(0, 20)
   }
 
-  const addGame = async () => {
-    const { data } = await supabase
-      .from('games')
-      .select('*')
-      .order('game_date', { ascending: false })
-      .order('created_at', { ascending: false })
-
-    if (data) setGames(data as Game[])
-  }
-
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/admin/login')
