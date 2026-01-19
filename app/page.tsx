@@ -1159,6 +1159,7 @@ export default function PublicView() {
                             // Find which session this game belongs to
                             let sessionRounds: Game[] = []
                             let currentSessionStart = 0
+                            let foundGameSession = false
                             const teamWins: Record<string, number> = {}
 
                             for (let i = 0; i < allRoundsOnDate.length; i++) {
@@ -1172,17 +1173,31 @@ export default function PublicView() {
                               if (round.winning_team === 1) teamWins[team1Key]++
                               else if (round.winning_team === 2) teamWins[team2Key]++
 
-                              // Check if this is our target game
-                              if (round.id === game.id || i === allRoundsOnDate.length - 1 || Object.values(teamWins).some(wins => wins >= 5)) {
-                                sessionRounds = allRoundsOnDate.slice(currentSessionStart, i + 1)
-                                break
+                              // Mark if we found our target game in this session
+                              if (round.id === game.id) {
+                                foundGameSession = true
                               }
 
-                              // Session ended, reset for next session
-                              if (Object.values(teamWins).some(wins => wins >= 5)) {
+                              // Check if session complete (someone hit 5 wins)
+                              const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
+                              
+                              // If session complete OR last game
+                              if (sessionComplete || i === allRoundsOnDate.length - 1) {
+                                if (foundGameSession) {
+                                  // This is the session containing our game
+                                  sessionRounds = allRoundsOnDate.slice(currentSessionStart, i + 1)
+                                  break
+                                }
+                                // Session ended, reset for next session
                                 currentSessionStart = i + 1
+                                foundGameSession = false
                                 Object.keys(teamWins).forEach(key => teamWins[key] = 0)
                               }
+                            }
+
+                            // If no session found (ongoing), use all rounds from last session start
+                            if (sessionRounds.length === 0) {
+                              sessionRounds = allRoundsOnDate.slice(currentSessionStart)
                             }
 
                             // Calculate standings for THIS session - track team pairings
