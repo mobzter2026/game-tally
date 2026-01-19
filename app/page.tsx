@@ -1256,38 +1256,44 @@ export default function PublicView() {
                             console.log('Player best teams:', playerBestTeam)
                             console.log('Max wins:', maxWins, 'Min wins:', minWins)
                             
-                            const sessionComplete = maxWins >= 5
-                            const winners = sessionComplete
-                              ? sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
-                              : sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) === maxWins)
+                            // Winners: players who reached 5 wins
+                            const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
                             
                             console.log('Winners:', winners)
                             
+                            // For remaining players (non-winners), categorize by score
+                            const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+                            
                             let runners: string[] = []
-                            if (sessionComplete && winners.length > 0) {
-                              const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
-                              if (nonWinners.length > 0) {
-                                const secondMax = Math.max(...nonWinners.map(p => playerBestTeam[p]?.wins || 0))
-                                runners = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === secondMax)
+                            let survivors: string[] = []
+                            let losers: string[] = []
+                            
+                            if (nonWinners.length > 0) {
+                              const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
+                              const maxNonWinnerScore = Math.max(...nonWinnerScores)
+                              const minNonWinnerScore = Math.min(...nonWinnerScores)
+                              
+                              // Runners-up: non-winners with highest score
+                              runners = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
+                              
+                              // If runners-up score equals the minimum score, they're all losers instead
+                              if (maxNonWinnerScore === minNonWinnerScore) {
+                                losers = runners
+                                runners = []
+                              } else {
+                                // Survivors: middle tier
+                                survivors = nonWinners.filter(p => 
+                                  !runners.includes(p) && 
+                                  (playerBestTeam[p]?.wins || 0) > minNonWinnerScore
+                                )
+                                
+                                // Losers: lowest score
+                                losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
                               }
                             }
                             
                             console.log('Runners:', runners)
-                            
-                            const survivors = sortedPlayers.filter(p => 
-                              !winners.includes(p) && 
-                              !runners.includes(p) && 
-                              (playerBestTeam[p]?.wins || 0) > minWins
-                            )
-                            
                             console.log('Survivors:', survivors)
-                            
-                            const losers = sortedPlayers.filter(p => 
-                              (playerBestTeam[p]?.wins || 0) === minWins && 
-                              !winners.includes(p) &&
-                              !runners.includes(p)
-                            )
-                            
                             console.log('Losers:', losers)
 
                             const renderPlayerBadges = (players: string[], colorClass: string) => {
