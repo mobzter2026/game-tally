@@ -202,9 +202,9 @@ export default function AdminDashboard() {
   const saveGameDateTime = async (gameId: string) => {
     const timestamp = new Date(`${editDate}T${editTime}:00`).toISOString()
     
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('games')
-      .update({ 
+      .update as any)({ 
         game_date: editDate,
         created_at: timestamp
       })
