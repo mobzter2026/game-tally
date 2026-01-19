@@ -640,7 +640,7 @@ export default function PublicView() {
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
-  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[]) => {
+  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[], gameId: string) => {
     // Fetch ALL Rung games from this date
     const { data } = await supabase
       .from('games')
@@ -653,10 +653,11 @@ export default function PublicView() {
     if (data) {
       const allRounds = data as Game[]
       
-      // Find which session the current game belongs to by detecting 5-win boundaries
+      // Find which session the clicked game belongs to
       const sessions: Game[][] = []
       let currentSession: Game[] = []
       const teamWins: Record<string, number> = {}
+      let targetSessionIndex = -1
 
       allRounds.forEach((round, idx) => {
         const team1Key = round.team1!.slice().sort().join('&')
@@ -667,6 +668,11 @@ export default function PublicView() {
 
         currentSession.push(round)
 
+        // Check if this is the game we're looking for
+        if (round.id === gameId) {
+          targetSessionIndex = sessions.length
+        }
+
         if (round.winning_team === 1) teamWins[team1Key]++
         else if (round.winning_team === 2) teamWins[team2Key]++
 
@@ -675,13 +681,17 @@ export default function PublicView() {
 
         if (sessionComplete || idx === allRounds.length - 1) {
           sessions.push([...currentSession])
+          // If we haven't found the target yet, it might be in this session
+          if (targetSessionIndex === -1 && currentSession.some(g => g.id === gameId)) {
+            targetSessionIndex = sessions.length - 1
+          }
           currentSession = []
           Object.keys(teamWins).forEach(key => teamWins[key] = 0)
         }
       })
 
-      // Return the last session (most recent ongoing or completed session)
-      return sessions[sessions.length - 1] || []
+      // Return the session that contains our game, or the last session if not found
+      return sessions[targetSessionIndex] || sessions[sessions.length - 1] || []
     }
     return []
   }
@@ -693,7 +703,7 @@ export default function PublicView() {
       setExpandedGame(gameId)
       // Fetch rounds if not already cached
       if (!rungRounds[gameId]) {
-        const rounds = await fetchRungRounds(gameDate, team1, team2)
+        const rounds = await fetchRungRounds(gameDate, team1, team2, gameId)
         setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
       }
     }
