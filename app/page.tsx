@@ -1132,7 +1132,7 @@ export default function PublicView() {
                         )}
                       </div>
 
-                      {game.game_type === 'Rung' && isOngoingRung ? (
+                      {game.game_type === 'Rung' && game.team1 && game.team2 ? (
                         <>
                           {/* Show first-to-5 session standings with ALL teams in THIS session */}
                           {(() => {
@@ -1231,14 +1231,12 @@ export default function PublicView() {
                           })()}
 
                           {/* Premium Expand Button - Darker */}
-                          {isOngoingRung && (
-                            <button
-                              onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
-                              className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(29,78,216,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
-                            >
-                              {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
-                            </button>
-                          )}
+                          <button
+                            onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
+                            className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(29,78,216,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
+                          </button>
 
                           {/* Expandable round history - Chronological order */}
                           {expandedGame === game.id && (
