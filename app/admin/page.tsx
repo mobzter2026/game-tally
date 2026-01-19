@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [editingGame, setEditingGame] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
+  const [expandedGame, setExpandedGame] = useState<string | null>(null)
+  const [rungRounds, setRungRounds] = useState<Record<string, any[]>>({})
   const router = useRouter()
   const supabase = createClient()
 
@@ -184,6 +186,33 @@ export default function AdminDashboard() {
     if (confirm('Are you sure you want to delete this game?')) {
       await supabase.from('games').delete().eq('id', id)
       fetchGames()
+    }
+  }
+
+  const fetchRungRounds = async (gameDate: string, gameId: string) => {
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('game_type', 'Rung')
+      .eq('game_date', gameDate)
+      .not('winning_team', 'is', null)
+      .order('created_at', { ascending: true })
+
+    if (data) {
+      return data as Game[]
+    }
+    return []
+  }
+
+  const toggleExpandGame = async (gameId: string, gameDate: string) => {
+    if (expandedGame === gameId) {
+      setExpandedGame(null)
+    } else {
+      setExpandedGame(gameId)
+      if (!rungRounds[gameId]) {
+        const rounds = await fetchRungRounds(gameDate, gameId)
+        setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
+      }
     }
   }
 
@@ -502,23 +531,87 @@ export default function AdminDashboard() {
 </div>
 
                   {game.game_type === 'Rung' ? (
-                    <div className="flex gap-2 flex-wrap items-center text-sm">
-                      <div className="flex gap-1">
-                        {(game.winning_team === 1 ? game.team1 : game.team2)?.map(p => (
-                          <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
-                            {p}
-                          </span>
-                        ))}
+                    <>
+                      <div className="flex gap-2 flex-wrap items-center text-sm mb-2">
+                        <div className="flex gap-1">
+                          {(game.winning_team === 1 ? game.team1 : game.team2)?.map(p => (
+                            <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-amber-400 font-bold">vs</span>
+                        <div className="flex gap-1">
+                          {(game.winning_team === 1 ? game.team2 : game.team1)?.map(p => (
+                            <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <span className="text-amber-400 font-bold">vs</span>
-                      <div className="flex gap-1">
-                        {(game.winning_team === 1 ? game.team2 : game.team1)?.map(p => (
-                          <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">
-                            {p}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+
+                      {/* Expand button for Rung games */}
+                      {game.team1 && game.team2 && (
+                        <button
+                          onClick={() => toggleExpandGame(game.id, game.game_date)}
+                          className="w-full mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide shadow-[0_4px_8px_rgba(29,78,216,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] transition-all"
+                        >
+                          {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
+                        </button>
+                      )}
+
+                      {/* Expandable rounds */}
+                      {expandedGame === game.id && (
+                        <div className="mt-3 bg-slate-900/50 p-3 rounded-lg">
+                          <h4 className="text-xs font-bold text-slate-300 mb-2 text-center">All Rounds</h4>
+                          {(rungRounds[game.id] || []).length === 0 ? (
+                            <div className="text-xs text-slate-500 text-center">No rounds found</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {(rungRounds[game.id] || []).map((round: Game, idx: number) => {
+                                const teamScores: Record<string, number> = {}
+                                // Calculate progressive scores
+                                (rungRounds[game.id] || []).slice(0, idx + 1).forEach((r: Game) => {
+                                  const t1 = r.team1!.slice().sort().join('&')
+                                  const t2 = r.team2!.slice().sort().join('&')
+                                  if (!teamScores[t1]) teamScores[t1] = 0
+                                  if (!teamScores[t2]) teamScores[t2] = 0
+                                  if (r.winning_team === 1) teamScores[t1]++
+                                  else if (r.winning_team === 2) teamScores[t2]++
+                                })
+                                
+                                const team1Key = round.team1!.slice().sort().join('&')
+                                const team2Key = round.team2!.slice().sort().join('&')
+
+                                return (
+                                  <div key={round.id} className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between">
+                                    <div className="flex items-center justify-center gap-2 text-xs font-bold flex-1">
+                                      <div className={`${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
+                                        {round.team1!.join(' & ')} ({teamScores[team1Key]})
+                                      </div>
+                                      <span className="text-amber-400">vs</span>
+                                      <div className={`${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
+                                        ({teamScores[team2Key]}) {round.team2!.join(' & ')}
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => deleteGame(round.id)}
+                                      className="ml-2 text-red-400 hover:text-red-300 text-xs"
+                                      title="Delete this round"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                )
+                              })}
+                              <div className="text-center text-amber-400 text-xs font-bold mt-2 pt-2 border-t border-slate-700">
+                                Total Rounds: {(rungRounds[game.id] || []).length}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="flex gap-1 flex-wrap">
                       {game.winners?.map(p => (
