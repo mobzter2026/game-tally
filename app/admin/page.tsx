@@ -244,6 +244,8 @@ export default function AdminDashboard() {
       alert('Error updating game')
     } else {
       setEditingGame(null)
+      setEditDate('')
+      setEditTime('')
       fetchGames()
     }
   }
@@ -550,8 +552,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Expand button for Rung games */}
-                      {game.team1 && game.team2 && (
+                      {/* Expand button for Rung games - only on summary cards */}
+                      {game.team1 && game.team2 && game.winning_team === null && (
                         <button
                           onClick={() => toggleExpandGame(game.id, game.game_date)}
                           className="w-full mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide shadow-[0_4px_8px_rgba(29,78,216,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] transition-all"
@@ -585,13 +587,15 @@ export default function AdminDashboard() {
 
                                 return (
                                   <div key={round.id} className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between">
-                                    <div className="flex items-center justify-center gap-2 text-xs font-bold flex-1">
-                                      <div className={`${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {round.team1!.join(' & ')} ({teamScores[team1Key]})
+                                    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs font-bold flex-1">
+                                      <div className={`text-right ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <span>{round.team1!.join(' & ')}</span>
+                                        <span className="text-amber-400 ml-2">({teamScores[team1Key]})</span>
                                       </div>
-                                      <span className="text-amber-400">vs</span>
-                                      <div className={`${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
-                                        ({teamScores[team2Key]}) {round.team2!.join(' & ')}
+                                      <span className="text-amber-400 text-center px-2">vs</span>
+                                      <div className={`text-left ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <span className="text-amber-400 mr-2">({teamScores[team2Key]})</span>
+                                        <span>{round.team2!.join(' & ')}</span>
                                       </div>
                                     </div>
                                     <button
