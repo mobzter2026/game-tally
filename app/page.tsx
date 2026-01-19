@@ -1091,8 +1091,31 @@ export default function PublicView() {
                 </div>
               ) : (
                 recentGames.map(game => {
-                  // Check if this is an ongoing Rung game (has team1/team2 but no winners)
-                  const isOngoingRung = game.game_type === 'Rung' && game.team1 && game.team2 && (!game.winners || game.winners.length === 0)
+                  // Check if this is an ongoing Rung game
+                  let isOngoingRung = false
+                  if (game.game_type === 'Rung' && game.team1 && game.team2 && (!game.winners || game.winners.length === 0)) {
+                    // Check if any team has reached 5 wins
+                    const sessionRounds = games.filter(g => 
+                      g.game_type === 'Rung' && 
+                      g.game_date === game.game_date &&
+                      g.winning_team !== null &&
+                      g.team1 && g.team2
+                    )
+
+                    const teamWins: Record<string, number> = {}
+                    sessionRounds.forEach(round => {
+                      const team1Key = round.team1!.slice().sort().join('&')
+                      const team2Key = round.team2!.slice().sort().join('&')
+                      if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                      if (!teamWins[team2Key]) teamWins[team2Key] = 0
+                      if (round.winning_team === 1) teamWins[team1Key]++
+                      else if (round.winning_team === 2) teamWins[team2Key]++
+                    })
+
+                    // Only ongoing if no team has reached 5 wins
+                    isOngoingRung = !Object.values(teamWins).some(wins => wins >= 5)
+                  }
+                  
                   const gameRounds = rungRounds[game.id] || []
                   
                   return (
