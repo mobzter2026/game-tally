@@ -342,12 +342,12 @@ export default function PublicView() {
           else if (round.winning_team === 2) teamWins[t2]++
         })
 
-        const teams = Array.from(allTeams)
-        const maxWins = teams.length ? Math.max(...teams.map(t => teamWins[t] || 0)) : 0
-        const minWins = teams.length ? Math.min(...teams.map(t => teamWins[t] || 0)) : 0
+        const sessionTeams = Array.from(allTeams)
+        const maxWins = sessionTeams.length ? Math.max(...teams.map(t => teamWins[t] || 0)) : 0
+        const minWins = sessionTeams.length ? Math.min(...teams.map(t => teamWins[t] || 0)) : 0
 
-        const winnersTeams = teams.filter(t => (teamWins[t] || 0) >= 5)
-        const nonWinnersTeams = teams.filter(t => !winnersTeams.includes(t))
+        const winnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) >= 5)
+        const nonWinnersTeams = sessionTeams.filter(t => !winnersTeams.includes(t))
 
         let runnersTeams: string[] = []
         let survivorsTeams: string[] = []
@@ -367,8 +367,8 @@ export default function PublicView() {
           }
         } else {
           // Ongoing sessions (used for recent column): top score = runners, bottom score = losers, middle = survivors
-          runnersTeams = teams.filter(t => (teamWins[t] || 0) === maxWins)
-          losersTeams = teams.filter(t => (teamWins[t] || 0) === minWins)
+          runnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) === maxWins)
+          losersTeams = sessionTeams.filter(t => (teamWins[t] || 0) === minWins)
 
           // everyone tied => all losers (your rule)
           if (maxWins === minWins) {
@@ -376,7 +376,7 @@ export default function PublicView() {
             runnersTeams = []
             survivorsTeams = []
           } else {
-            survivorsTeams = teams.filter(t => !runnersTeams.includes(t) && !losersTeams.includes(t))
+            survivorsTeams = sessionTeams.filter(t => !runnersTeams.includes(t) && !losersTeams.includes(t))
           }
         }
 
@@ -1227,9 +1227,9 @@ gamesForStats.forEach(game => {
                               else if (round.winning_team === 2) teamWins[t2]++
                             })
 
-                            const teams = Array.from(allTeams)
+                            const sessionTeams = Array.from(allTeams)
                             // If no rounds yet (brand new ongoing session), still show players from the card's players_in_game
-                            if (teams.length === 0) {
+                            if (sessionTeams.length === 0) {
                               const players = game.players_in_game || []
                               return (
                                 <div className="flex gap-1 flex-wrap mb-3">
@@ -1243,10 +1243,10 @@ gamesForStats.forEach(game => {
                             }
 
                             // Build player-centric standings (because teams can be mixed across rounds)
-                            const teams = Array.from(allTeams)
+                            const sessionTeams = Array.from(allTeams)
 
                             // If no rounds yet (brand new session), still show players from the card's players_in_game
-                            if (teams.length === 0) {
+                            if (sessionTeams.length === 0) {
                               const players = game.players_in_game || []
                               return (
                                 <div className="flex gap-1 flex-wrap mb-3">
@@ -1263,18 +1263,18 @@ gamesForStats.forEach(game => {
                             }
 
                             const allPlayers = new Set<string>()
-                            teams.forEach(t => t.split('&').forEach(p => allPlayers.add(p)))
+                            sessionTeams.forEach(t => t.split('&').forEach(p => allPlayers.add(p)))
 
                             // Who actually "won" the session: players on any team that reached 5 first-to-5.
                             // (If multiple teams are >=5 due to edits, treat them all as winners.)
-                            const winnersTeams = teams.filter(t => (teamWins[t] || 0) >= 5)
+                            const winnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) >= 5)
                             const winnersPlayers = new Set<string>()
                             winnersTeams.forEach(t => t.split('&').forEach(p => winnersPlayers.add(p)))
 
                             // Best score each player achieved across ANY team they played in this session
                             const playerBestScore: Record<string, number> = {}
                             allPlayers.forEach(p => (playerBestScore[p] = 0))
-                            teams.forEach(teamKeyStr => {
+                            sessionTeams.forEach(teamKeyStr => {
                               const score = teamWins[teamKeyStr] || 0
                               teamKeyStr.split('&').forEach(p => {
                                 if (score > (playerBestScore[p] || 0)) playerBestScore[p] = score
