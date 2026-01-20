@@ -343,8 +343,8 @@ export default function PublicView() {
         })
 
         const sessionTeams = Array.from(allTeams)
-        const maxWins = sessionTeams.length ? Math.max(...teams.map(t => teamWins[t] || 0)) : 0
-        const minWins = sessionTeams.length ? Math.min(...teams.map(t => teamWins[t] || 0)) : 0
+        const maxWins = sessionTeams.length ? Math.max(...sessionTeams.map(t => teamWins[t] || 0)) : 0
+        const minWins = sessionTeams.length ? Math.min(...sessionTeams.map(t => teamWins[t] || 0)) : 0
 
         const winnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) >= 5)
         const nonWinnersTeams = sessionTeams.filter(t => !winnersTeams.includes(t))
@@ -372,7 +372,7 @@ export default function PublicView() {
 
           // everyone tied => all losers (your rule)
           if (maxWins === minWins) {
-            losersTeams = teams
+            losersTeams = sessionTeams
             runnersTeams = []
             survivorsTeams = []
           } else {
@@ -383,7 +383,17 @@ export default function PublicView() {
         // Best achievement per player across all teams they played in this session
         const playerTier: Record<string, 'W' | 'R' | 'S' | 'L'> = {}
 
-        const apply = (teamStr: string, tier: 'W' | 'R' | 'S' | 'L') => {
+        
+        // Player-centric "best score" across any team they played in this session (teams can be mixed)
+        const playerBestScore: Record<string, number> = {}
+        sessionTeams.forEach(t => {
+          const score = teamWins[t] || 0
+          t.split('&').forEach(p => {
+            if (playerBestScore[p] === undefined || score > playerBestScore[p]) playerBestScore[p] = score
+          })
+        })
+
+const apply = (teamStr: string, tier: 'W' | 'R' | 'S' | 'L') => {
           teamStr.split('&').forEach(p => {
             const existing = playerTier[p]
             const rank = (x: any) => (x === 'W' ? 1 : x === 'R' ? 2 : x === 'S' ? 3 : 4)
@@ -396,11 +406,26 @@ export default function PublicView() {
         survivorsTeams.forEach(t => apply(t, 'S'))
         losersTeams.forEach(t => apply(t, 'L'))
 
+        const players_in_game = Object.keys(playerTier)
         const winners = Object.keys(playerTier).filter(p => playerTier[p] === 'W')
         const runners_up = Object.keys(playerTier).filter(p => playerTier[p] === 'R')
         const survivors = Object.keys(playerTier).filter(p => playerTier[p] === 'S')
         const losers = Object.keys(playerTier).filter(p => playerTier[p] === 'L')
-        const players_in_game = Object.keys(playerTier)
+
+        // If we have winners and ALL remaining players share the same score, there is NO runner-up: they are all losers.
+        if (winners.length > 0) {
+          const remaining = players_in_game.filter(p => !winners.includes(p))
+          const allSame = remaining.length > 0 &&
+            remaining.every(p => (playerBestScore[p] ?? 0) === (playerBestScore[remaining[0]] ?? 0))
+          if (allSame) {
+            remaining.forEach(p => { playerTier[p] = 'L' })
+          }
+        }
+
+        const winnersFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'W')
+        const runners_upFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'R')
+        const survivorsFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'S')
+        const losersFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'L')
 
         const last = roundsAsc[roundsAsc.length - 1]
         rungSessionResults.push({
@@ -408,10 +433,10 @@ export default function PublicView() {
           id: `rung-session-${date}-${sessionIndex}`,
           game_type: 'Rung',
           players_in_game,
-          winners: winners.length ? winners : null,
-          runners_up: runners_up.length ? runners_up : null,
-          survivors: survivors.length ? survivors : null,
-          losers: losers.length ? losers : null,
+          winners: winnersFinal.length ? winnersFinal : null,
+          runners_up: runners_upFinal.length ? runners_upFinal : null,
+          survivors: survivorsFinal.length ? survivorsFinal : null,
+          losers: losersFinal.length ? losersFinal : null,
         } as any)
 
         sessionIndex++
@@ -1290,18 +1315,22 @@ gamesForStats.forEach(game => {
 
                             if (hasWinners) {
                               if (nonWinnerPlayers.length > 0) {
-                                const scores = nonWinnerPlayers.map(p => playerBestScore[p] || 0)
-                                const maxScore = Math.max(...scores)
-                                const minScore = Math.min(...scores)
+                                const scores = nonWinnerPlayers.map(p => playerBestScore[p] ?? 0)
 
-                                // If everyone remaining is tied, there is no runner-up — they are all losers.
-                                if (maxScore === minScore) {
+                                // Strong tie check: if ALL remaining players share the same score → NO runner-up (all losers)
+                                const allSame = nonWinnerPlayers.length > 0 &&
+                                  nonWinnerPlayers.every(p => (playerBestScore[p] ?? 0) === (playerBestScore[nonWinnerPlayers[0]] ?? 0))
+
+                                if (allSame) {
                                   runners = []
                                   survivors = []
                                   losers = nonWinnerPlayers
                                 } else {
-                                  runners = nonWinnerPlayers.filter(p => (playerBestScore[p] || 0) === maxScore)
-                                  losers = nonWinnerPlayers.filter(p => (playerBestScore[p] || 0) === minScore)
+                                  const maxScore = Math.max(...scores)
+                                  const minScore = Math.min(...scores)
+
+                                  runners = nonWinnerPlayers.filter(p => (playerBestScore[p] ?? 0) === maxScore)
+                                  losers = nonWinnerPlayers.filter(p => (playerBestScore[p] ?? 0) === minScore)
                                   survivors = nonWinnerPlayers.filter(p => !runners.includes(p) && !losers.includes(p))
                                 }
                               }
