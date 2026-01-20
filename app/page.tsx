@@ -1377,7 +1377,7 @@ gamesForStats.forEach(game => {
                                               <span className="text-amber-400">({scores[team2Key] || 0})</span>
                                               <span>{round.team2!.join(' & ')}</span>
                                             </div>
-                                          </div></div>
+                                          </div>
                                         </div>
                                       )
                                     })
