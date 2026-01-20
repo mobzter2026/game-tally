@@ -1192,9 +1192,9 @@ gamesForStats.forEach(game => {
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
                       <div className="mb-3">
-                        <div className="font-bold text-base text-slate-300 mb-1">
+                        <div className="font-bold text-sm text-slate-300 mb-1">
                           {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
-                          {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                          {game.game_type === 'Rung' && game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         {isOngoingRung && (
                           <div className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
@@ -1242,79 +1242,115 @@ gamesForStats.forEach(game => {
                               )
                             }
 
-                            const maxWins = Math.max(...teams.map(t => teamWins[t] || 0))
-                            const minWins = Math.min(...teams.map(t => teamWins[t] || 0))
+                            // Build player-centric standings (because teams can be mixed across rounds)
+                            const teams = Array.from(allTeams)
 
+                            // If no rounds yet (brand new session), still show players from the card's players_in_game
+                            if (teams.length === 0) {
+                              const players = game.players_in_game || []
+                              return (
+                                <div className="flex gap-1 flex-wrap mb-3">
+                                  {players.map(p => (
+                                    <span
+                                      key={p}
+                                      className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all"
+                                    >
+                                      {p}
+                                    </span>
+                                  ))}
+                                </div>
+                              )
+                            }
+
+                            const allPlayers = new Set<string>()
+                            teams.forEach(t => t.split('&').forEach(p => allPlayers.add(p)))
+
+                            // Who actually "won" the session: players on any team that reached 5 first-to-5.
+                            // (If multiple teams are >=5 due to edits, treat them all as winners.)
                             const winnersTeams = teams.filter(t => (teamWins[t] || 0) >= 5)
-                            const nonWinnersTeams = teams.filter(t => !winnersTeams.includes(t))
+                            const winnersPlayers = new Set<string>()
+                            winnersTeams.forEach(t => t.split('&').forEach(p => winnersPlayers.add(p)))
 
-                            let runnersTeams: string[] = []
-                            let survivorsTeams: string[] = []
-                            let losersTeams: string[] = []
+                            // Best score each player achieved across ANY team they played in this session
+                            const playerBestScore: Record<string, number> = {}
+                            allPlayers.forEach(p => (playerBestScore[p] = 0))
+                            teams.forEach(teamKeyStr => {
+                              const score = teamWins[teamKeyStr] || 0
+                              teamKeyStr.split('&').forEach(p => {
+                                if (score > (playerBestScore[p] || 0)) playerBestScore[p] = score
+                              })
+                            })
 
-                            if (winnersTeams.length > 0) {
-                              // Completed: someone has reached 5.
-                              const bestNonWinner = nonWinnersTeams.length
-                                ? Math.max(...nonWinnersTeams.map(t => teamWins[t] || 0))
-                                : -1
-                              const minNonWinner = nonWinnersTeams.length
-                                ? Math.min(...nonWinnersTeams.map(t => teamWins[t] || 0))
-                                : -1
+                            const nonWinnerPlayers = Array.from(allPlayers).filter(p => !winnersPlayers.has(p))
+                            const hasWinners = winnersPlayers.size > 0
 
-                              // If everyone remaining is tied, there is no runner-up — they are all losers.
-                              if (bestNonWinner === minNonWinner) {
-                                runnersTeams = []
-                                survivorsTeams = []
-                                losersTeams = nonWinnersTeams
-                              } else {
-                                runnersTeams = nonWinnersTeams.filter(t => (teamWins[t] || 0) === bestNonWinner)
-                                losersTeams = nonWinnersTeams.filter(t => (teamWins[t] || 0) === minNonWinner)
-                                survivorsTeams = nonWinnersTeams.filter(t => !runnersTeams.includes(t) && !losersTeams.includes(t))
+                            let runners: string[] = []
+                            let survivors: string[] = []
+                            let losers: string[] = []
+
+                            if (hasWinners) {
+                              if (nonWinnerPlayers.length > 0) {
+                                const scores = nonWinnerPlayers.map(p => playerBestScore[p] || 0)
+                                const maxScore = Math.max(...scores)
+                                const minScore = Math.min(...scores)
+
+                                // If everyone remaining is tied, there is no runner-up — they are all losers.
+                                if (maxScore === minScore) {
+                                  runners = []
+                                  survivors = []
+                                  losers = nonWinnerPlayers
+                                } else {
+                                  runners = nonWinnerPlayers.filter(p => (playerBestScore[p] || 0) === maxScore)
+                                  losers = nonWinnerPlayers.filter(p => (playerBestScore[p] || 0) === minScore)
+                                  survivors = nonWinnerPlayers.filter(p => !runners.includes(p) && !losers.includes(p))
+                                }
                               }
                             } else {
                               // Ongoing: top score = runners (blue), bottom score = losers (red), middle = survivors (grey)
-                              runnersTeams = teams.filter(t => (teamWins[t] || 0) === maxWins)
-                              losersTeams = teams.filter(t => (teamWins[t] || 0) === minWins)
+                              const playersArr = Array.from(allPlayers)
+                              const scores = playersArr.map(p => playerBestScore[p] || 0)
+                              const maxScore = Math.max(...scores)
+                              const minScore = Math.min(...scores)
 
-                              // If everyone is tied (e.g. 0-0 across teams), treat all as losers (your rule)
-                              if (maxWins === minWins) {
-                                losersTeams = teams
-                                runnersTeams = []
-                                survivorsTeams = []
+                              if (maxScore === minScore) {
+                                // Everyone tied -> treat all as losers (your rule)
+                                runners = []
+                                survivors = []
+                                losers = playersArr
                               } else {
-                                survivorsTeams = teams.filter(t =>
-                                  !runnersTeams.includes(t) && !losersTeams.includes(t)
-                                )
+                                runners = playersArr.filter(p => (playerBestScore[p] || 0) === maxScore)
+                                losers = playersArr.filter(p => (playerBestScore[p] || 0) === minScore)
+                                survivors = playersArr.filter(p => !runners.includes(p) && !losers.includes(p))
                               }
                             }
 
-                            // For each player, choose BEST achievement across all teams they played in this session
                             type Badge = { player: string, tier: number, cls: string }
                             const badges: Badge[] = []
-                            const playerBest: Record<string, Badge> = {}
 
-                            const applyTeam = (teamKeyStr: string, tier: number, cls: string) => {
-                              teamKeyStr.split('&').forEach(player => {
-                                const existing = playerBest[player]
-                                if (!existing || tier < existing.tier) {
-                                  playerBest[player] = { player, tier, cls }
-                                }
-                              })
+                            const pushTier = (arr: string[], tier: number, cls: string) => {
+                              arr.forEach(player => badges.push({ player, tier, cls }))
                             }
 
-                            winnersTeams.forEach(t => applyTeam(t, 1, 'bg-green-600'))
-                            runnersTeams.forEach(t => applyTeam(t, 2, 'bg-blue-600'))
-                            survivorsTeams.forEach(t => applyTeam(t, 3, 'bg-slate-600'))
-                            losersTeams.forEach(t => applyTeam(t, 4, 'bg-red-600'))
+                            // Tier order = best achievement first
+                            pushTier(Array.from(winnersPlayers), 1, 'bg-green-600')
+                            pushTier(runners, 2, 'bg-blue-600')
+                            pushTier(survivors, 3, 'bg-slate-600')
+                            pushTier(losers, 4, 'bg-red-600')
 
-                            Object.values(playerBest).forEach(b => badges.push(b))
+                            // De-dupe (winner overrides any other tier, etc.)
+                            const bestByPlayer: Record<string, Badge> = {}
+                            badges.forEach(b => {
+                              const existing = bestByPlayer[b.player]
+                              if (!existing || b.tier < existing.tier) bestByPlayer[b.player] = b
+                            })
 
-                            const tierOrder = (t: number) => t
-                            badges.sort((a, b) => tierOrder(a.tier) - tierOrder(b.tier) || a.player.localeCompare(b.player))
+                            const finalBadges = Object.values(bestByPlayer).sort(
+                              (a, b) => a.tier - b.tier || a.player.localeCompare(b.player)
+                            )
 
                             return (
                               <div className="flex gap-1 flex-wrap mb-3">
-                                {badges.map(b => (
+                                {finalBadges.map(b => (
                                   <span key={b.player} className={`${b.cls} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
                                     {b.player}
                                   </span>
