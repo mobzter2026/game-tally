@@ -1268,7 +1268,6 @@ gamesForStats.forEach(game => {
                             }
 
                             // Build player-centric standings (because teams can be mixed across rounds)
-                            const sessionTeams = Array.from(allTeams)
 
                             // If no rounds yet (brand new session), still show players from the card's players_in_game
                             if (sessionTeams.length === 0) {
