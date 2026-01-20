@@ -1367,12 +1367,12 @@ gamesForStats.forEach(game => {
                                           <div className="text-xs text-slate-400 mb-2 text-center">
                                             {new Date(round.created_at).toLocaleDateString()} • {new Date(round.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                           </div>
-                                          <div className="flex items-center justify-center gap-3 text-sm font-bold">
+                                          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm font-bold w-full">
                                             <div className={`flex items-center gap-2 ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
                                               <span className="text-amber-400">({scores[team1Key] || 0})</span>
                                             </div>
-                                            <span className="text-amber-400">vs</span>
+                                            <span className="text-amber-400 px-2 text-center">vs</span>
                                             <div className={`flex items-center gap-2 ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span className="text-amber-400">({scores[team2Key] || 0})</span>
                                               <span>{round.team2!.join(' & ')}</span>
