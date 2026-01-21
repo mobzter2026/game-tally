@@ -376,7 +376,7 @@ export default function AdminDashboard() {
     setEditSessionTime('')
   }
 
-  const saveSessionDateTime = async (session: { sessionKey: string; rounds: Game[] }) => {
+  const saveSessionDateTime = async (session: RungSession) => {
     // We update EVERY round in the session so grouping stays intact and nothing leaks into other sessions.
     const base = new Date(`${editSessionDate}T${editSessionTime}:00`).getTime()
     const roundsAsc = [...session.rounds].sort(
