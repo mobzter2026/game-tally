@@ -378,15 +378,21 @@ export default function AdminDashboard() {
   const saveSessionDate = async (s: RungSession) => {
     try {
       if (!editDate) return
-      await Promise.all(
-        s.rounds.map(r => (supabase.from('games').update as any)({ game_date: editDate }).eq('id', r.id))
-      )
+
+      // Update ONLY real DB rows (skip the synthetic "ongoing-*" placeholder)
+      for (const r of s.rounds) {
+        if (typeof r.id === 'string' && r.id.startsWith('ongoing-')) continue
+
+        const { error } = await (supabase.from('games').update as any)({ game_date: editDate }).eq('id', r.id)
+        if (error) throw error
+      }
+
       setEditingSessionKey(null)
       setEditDate('')
       await fetchGames()
     } catch (e) {
       console.error(e)
-      alert('Failed to update session date')
+      alert('Failed to update session date (check console)')
     }
   }
 
@@ -733,7 +739,7 @@ export default function AdminDashboard() {
                       </button>
 
                       {isExpanded && (
-                        <div className="mt-3 bg-slate-900/50 p-3 rounded-lg">
+                        <div className="mt-3 bg-slate-900/50 p-2 rounded-lg">
                           <h4 className="text-xs font-bold text-slate-300 mb-2 text-center">All Rounds</h4>
 
                           <div className="space-y-2">
@@ -760,9 +766,9 @@ export default function AdminDashboard() {
                               return (
                                 <div
                                   key={round.id}
-                                  className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between"
+                                  className="bg-slate-800/50 p-1.5 rounded-lg flex items-center justify-between overflow-x-auto"
                                 >
-                                  <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs font-bold flex-1">
+                                  <div className="grid grid-cols-[max-content_auto_max-content] gap-2 items-center text-xs font-bold flex-1 whitespace-nowrap">
                                     <div className={`text-right ${leftWin ? 'text-green-400' : 'text-red-400'}`}>
                                       <span>{round.team1!.join(' & ')}</span>
                                       <span className="text-amber-400 ml-2">({t1Score})</span>

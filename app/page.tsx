@@ -1410,7 +1410,7 @@ gamesForStats.forEach(game => {
 
                           {/* Expandable round history - Chronological order */}
                           {expandedGame === game.id && (
-                            <div className="mt-3 bg-slate-900/50 p-4 rounded-lg">
+                            <div className="mt-3 bg-slate-900/50 p-2 rounded-lg">
                               <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Most Recent First)</h4>
                               {gameRounds.length === 0 ? (
                                 <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
@@ -1441,7 +1441,7 @@ gamesForStats.forEach(game => {
 
                                       return (
                                         <div key={round.id} className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between">
-                                          <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs font-bold flex-1">
+                                          <div className="grid grid-cols-[max-content_auto_max-content] gap-2 items-center text-xs font-bold flex-1 whitespace-nowrap">
                                             <div className={`text-right ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
                                               <span className="text-amber-400 ml-2">({scores[team1Key] || 0})</span>
