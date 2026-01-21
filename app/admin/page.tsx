@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Game } from '@/lib/types'
 import Button from '@/Components/Button'
+import { buildRungSessions, formatRoundLine, type RungSession } from '@/lib/rungSessions'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 
@@ -16,67 +17,6 @@ const GAME_EMOJIS: Record<string, string> = {
   Rung: '🎭',
 }
 
-type PlayerTier = {
-  winners: string[]
-  runners: string[]
-  survivors: string[]
-  losers: string[]
-}
-
-type RungSession = {
-  key: string
-  gameDate: string
-  rounds: Game[]
-  // teamKey = "A&B" sorted within team
-  teamScores: Record<string, number>
-  playerBest: Record<string, { teamKey: string; wins: number }>
-  tiers: PlayerTier
-  isComplete: boolean
-  endAtIso: string | null
-  roundCount: number
-}
-
-function teamKey(team: string[]) {
-  return team.slice().sort().join('&')
-}
-
-function computePlayerTiersFromBest(playerBest: Record<string, { teamKey: string; wins: number }>): PlayerTier {
-  const players = Object.keys(playerBest)
-  if (players.length === 0) return { winners: [], runners: [], survivors: [], losers: [] }
-
-  const scores = players.map(p => playerBest[p]?.wins ?? 0)
-  const maxScore = Math.max(...scores)
-  const minScore = Math.min(...scores)
-
-  const winners = players.filter(p => (playerBest[p]?.wins ?? 0) === maxScore && maxScore >= 5)
-  const nonWinners = players.filter(p => !winners.includes(p))
-
-  // If everybody is tied (or only winners exist), no runners/survivors; everyone else is losers by rule
-  if (nonWinners.length === 0) return { winners, runners: [], survivors: [], losers: [] }
-
-  const nonWinnerScores = nonWinners.map(p => playerBest[p]?.wins ?? 0)
-  const maxNonWinner = Math.max(...nonWinnerScores)
-  const minNonWinner = Math.min(...nonWinnerScores)
-
-  // Rule: if winners exist AND all remaining have the same points => all remaining are losers (no runner-up)
-  if (winners.length > 0 && maxNonWinner === minNonWinner) {
-    return { winners, runners: [], survivors: [], losers: nonWinners }
-  }
-
-  // Otherwise normal tiering
-  const runners = nonWinners.filter(p => (playerBest[p]?.wins ?? 0) === maxNonWinner)
-  const losers = nonWinners.filter(p => (playerBest[p]?.wins ?? 0) === minNonWinner && minNonWinner < maxNonWinner)
-  const survivors = nonWinners.filter(
-    p => !runners.includes(p) && !losers.includes(p)
-  )
-
-  // Edge: if everyone non-winner is tied (no losers), classify them all as losers (no runners)
-  if (maxNonWinner === minNonWinner) {
-    return { winners, runners: [], survivors: [], losers: nonWinners }
-  }
-
-  return { winners, runners, survivors, losers }
-}
 
 function buildRungSessions(allGames: Game[]): RungSession[] {
   const rungRounds = allGames
@@ -817,7 +757,7 @@ export default function AdminDashboard() {
                             {GAME_EMOJIS[game.game_type]} {game.game_type}
                           </div>
                           <span className="text-[0.7rem] text-slate-400 font-normal">
-                            {new Date(game.game_date).toLocaleDateString()}
+                            {new Date(s.gameDate).toLocaleDateString()}
                           </span>
                         </div>
                       </div>

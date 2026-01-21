@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 import Button from '@/Components/Button'
+import { buildRungSessions, formatRoundLine, teamKey } from '@/lib/rungSessions'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const MIN_GAMES_FOR_RANKING = 0
@@ -179,6 +180,9 @@ export default function PublicView() {
   }
 
   const filteredGames = getFilteredGames()
+
+  const rungSessions = buildRungSessions(filteredGames)
+
 
   const getPlayerStatsForGame = (gameType?: string) => {
     const stats: any = {}
