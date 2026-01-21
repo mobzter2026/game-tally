@@ -355,11 +355,7 @@ export default function AdminDashboard() {
       setEditDate('')
       fetchGames()
     }
-  } else {
-      setEditingGame(null)
-      setEditDate('')
-      fetchGames()
-    }
+
   }
 
   const startEditingSession = (sessionKey: string, gameDate: string, endAtIso: string) => {
