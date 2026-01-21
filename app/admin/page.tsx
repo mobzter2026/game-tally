@@ -169,6 +169,9 @@ export default function AdminDashboard() {
   const [editingGame, setEditingGame] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
+  const [editingSession, setEditingSession] = useState<string | null>(null)
+  const [editSessionDate, setEditSessionDate] = useState('')
+  const [editSessionTime, setEditSessionTime] = useState('')
 
   const [expandedSessionKey, setExpandedSessionKey] = useState<string | null>(null)
   const router = useRouter()
@@ -359,6 +362,46 @@ export default function AdminDashboard() {
       fetchGames()
     }
   }
+
+  const startEditingSession = (sessionKey: string, gameDate: string, endAtIso: string) => {
+    setEditingSession(sessionKey)
+    setEditSessionDate(gameDate)
+    // use session end time as the editable time (keeps cards consistent with what you see)
+    setEditSessionTime(new Date(endAtIso).toTimeString().slice(0, 5))
+  }
+
+  const cancelEditingSession = () => {
+    setEditingSession(null)
+    setEditSessionDate('')
+    setEditSessionTime('')
+  }
+
+  const saveSessionDateTime = async (session: { sessionKey: string; rounds: Game[] }) => {
+    // We update EVERY round in the session so grouping stays intact and nothing leaks into other sessions.
+    const base = new Date(`${editSessionDate}T${editSessionTime}:00`).getTime()
+    const roundsAsc = [...session.rounds].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+
+    const updates = roundsAsc.map((round, idx) => {
+      const createdAt = new Date(base + idx * 1000).toISOString() // +1s per round keeps ordering stable
+      return (supabase.from('games').update as any)({ game_date: editSessionDate, created_at: createdAt }).eq('id', round.id)
+    })
+
+    const results = await Promise.all(updates)
+    const hasError = results.some(r => r.error)
+    if (hasError) {
+      console.error('Error updating session date/time:', results.find(r => r.error)?.error)
+      alert('Error updating session date/time. Check console for details.')
+      return
+    }
+
+    setEditingSession(null)
+    setEditSessionDate('')
+    setEditSessionTime('')
+    fetchGames()
+  }
+
 
   // Build Rung sessions from current games
   const rungSessions = useMemo(() => {
@@ -668,8 +711,49 @@ export default function AdminDashboard() {
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex flex-col gap-2 flex-1">
                           <div className="flex items-center gap-3">
-                            <div className="font-bold text-base">
-                              {GAME_EMOJIS.Rung} Rung • {dateLabel} • {timeLabel}
+                            <div className="font-bold text-base text-white">{GAME_EMOJIS.Rung} Rung</div>
+                            <div className="text-xs text-slate-400 flex items-center gap-2 mt-1">
+                              {editingSession === s.sessionKey ? (
+                                <>
+                                  <input
+                                    type="date"
+                                    value={editSessionDate}
+                                    onChange={(e) => setEditSessionDate(e.target.value)}
+                                    className="p-1 bg-purple-700 rounded text-xs text-white"
+                                  />
+                                  <input
+                                    type="time"
+                                    value={editSessionTime}
+                                    onChange={(e) => setEditSessionTime(e.target.value)}
+                                    className="p-1 bg-purple-700 rounded text-xs text-white"
+                                  />
+                                  <button
+                                    onClick={() => saveSessionDateTime(s)}
+                                    className="text-green-400 hover:text-green-300 font-bold text-xs"
+                                    title="Save"
+                                  >
+                                    ✓
+                                  </button>
+                                  <button
+                                    onClick={cancelEditingSession}
+                                    className="text-red-400 hover:text-red-300 font-bold text-xs"
+                                    title="Cancel"
+                                  >
+                                    ✗
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <span>{dateLabel} • {timeLabel}</span>
+                                  <button
+                                    onClick={() => startEditingSession(s.sessionKey, s.game_date, s.endAt)}
+                                    className="text-slate-400 hover:text-slate-200 transition-colors"
+                                    title="Edit session date/time"
+                                  >
+                                    ✏️
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                           <div className="text-xs text-slate-400">Session rounds: {s.rounds.length}</div>
@@ -771,7 +855,7 @@ export default function AdminDashboard() {
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex flex-col gap-2 flex-1">
                         <div className="flex items-center gap-3">
-                          <div className="font-bold text-base">
+                          <div className="font-bold text-base text-white">
                             {GAME_EMOJIS[game.game_type] ?? '🎮'} {game.game_type}
                           </div>
                         </div>

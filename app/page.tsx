@@ -1197,6 +1197,15 @@ gamesForStats.forEach(game => {
                   const sessionRounds = ((game as any).__rung_session_rounds as Game[] | undefined) || []
                   const gameRounds = sessionRounds
 
+                  // Use the latest round timestamp for the session header (so date/time updates as rounds are edited/added)
+                  const sessionLatestRound = (game.game_type === 'Rung' && gameRounds.length > 0)
+                    ? gameRounds.reduce((latest, r) => {
+                        const tLatest = new Date((latest as any).created_at || (latest as any).game_date)
+                        const tCur = new Date((r as any).created_at || (r as any).game_date)
+                        return tCur.getTime() > tLatest.getTime() ? r : latest
+                      }, gameRounds[0])
+                    : null
+
                   // Session is ongoing if no team has reached 5 yet
                   let isOngoingRung = false
                   if (game.game_type === 'Rung' && game.team1 && game.team2) {
@@ -1217,9 +1226,14 @@ gamesForStats.forEach(game => {
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
                       <div className="mb-3">
-                        <div className="font-bold text-sm text-slate-300 mb-1">
-                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
-                          {game.game_type === 'Rung' && game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                        <div className="flex items-baseline justify-between gap-2">
+                          <div className="font-bold text-sm text-white">
+                            {GAME_EMOJIS[game.game_type]} {game.game_type}
+                          </div>
+                          <div className="text-[0.7rem] sm:text-xs text-slate-400 font-normal">
+                            {new Date((sessionLatestRound?.game_date || game.game_date) as any).toLocaleDateString()}
+                            {sessionLatestRound?.created_at && ` • ${new Date(sessionLatestRound.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                          </div>
                         </div>
                         {isOngoingRung && (
                           <div className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
@@ -1390,7 +1404,7 @@ gamesForStats.forEach(game => {
                           {/* Premium Expand Button - Darker */}
                           <button
                             onClick={() => toggleExpandGame(game.id)}
-                            className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(29,78,216,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide shadow-[0_4px_8px_rgba(29,78,216,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] transition-all"
                           >
                             {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
                           </button>
@@ -1427,18 +1441,15 @@ gamesForStats.forEach(game => {
                                       const team2Key = round.team2!.slice().sort().join('&')
 
                                       return (
-                                        <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
-                                          <div className="text-xs text-slate-400 mb-2 text-center">
-                                            {new Date(round.created_at).toLocaleDateString()} • {new Date(round.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                          </div>
-                                          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm font-bold w-full">
-                                            <div className={`flex items-center gap-2 ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <div key={round.id} className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between">
+                                          <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-xs font-bold flex-1">
+                                            <div className={`text-right ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
-                                              <span className="text-amber-400">({scores[team1Key] || 0})</span>
+                                              <span className="text-amber-400 ml-2">({scores[team1Key] || 0})</span>
                                             </div>
-                                            <span className="text-amber-400 px-2 text-center">vs</span>
-                                            <div className={`flex items-center gap-2 ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
-                                              <span className="text-amber-400">({scores[team2Key] || 0})</span>
+                                            <span className="text-amber-400 text-center px-2">vs</span>
+                                            <div className={`text-left ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
+                                              <span className="text-amber-400 mr-2">({scores[team2Key] || 0})</span>
                                               <span>{round.team2!.join(' & ')}</span>
                                             </div>
                                           </div>
