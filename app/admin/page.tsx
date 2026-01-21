@@ -168,10 +168,8 @@ export default function AdminDashboard() {
 
   const [editingGame, setEditingGame] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
-  const [editTime, setEditTime] = useState('')
   const [editingSession, setEditingSession] = useState<string | null>(null)
   const [editSessionDate, setEditSessionDate] = useState('')
-  const [editSessionTime, setEditSessionTime] = useState('')
 
   const [expandedSessionKey, setExpandedSessionKey] = useState<string | null>(null)
   const router = useRouter()
@@ -180,7 +178,6 @@ export default function AdminDashboard() {
   const [newGame, setNewGame] = useState<NewGameState>({
     type: '',
     date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().slice(0, 5),
     players: [],
     winners: [],
     runnersUp: [],
@@ -252,7 +249,7 @@ export default function AdminDashboard() {
   const clearPlayers = () => setNewGame({ ...newGame, players: [] })
 
   const addGame = async () => {
-    const timestamp = new Date(`${newGame.date}T${newGame.time}:00`).toISOString()
+    const timestamp = new Date().toISOString()
 
     if (!newGame.type) return
 
@@ -312,7 +309,6 @@ export default function AdminDashboard() {
     setNewGame({
       type: '',
       date: new Date().toISOString().split('T')[0],
-      time: new Date().toTimeString().slice(0, 5),
       players: [],
       winners: [],
       runnersUp: [],
@@ -336,29 +332,32 @@ export default function AdminDashboard() {
   const startEditingGame = (game: Game) => {
     setEditingGame(game.id)
     setEditDate(game.game_date)
-    setEditTime(game.created_at ? new Date(game.created_at).toTimeString().slice(0, 5) : '00:00')
   }
 
   const cancelEditing = () => {
     setEditingGame(null)
     setEditDate('')
-    setEditTime('')
   }
 
   const saveGameDateTime = async (gameId: string) => {
-    const timestamp = new Date(`${editDate}T${editTime}:00`).toISOString()
-    const { error } = await (supabase.from('games').update as any)({ game_date: editDate, created_at: timestamp }).eq(
-      'id',
-      gameId
-    )
+    const { error } = await (supabase
+      .from('games')
+      .update as any)({
+        game_date: editDate
+      })
+      .eq('id', gameId)
 
     if (error) {
-      console.error('Error updating game:', error)
-      alert('Error updating game')
+      console.error('Error updating game date:', error)
+      alert('Error updating game date')
     } else {
       setEditingGame(null)
       setEditDate('')
-      setEditTime('')
+      fetchGames()
+    }
+  } else {
+      setEditingGame(null)
+      setEditDate('')
       fetchGames()
     }
   }
@@ -367,26 +366,30 @@ export default function AdminDashboard() {
     setEditingSession(sessionKey)
     setEditSessionDate(gameDate)
     // use session end time as the editable time (keeps cards consistent with what you see)
-    setEditSessionTime(new Date(endAtIso).toTimeString().slice(0, 5))
   }
 
   const cancelEditingSession = () => {
     setEditingSession(null)
     setEditSessionDate('')
-    setEditSessionTime('')
   }
 
   const saveSessionDateTime = async (session: RungSession) => {
-    // We update EVERY round in the session so grouping stays intact and nothing leaks into other sessions.
-    const base = new Date(`${editSessionDate}T${editSessionTime}:00`).getTime()
-    const roundsAsc = [...session.rounds].sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    )
+    // Update ONLY the session date (keep created_at as-is so round order never changes)
+    const { error } = await (supabase
+      .from('games')
+      .update as any)({ game_date: editSessionDate })
+      .eq('session_id', session.session_id)
 
-    const updates = roundsAsc.map((round, idx) => {
-      const createdAt = new Date(base + idx * 1000).toISOString() // +1s per round keeps ordering stable
-      return (supabase.from('games').update as any)({ game_date: editSessionDate, created_at: createdAt }).eq('id', round.id)
-    })
+    if (error) {
+      console.error('Error updating session date:', error)
+      alert('Error updating session date')
+      return
+    }
+
+    setEditingSession(null)
+    setEditSessionDate('')
+    fetchGames()
+  })
 
     const results = await Promise.all(updates)
     const hasError = results.some(r => r.error)
@@ -398,7 +401,6 @@ export default function AdminDashboard() {
 
     setEditingSession(null)
     setEditSessionDate('')
-    setEditSessionTime('')
     fetchGames()
   }
 
@@ -511,15 +513,6 @@ export default function AdminDashboard() {
                     type="date"
                     value={newGame.date}
                     onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
-                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-xs font-bold">Time</label>
-                  <input
-                    type="time"
-                    value={newGame.time}
-                    onChange={(e) => setNewGame({ ...newGame, time: e.target.value })}
                     className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
@@ -679,12 +672,7 @@ export default function AdminDashboard() {
               Recent Games
             </h2>
 
-            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-              {recentCards.map((card) => {
-                if (card.kind === 'session') {
-                  const s = card.session
-                  const dateLabel = new Date(s.game_date).toLocaleDateString()
-                  const timeLabel = new Date(s.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">)
                   const isExpanded = expandedSessionKey === s.key
 
                   const renderBadge = (p: string) => {
@@ -721,12 +709,6 @@ export default function AdminDashboard() {
                                     onChange={(e) => setEditSessionDate(e.target.value)}
                                     className="p-1 bg-purple-700 rounded text-xs text-white"
                                   />
-                                  <input
-                                    type="time"
-                                    value={editSessionTime}
-                                    onChange={(e) => setEditSessionTime(e.target.value)}
-                                    className="p-1 bg-purple-700 rounded text-xs text-white"
-                                  />
                                   <button
                                     onClick={() => saveSessionDateTime(s)}
                                     className="text-green-400 hover:text-green-300 font-bold text-xs"
@@ -744,7 +726,7 @@ export default function AdminDashboard() {
                                 </>
                               ) : (
                                 <>
-                                  <span>{dateLabel} • {timeLabel}</span>
+                                  <span>{dateLabel} {timeLabel}</span>
                                   <button
                                     onClick={() => startEditingSession(s.key, s.game_date, s.endAt)}
                                     className="text-slate-400 hover:text-slate-200 transition-colors"
@@ -844,7 +826,7 @@ export default function AdminDashboard() {
                 const game = card.game
                 const dateStr = new Date(game.game_date).toLocaleDateString()
                 const timeStr = game.created_at
-                  ? ` • ${new Date(game.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                  ? ` $)}`
                   : ''
 
                 return (
@@ -867,12 +849,6 @@ export default function AdminDashboard() {
                                 type="date"
                                 value={editDate}
                                 onChange={(e) => setEditDate(e.target.value)}
-                                className="p-1 bg-purple-700 rounded text-xs text-white"
-                              />
-                              <input
-                                type="time"
-                                value={editTime}
-                                onChange={(e) => setEditTime(e.target.value)}
                                 className="p-1 bg-purple-700 rounded text-xs text-white"
                               />
                               <button

@@ -1231,8 +1231,7 @@ gamesForStats.forEach(game => {
                             {GAME_EMOJIS[game.game_type]} {game.game_type}
                           </div>
                           <div className="text-[0.7rem] sm:text-xs text-slate-400 font-normal">
-                            {new Date((sessionLatestRound?.game_date || game.game_date) as any).toLocaleDateString()}
-                            {sessionLatestRound?.created_at && ` • ${new Date(sessionLatestRound.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                            {new Date((sessionLatestRound?.game_date || game.game_date) as any).toLocaleDateString()})}`}
                           </div>
                         </div>
                         {isOngoingRung && (
