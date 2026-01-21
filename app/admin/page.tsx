@@ -155,7 +155,7 @@ export default function AdminDashboard() {
   const saveSessionDate = async (s: RungSession) => {
     await Promise.all(
       s.rounds.map(r =>
-        supabase.from('games').update({ game_date: editDate }).eq('id', r.id)
+        (supabase.from('games').update as any)({ game_date: editDate }).eq('id', r.id)
       )
     )
     setEditingSessionKey(null)
