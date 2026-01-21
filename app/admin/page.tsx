@@ -713,7 +713,7 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-3">
                             <div className="font-bold text-base text-white">{GAME_EMOJIS.Rung} Rung</div>
                             <div className="text-xs text-slate-400 flex items-center gap-2 mt-1">
-                              {editingSession === s.sessionKey ? (
+                              {editingSession === s.key ? (
                                 <>
                                   <input
                                     type="date"
@@ -746,7 +746,7 @@ export default function AdminDashboard() {
                                 <>
                                   <span>{dateLabel} • {timeLabel}</span>
                                   <button
-                                    onClick={() => startEditingSession(s.sessionKey, s.game_date, s.endAt)}
+                                    onClick={() => startEditingSession(s.key, s.game_date, s.endAt)}
                                     className="text-slate-400 hover:text-slate-200 transition-colors"
                                     title="Edit session date/time"
                                   >
