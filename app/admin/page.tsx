@@ -215,26 +215,40 @@ export default function AdminDashboard() {
     setEditDate('')
   }
 
-  const saveSessionDate = async (s: RungSession) => {
-    try {
-      if (!editDate) return
+    const saveSessionDate = async (s: RungSession) => {
+      try {
+        if (!editDate) return
 
-      // Update ONLY real DB rows (skip the synthetic "ongoing-*" placeholder)
-      for (const r of s.rounds) {
-        if (typeof r.id === 'string' && r.id.startsWith('ongoing-')) continue
+        const ids = s.rounds
+          .map(r => r.id)
+          .filter((id): id is string => typeof id === 'string' && !id.startsWith('ongoing-'))
 
-        const { error } = await (supabase.from('games').update as any)({ game_date: editDate }).eq('id', r.id)
-        if (error) throw error
+        if (ids.length === 0) {
+          setEditingSessionKey(null)
+          setEditDate('')
+          return
+        }
+
+        // Bulk update: faster + avoids partial updates
+        const { error } = await (supabase
+          .from('games')
+          .update as any)({ game_date: editDate })
+          .in('id', ids)
+
+        if (error) {
+          console.error('Error updating session date:', error)
+          alert(`Failed to update date: ${error.message}`)
+          return
+        }
+
+        setEditingSessionKey(null)
+        setEditDate('')
+        await fetchGames()
+      } catch (e: any) {
+        console.error('Unexpected error updating session date:', e)
+        alert(`Failed to update date: ${e?.message || e}`)
       }
-
-      setEditingSessionKey(null)
-      setEditDate('')
-      await fetchGames()
-    } catch (e) {
-      console.error(e)
-      alert('Failed to update session date (check console)')
     }
-  }
 
   const startEditingGame = (game: Game) => {
     setEditingGameId(game.id)
@@ -657,7 +671,7 @@ export default function AdminDashboard() {
                             {GAME_EMOJIS[game.game_type]} {game.game_type}
                           </div>
                           <span className="text-[0.7rem] text-slate-400 font-normal">
-                            {new Date(game.game_date).toLocaleDateString()}
+                            {new Date(s.gameDate).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
