@@ -671,7 +671,7 @@ export default function AdminDashboard() {
                             {GAME_EMOJIS[game.game_type]} {game.game_type}
                           </div>
                           <span className="text-[0.7rem] text-slate-400 font-normal">
-                            {new Date(s.gameDate).toLocaleDateString()}
+                            {new Date(game.game_date).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
