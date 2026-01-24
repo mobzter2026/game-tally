@@ -125,8 +125,51 @@ export default function AdminDashboard() {
       })
     })
 
-    // Mix with non-Rung games and sort by date
-    return [...grouped, ...nonRungGames].sort((a, b) => 
+    // Group Monopoly and Tai Ti games into sessions (first-to-3)
+    const sessionGames = ['Monopoly', 'Tai Ti']
+    sessionGames.forEach(gameType => {
+      const typeGames = allGames.filter(g => g.game_type === gameType && g.winners && g.winners.length > 0)
+      
+      const gamesByDate: Record<string, Game[]> = {}
+      typeGames.forEach(game => {
+        if (!gamesByDate[game.game_date]) {
+          gamesByDate[game.game_date] = []
+        }
+        gamesByDate[game.game_date].push(game)
+      })
+
+      Object.keys(gamesByDate).sort().reverse().forEach(date => {
+        const gamesOnDate = gamesByDate[date].sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+
+        let sessionStart = 0
+        const playerWins: Record<string, number> = {}
+
+        gamesOnDate.forEach((game, idx) => {
+          game.winners?.forEach(winner => {
+            if (!playerWins[winner]) playerWins[winner] = 0
+            playerWins[winner]++
+          })
+
+          const sessionComplete = Object.values(playerWins).some(wins => wins >= 3)
+
+          if (sessionComplete || idx === gamesOnDate.length - 1) {
+            grouped.push(gamesOnDate[sessionStart])
+            sessionStart = idx + 1
+            Object.keys(playerWins).forEach(key => playerWins[key] = 0)
+          }
+        })
+      })
+    })
+
+    // Add other games (Blackjack, Shithead)
+    const otherGames = allGames.filter(g => 
+      g.game_type !== 'Rung' && g.game_type !== 'Monopoly' && g.game_type !== 'Tai Ti'
+    )
+
+    // Mix with other games and sort by date
+    return [...grouped, ...otherGames].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     ).slice(0, 20)
   }
@@ -192,6 +235,22 @@ export default function AdminDashboard() {
     } else {
       if (newGame.players.length === 0) {
         alert('Please select at least one player')
+        return
+      }
+
+      // Check for duplicate players across categories
+      const allCategorized = [
+        ...newGame.winners,
+        ...newGame.runnersUp,
+        ...newGame.survivors,
+        ...newGame.losers
+      ]
+      const duplicates = allCategorized.filter((player, index) => 
+        allCategorized.indexOf(player) !== index
+      )
+      
+      if (duplicates.length > 0) {
+        alert(`Player(s) ${duplicates.join(', ')} appear in multiple categories. Each player should only be in one category.`)
         return
       }
 
