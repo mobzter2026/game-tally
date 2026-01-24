@@ -618,9 +618,55 @@ export default function PublicView() {
       })
     })
 
-    // Add non-Rung games
+    // Group Monopoly and Tai Ti games into sessions (first-to-3)
+    const sessionGames = ['Monopoly', 'Tai Ti']
+    sessionGames.forEach(gameType => {
+      const typeGames = allGames.filter(g => g.game_type === gameType && g.winners && g.winners.length > 0)
+      
+      // Group by date
+      const gamesByDate: Record<string, Game[]> = {}
+      typeGames.forEach(game => {
+        if (!gamesByDate[game.game_date]) {
+          gamesByDate[game.game_date] = []
+        }
+        gamesByDate[game.game_date].push(game)
+      })
+
+      // For each date, detect sessions (session ends when player hits 3 wins)
+      Object.keys(gamesByDate).sort().reverse().forEach(date => {
+        const gamesOnDate = gamesByDate[date].sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+
+        let sessionStart = 0
+        const playerWins: Record<string, number> = {}
+
+        gamesOnDate.forEach((game, idx) => {
+          // Track wins for each player
+          game.winners?.forEach(winner => {
+            if (!playerWins[winner]) playerWins[winner] = 0
+            playerWins[winner]++
+          })
+
+          // Check if any player reached 3 wins (session complete)
+          const sessionComplete = Object.values(playerWins).some(wins => wins >= 3)
+
+          // If session complete OR last game, add this session
+          if (sessionComplete || idx === gamesOnDate.length - 1) {
+            // Add the first game of this session as the representative
+            grouped.push(gamesOnDate[sessionStart])
+            
+            // Reset for next session
+            sessionStart = idx + 1
+            Object.keys(playerWins).forEach(key => playerWins[key] = 0)
+          }
+        })
+      })
+    })
+
+    // Add other non-session games (Blackjack, Shithead)
     allGames.forEach(game => {
-      if (game.game_type !== 'Rung') {
+      if (game.game_type !== 'Rung' && game.game_type !== 'Monopoly' && game.game_type !== 'Tai Ti') {
         grouped.push(game)
       }
     })
