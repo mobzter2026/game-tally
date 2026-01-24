@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Game } from '@/lib/types'
 import Button from '@/Components/Button'
-import { buildRungSessions, formatRoundLine, teamKey } from '@/lib/rungSessions'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
 const MIN_GAMES_FOR_RANKING = 0
@@ -53,6 +52,7 @@ export default function PublicView() {
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const [currentQuote, setCurrentQuote] = useState(0)
   const [expandedGame, setExpandedGame] = useState<string | null>(null)
+  const [rungRounds, setRungRounds] = useState<Record<string, any[]>>({})
   const supabase = createClient()
 
   useEffect(() => {
@@ -91,8 +91,6 @@ export default function PublicView() {
     }
     setLoading(false)
   }
-
-
 
   const checkPerfectGameAndStreak = (gamesData: Game[]) => {
     const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
@@ -180,9 +178,6 @@ export default function PublicView() {
   }
 
   const filteredGames = getFilteredGames()
-
-  const rungSessions = buildRungSessions(filteredGames)
-
 
   const getPlayerStatsForGame = (gameType?: string) => {
     const stats: any = {}
@@ -299,177 +294,17 @@ export default function PublicView() {
       }
     })
 
-    // Get all games (including Rung session outcomes)
+    // Get all games (including Rung leaderboard entries)
     let allGames = filteredGames
     if (selectedGameType !== 'All Games') {
       allGames = allGames.filter(g => g.game_type === selectedGameType)
     }
 
-    // Build pseudo "final" results for each Rung first-to-5 session (mixed teams supported)
-    const rungRounds = allGames
-      .filter(g => g.game_type === 'Rung' && g.winning_team !== null && g.team1 && g.team2 && g.created_at)
-      .slice()
-      .sort((a, b) => new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime())
-
-    const roundsByDate: Record<string, Game[]> = {}
-    rungRounds.forEach(r => {
-      const d = r.game_date
-      if (!roundsByDate[d]) roundsByDate[d] = []
-      roundsByDate[d].push(r)
-    })
-
-    const rungSessionResults: Game[] = []
-    const teamKey = (t: string[]) => t.slice().sort().join('&')
-
-    Object.keys(roundsByDate).forEach(date => {
-      const rounds = roundsByDate[date]
-
-      let sessionIndex = 0
-      let current: Game[] = []
-      let wins: Record<string, number> = {}
-
-      const finishSession = () => {
-        if (current.length === 0) return
-
-        const roundsAsc = current.slice().sort((a, b) => new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime())
-        const allTeams = new Set<string>()
-        const teamWins: Record<string, number> = {}
-
-        roundsAsc.forEach(round => {
-          const t1 = teamKey(round.team1!)
-          const t2 = teamKey(round.team2!)
-          allTeams.add(t1)
-          allTeams.add(t2)
-          if (!teamWins[t1]) teamWins[t1] = 0
-          if (!teamWins[t2]) teamWins[t2] = 0
-          if (round.winning_team === 1) teamWins[t1]++
-          else if (round.winning_team === 2) teamWins[t2]++
-        })
-
-        const sessionTeams = Array.from(allTeams)
-        const maxWins = sessionTeams.length ? Math.max(...sessionTeams.map(t => teamWins[t] || 0)) : 0
-        const minWins = sessionTeams.length ? Math.min(...sessionTeams.map(t => teamWins[t] || 0)) : 0
-
-        const winnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) >= 5)
-        const nonWinnersTeams = sessionTeams.filter(t => !winnersTeams.includes(t))
-
-        let runnersTeams: string[] = []
-        let survivorsTeams: string[] = []
-        let losersTeams: string[] = []
-
-        if (winnersTeams.length > 0) {
-          const bestNonWinner = nonWinnersTeams.length ? Math.max(...nonWinnersTeams.map(t => teamWins[t] || 0)) : -1
-          const minNonWinner = nonWinnersTeams.length ? Math.min(...nonWinnersTeams.map(t => teamWins[t] || 0)) : -1
-
-          // If everyone remaining is tied, there is no runner-up — they are all losers.
-          if (bestNonWinner === minNonWinner) {
-            losersTeams = nonWinnersTeams
-          } else {
-            runnersTeams = nonWinnersTeams.filter(t => (teamWins[t] || 0) === bestNonWinner)
-            losersTeams = nonWinnersTeams.filter(t => (teamWins[t] || 0) === minNonWinner)
-            survivorsTeams = nonWinnersTeams.filter(t => !runnersTeams.includes(t) && !losersTeams.includes(t))
-          }
-        } else {
-          // Ongoing sessions (used for recent column): top score = runners, bottom score = losers, middle = survivors
-          runnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) === maxWins)
-          losersTeams = sessionTeams.filter(t => (teamWins[t] || 0) === minWins)
-
-          // everyone tied => all losers (your rule)
-          if (maxWins === minWins) {
-            losersTeams = sessionTeams
-            runnersTeams = []
-            survivorsTeams = []
-          } else {
-            survivorsTeams = sessionTeams.filter(t => !runnersTeams.includes(t) && !losersTeams.includes(t))
-          }
-        }
-
-        // Best achievement per player across all teams they played in this session
-        const playerTier: Record<string, 'W' | 'R' | 'S' | 'L'> = {}
-
-        
-        // Player-centric "best score" across any team they played in this session (teams can be mixed)
-        const playerBestScore: Record<string, number> = {}
-        sessionTeams.forEach(t => {
-          const score = teamWins[t] || 0
-          t.split('&').forEach(p => {
-            if (playerBestScore[p] === undefined || score > playerBestScore[p]) playerBestScore[p] = score
-          })
-        })
-
-const apply = (teamStr: string, tier: 'W' | 'R' | 'S' | 'L') => {
-          teamStr.split('&').forEach(p => {
-            const existing = playerTier[p]
-            const rank = (x: any) => (x === 'W' ? 1 : x === 'R' ? 2 : x === 'S' ? 3 : 4)
-            if (!existing || rank(tier) < rank(existing)) playerTier[p] = tier
-          })
-        }
-
-        winnersTeams.forEach(t => apply(t, 'W'))
-        runnersTeams.forEach(t => apply(t, 'R'))
-        survivorsTeams.forEach(t => apply(t, 'S'))
-        losersTeams.forEach(t => apply(t, 'L'))
-
-        const players_in_game = Object.keys(playerTier)
-        const winners = Object.keys(playerTier).filter(p => playerTier[p] === 'W')
-        const runners_up = Object.keys(playerTier).filter(p => playerTier[p] === 'R')
-        const survivors = Object.keys(playerTier).filter(p => playerTier[p] === 'S')
-        const losers = Object.keys(playerTier).filter(p => playerTier[p] === 'L')
-
-        // If we have winners and ALL remaining players share the same score, there is NO runner-up: they are all losers.
-        if (winners.length > 0) {
-          const remaining = players_in_game.filter(p => !winners.includes(p))
-          const allSame = remaining.length > 0 &&
-            remaining.every(p => (playerBestScore[p] ?? 0) === (playerBestScore[remaining[0]] ?? 0))
-          if (allSame) {
-            remaining.forEach(p => { playerTier[p] = 'L' })
-          }
-        }
-
-        const winnersFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'W')
-        const runners_upFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'R')
-        const survivorsFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'S')
-        const losersFinal = Object.keys(playerTier).filter(p => playerTier[p] === 'L')
-
-        const last = roundsAsc[roundsAsc.length - 1]
-        rungSessionResults.push({
-          ...(last as any),
-          id: `rung-session-${date}-${sessionIndex}`,
-          game_type: 'Rung',
-          players_in_game,
-          winners: winnersFinal.length ? winnersFinal : null,
-          runners_up: runners_upFinal.length ? runners_upFinal : null,
-          survivors: survivorsFinal.length ? survivorsFinal : null,
-          losers: losersFinal.length ? losersFinal : null,
-        } as any)
-
-        sessionIndex++
-        current = []
-        wins = {}
+    allGames.forEach(game => {
+      // For Rung, only count final leaderboard entries (those with winners array)
+      if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+        return // Skip individual round entries
       }
-
-      for (const round of rounds) {
-        current.push(round)
-        const t1 = teamKey(round.team1!)
-        const t2 = teamKey(round.team2!)
-        if (!wins[t1]) wins[t1] = 0
-        if (!wins[t2]) wins[t2] = 0
-        if (round.winning_team === 1) wins[t1]++
-        else if (round.winning_team === 2) wins[t2]++
-
-        if (Object.values(wins).some(v => v >= 5)) {
-          finishSession()
-        }
-      }
-
-      finishSession()
-    })
-
-    const gamesForStats = [
-      ...allGames.filter(g => g.game_type !== 'Rung'),
-      ...rungSessionResults
-    ].sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())
-gamesForStats.forEach(game => {
 
       if (game.players_in_game) {
         game.players_in_game.forEach(p => {
@@ -535,8 +370,13 @@ gamesForStats.forEach(game => {
       let currentStreak = 0
       let bestStreak = 0
 
-      const reversedGames = gamesForStats.slice().reverse()
+      const reversedGames = allGames.slice().reverse()
       reversedGames.forEach(game => {
+        // Skip Rung rounds that aren't final results
+        if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+          return
+        }
+
         if (game.winners?.includes(player)) {
           currentStreak++
           if (currentStreak > bestStreak) {
@@ -720,88 +560,150 @@ gamesForStats.forEach(game => {
   const rungTeamStats = getRungTeamStats()
   
   // Group Rung games by session (detect when 5 wins reached)
-    // Group games for Recent Games tab (Rung grouped by rung_session_id)
   const getGroupedRecentGames = () => {
     const allGames = activeTab === 'rung'
       ? filteredGames.filter(g => g.game_type === 'Rung')
       : filteredGames
 
-    // For non-recent tab, return as-is
+    // For non-Rung games or non-recent tab, return as is
     if (activeTab !== 'recent') {
       return allGames.slice(0, 20)
     }
 
-    // Build Rung sessions (first-to-5) PER DATE, using chronological rounds.
-    // This works even when teams mix between rounds.
-    const rungRounds = allGames
-      .filter(g => g.game_type === 'Rung' && g.winning_team !== null && g.team1 && g.team2)
-      .slice()
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-
-    const roundsByDate: Record<string, Game[]> = {}
-    rungRounds.forEach(r => {
-      const d = r.game_date
-      if (!roundsByDate[d]) roundsByDate[d] = []
-      roundsByDate[d].push(r)
+    // Group Rung games into sessions
+    const grouped: Game[] = []
+    const rungGames = allGames.filter(g => g.game_type === 'Rung' && g.team1 && g.team2)
+    
+    // Group by date first
+    const gamesByDate: Record<string, Game[]> = {}
+    rungGames.forEach(game => {
+      if (!gamesByDate[game.game_date]) {
+        gamesByDate[game.game_date] = []
+      }
+      gamesByDate[game.game_date].push(game)
     })
 
-    const sessionCards: Game[] = []
+    // For each date, detect sessions (session ends when team hits 5 wins)
+    Object.keys(gamesByDate).sort().reverse().forEach(date => {
+      const gamesOnDate = gamesByDate[date].sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
 
-    Object.keys(roundsByDate).sort().reverse().forEach(date => {
-      const rounds = roundsByDate[date]
+      let sessionStart = 0
+      const teamWins: Record<string, number> = {}
 
-      let sessionIndex = 0
-      let current: Game[] = []
-      let scores: Record<string, number> = {}
+      gamesOnDate.forEach((game, idx) => {
+        const team1Key = game.team1!.slice().sort().join('&')
+        const team2Key = game.team2!.slice().sort().join('&')
 
-      const finishSession = () => {
-        if (current.length === 0) return
-        const last = current[current.length - 1]
-        const syntheticId = `rung-${date}-${sessionIndex}`
-        // We create a synthetic "Game" row representing the whole session.
-        const card: any = { ...last, id: syntheticId }
-        card.__rung_session_rounds = current
-        sessionCards.push(card as Game)
-        sessionIndex++
-        current = []
-        scores = {}
-      }
+        if (!teamWins[team1Key]) teamWins[team1Key] = 0
+        if (!teamWins[team2Key]) teamWins[team2Key] = 0
 
-      const teamKey = (team: string[]) => team.slice().sort().join('&')
+        // Increment win for winning team BEFORE checking completion
+        if (game.winning_team === 1) teamWins[team1Key]++
+        else if (game.winning_team === 2) teamWins[team2Key]++
 
-      for (const round of rounds) {
-        current.push(round)
-        const t1 = teamKey(round.team1!)
-        const t2 = teamKey(round.team2!)
-        if (!scores[t1]) scores[t1] = 0
-        if (!scores[t2]) scores[t2] = 0
-        if (round.winning_team === 1) scores[t1]++
-        else if (round.winning_team === 2) scores[t2]++
+        // Check if any team reached 5 wins (session complete)
+        const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
 
-        const sessionComplete = Object.values(scores).some(v => v >= 5)
-        if (sessionComplete) {
-          finishSession()
+        // If session complete OR last game, add this session
+        if (sessionComplete || idx === gamesOnDate.length - 1) {
+          // Add the first game of this session as the representative
+          grouped.push(gamesOnDate[sessionStart])
+          
+          // Reset for next session
+          sessionStart = idx + 1
+          Object.keys(teamWins).forEach(key => teamWins[key] = 0)
         }
-      }
-
-      // leftover is ongoing session
-      finishSession()
+      })
     })
 
-    // Include non-Rung games normally
-    const nonRung = allGames.filter(g => g.game_type !== 'Rung')
+    // Add non-Rung games
+    allGames.forEach(game => {
+      if (game.game_type !== 'Rung') {
+        grouped.push(game)
+      }
+    })
 
-    return [...sessionCards, ...nonRung]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 20)
+    // Sort by date descending
+    return grouped.sort((a, b) => {
+      const dateCompare = new Date(b.game_date).getTime() - new Date(a.game_date).getTime()
+      if (dateCompare !== 0) return dateCompare
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }).slice(0, 20)
   }
+
   const recentGames = getGroupedRecentGames()
 
   const worstShitheadPlayer = getWorstShitheadPlayer()
 
+  const fetchRungRounds = async (gameDate: string, team1: string[], team2: string[], gameId: string) => {
+    // Fetch ALL Rung games from this date
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('game_type', 'Rung')
+      .eq('game_date', gameDate)
+      .not('winning_team', 'is', null)
+      .order('created_at', { ascending: true })
 
-  const toggleExpandGame = (gameId: string) => {
-    setExpandedGame(prev => (prev === gameId ? null : gameId))
+    if (data) {
+      const allRounds = data as Game[]
+      
+      // Find which session the clicked game belongs to
+      const sessions: Game[][] = []
+      let currentSession: Game[] = []
+      const teamWins: Record<string, number> = {}
+      let targetSessionIndex = -1
+
+      allRounds.forEach((round, idx) => {
+        const team1Key = round.team1!.slice().sort().join('&')
+        const team2Key = round.team2!.slice().sort().join('&')
+
+        if (!teamWins[team1Key]) teamWins[team1Key] = 0
+        if (!teamWins[team2Key]) teamWins[team2Key] = 0
+
+        currentSession.push(round)
+
+        // Check if this is the game we're looking for
+        if (round.id === gameId) {
+          targetSessionIndex = sessions.length
+        }
+
+        if (round.winning_team === 1) teamWins[team1Key]++
+        else if (round.winning_team === 2) teamWins[team2Key]++
+
+        // Check if session complete (someone hit 5 wins)
+        const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
+
+        if (sessionComplete || idx === allRounds.length - 1) {
+          sessions.push([...currentSession])
+          // If we haven't found the target yet, it might be in this session
+          if (targetSessionIndex === -1 && currentSession.some(g => g.id === gameId)) {
+            targetSessionIndex = sessions.length - 1
+          }
+          currentSession = []
+          Object.keys(teamWins).forEach(key => teamWins[key] = 0)
+        }
+      })
+
+      // Return the session that contains our game, or the last session if not found
+      return sessions[targetSessionIndex] || sessions[sessions.length - 1] || []
+    }
+    return []
+  }
+
+  const toggleExpandGame = async (gameId: string, gameDate: string, team1: string[], team2: string[]) => {
+    if (expandedGame === gameId) {
+      setExpandedGame(null)
+    } else {
+      setExpandedGame(gameId)
+      // Fetch rounds if not already cached
+      if (!rungRounds[gameId]) {
+        const rounds = await fetchRungRounds(gameDate, team1, team2, gameId)
+        setRungRounds(prev => ({ ...prev, [gameId]: rounds }))
+      }
+    }
   }
 
   const calculateRungWinners = (gameDate: string, team1: string[], team2: string[]) => {
@@ -1197,46 +1099,38 @@ gamesForStats.forEach(game => {
               ) : (
                 recentGames.map(game => {
                   // Check if this is an ongoing Rung game
-                  // Check if this is an ongoing Rung session card
-                  const sessionRounds = ((game as any).__rung_session_rounds as Game[] | undefined) || []
-                  const gameRounds = sessionRounds
-
-                  // Use the latest round timestamp for the session header (so date/time updates as rounds are edited/added)
-                  const sessionLatestRound = (game.game_type === 'Rung' && gameRounds.length > 0)
-                    ? gameRounds.reduce((latest, r) => {
-                        const tLatest = new Date((latest as any).created_at || (latest as any).game_date)
-                        const tCur = new Date((r as any).created_at || (r as any).game_date)
-                        return tCur.getTime() > tLatest.getTime() ? r : latest
-                      }, gameRounds[0])
-                    : null
-
-                  // Session is ongoing if no team has reached 5 yet
                   let isOngoingRung = false
-                  if (game.game_type === 'Rung' && game.team1 && game.team2) {
-                    const teamKey = (t: string[]) => t.slice().sort().join('&')
-                    const wins: Record<string, number> = {}
-                    gameRounds.forEach(r => {
-                      const t1 = teamKey(r.team1!)
-                      const t2 = teamKey(r.team2!)
-                      if (!wins[t1]) wins[t1] = 0
-                      if (!wins[t2]) wins[t2] = 0
-                      if (r.winning_team === 1) wins[t1]++
-                      else if (r.winning_team === 2) wins[t2]++
+                  if (game.game_type === 'Rung' && game.team1 && game.team2 && (!game.winners || game.winners.length === 0)) {
+                    // Check if any team has reached 5 wins
+                    const sessionRounds = games.filter(g => 
+                      g.game_type === 'Rung' && 
+                      g.game_date === game.game_date &&
+                      g.winning_team !== null &&
+                      g.team1 && g.team2
+                    )
+
+                    const teamWins: Record<string, number> = {}
+                    sessionRounds.forEach(round => {
+                      const team1Key = round.team1!.slice().sort().join('&')
+                      const team2Key = round.team2!.slice().sort().join('&')
+                      if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                      if (!teamWins[team2Key]) teamWins[team2Key] = 0
+                      if (round.winning_team === 1) teamWins[team1Key]++
+                      else if (round.winning_team === 2) teamWins[team2Key]++
                     })
-                    const reachedFive = Object.values(wins).some(v => v >= 5)
-                    isOngoingRung = !reachedFive
+
+                    // Only ongoing if no team has reached 5 wins
+                    isOngoingRung = !Object.values(teamWins).some(wins => wins >= 5)
                   }
+                  
+                  const gameRounds = rungRounds[game.id] || []
                   
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full ${isOngoingRung ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
                       <div className="mb-3">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <div className="font-bold text-sm text-white">
-                            {GAME_EMOJIS[game.game_type]} {game.game_type}
-                          </div>
-                          <div className="text-[0.7rem] sm:text-xs text-slate-400 font-normal">
-                            {new Date((sessionLatestRound?.game_date || game.game_date) as any).toLocaleDateString()}
-                          </div>
+                        <div className="font-bold text-base text-slate-300 mb-1">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
+                          {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                         {isOngoingRung && (
                           <div className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 text-sm font-black tracking-wider drop-shadow-[0_2px_8px_rgba(251,191,36,0.8)]">
@@ -1249,210 +1143,215 @@ gamesForStats.forEach(game => {
                         <>
                           {/* Show first-to-5 session standings with ALL teams in THIS session */}
                           {(() => {
-                            // Compute session standings from the rounds that belong to THIS session
-                            const roundsAsc = gameRounds.slice().sort((a, b) =>
+                            // Get all rounds for this DATE
+                            const allRoundsOnDate = games.filter(g => 
+                              g.game_type === 'Rung' && 
+                              g.game_date === game.game_date &&
+                              g.winning_team !== null &&
+                              g.team1 && g.team2
+                            ).sort((a, b) => 
                               new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                             )
 
+                            // Find which session this game belongs to
+                            let sessionRounds: Game[] = []
+                            let currentSessionStart = 0
+                            let foundGameSession = false
                             const teamWins: Record<string, number> = {}
+
+                            for (let i = 0; i < allRoundsOnDate.length; i++) {
+                              const round = allRoundsOnDate[i]
+                              const team1Key = round.team1!.slice().sort().join('&')
+                              const team2Key = round.team2!.slice().sort().join('&')
+
+                              if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                              if (!teamWins[team2Key]) teamWins[team2Key] = 0
+
+                              if (round.winning_team === 1) teamWins[team1Key]++
+                              else if (round.winning_team === 2) teamWins[team2Key]++
+
+                              // Mark if we found our target game in this session
+                              if (round.id === game.id) {
+                                foundGameSession = true
+                              }
+
+                              // Check if session complete (someone hit 5 wins)
+                              const sessionComplete = Object.values(teamWins).some(wins => wins >= 5)
+                              
+                              // If session complete OR last game
+                              if (sessionComplete || i === allRoundsOnDate.length - 1) {
+                                if (foundGameSession) {
+                                  // This is the session containing our game
+                                  sessionRounds = allRoundsOnDate.slice(currentSessionStart, i + 1)
+                                  break
+                                }
+                                // Session ended, reset for next session
+                                currentSessionStart = i + 1
+                                foundGameSession = false
+                                Object.keys(teamWins).forEach(key => teamWins[key] = 0)
+                              }
+                            }
+
+                            // If no session found (ongoing), use all rounds from last session start
+                            if (sessionRounds.length === 0) {
+                              sessionRounds = allRoundsOnDate.slice(currentSessionStart)
+                            }
+
+                            // Calculate standings for THIS session - track team pairings
+                            const sessionTeamWins: Record<string, number> = {}
+                            const playerBestTeam: Record<string, { team: string, wins: number }> = {}
                             const allTeams = new Set<string>()
-                            const teamKey = (t: string[]) => t.slice().sort().join('&')
 
-                            roundsAsc.forEach(round => {
-                              const t1 = teamKey(round.team1!)
-                              const t2 = teamKey(round.team2!)
-                              allTeams.add(t1)
-                              allTeams.add(t2)
-                              if (!teamWins[t1]) teamWins[t1] = 0
-                              if (!teamWins[t2]) teamWins[t2] = 0
-                              if (round.winning_team === 1) teamWins[t1]++
-                              else if (round.winning_team === 2) teamWins[t2]++
+                            sessionRounds.forEach(round => {
+                              const team1Key = round.team1!.slice().sort().join('&')
+                              const team2Key = round.team2!.slice().sort().join('&')
+                              
+                              allTeams.add(team1Key)
+                              allTeams.add(team2Key)
+                              
+                              if (!sessionTeamWins[team1Key]) sessionTeamWins[team1Key] = 0
+                              if (!sessionTeamWins[team2Key]) sessionTeamWins[team2Key] = 0
+                              
+                              if (round.winning_team === 1) sessionTeamWins[team1Key]++
+                              else if (round.winning_team === 2) sessionTeamWins[team2Key]++
                             })
 
-                            const sessionTeams = Array.from(allTeams)
-                            // If no rounds yet (brand new ongoing session), still show players from the card's players_in_game
-                            if (sessionTeams.length === 0) {
-                              const players = game.players_in_game || []
-                              return (
-                                <div className="flex gap-1 flex-wrap mb-3">
-                                  {players.map(p => (
-                                    <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                                      {p}
-                                    </span>
-                                  ))}
-                                </div>
-                              )
-                            }
-
-                            // Build player-centric standings (because teams can be mixed across rounds)
-
-                            // If no rounds yet (brand new session), still show players from the card's players_in_game
-                            if (sessionTeams.length === 0) {
-                              const players = game.players_in_game || []
-                              return (
-                                <div className="flex gap-1 flex-wrap mb-3">
-                                  {players.map(p => (
-                                    <span
-                                      key={p}
-                                      className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all"
-                                    >
-                                      {p}
-                                    </span>
-                                  ))}
-                                </div>
-                              )
-                            }
-
+                            // For each player, find their best-performing team
                             const allPlayers = new Set<string>()
-                            sessionTeams.forEach(t => t.split('&').forEach(p => allPlayers.add(p)))
-
-                            // Who actually "won" the session: players on any team that reached 5 first-to-5.
-                            // (If multiple teams are >=5 due to edits, treat them all as winners.)
-                            const winnersTeams = sessionTeams.filter(t => (teamWins[t] || 0) >= 5)
-                            const winnersPlayers = new Set<string>()
-                            winnersTeams.forEach(t => t.split('&').forEach(p => winnersPlayers.add(p)))
-
-                            // Best score each player achieved across ANY team they played in this session
-                            const playerBestScore: Record<string, number> = {}
-                            allPlayers.forEach(p => (playerBestScore[p] = 0))
-                            sessionTeams.forEach(teamKeyStr => {
-                              const score = teamWins[teamKeyStr] || 0
-                              teamKeyStr.split('&').forEach(p => {
-                                if (score > (playerBestScore[p] || 0)) playerBestScore[p] = score
-                              })
+                            allTeams.forEach(teamKey => {
+                              teamKey.split('&').forEach(p => allPlayers.add(p))
                             })
 
-                            const nonWinnerPlayers = Array.from(allPlayers).filter(p => !winnersPlayers.has(p))
-                            const hasWinners = winnersPlayers.size > 0
+                            allPlayers.forEach(player => {
+                              let bestWins = -1
+                              let bestTeam = ''
+                              
+                              allTeams.forEach(teamKey => {
+                                if (teamKey.split('&').includes(player)) {
+                                  const wins = sessionTeamWins[teamKey] || 0
+                                  if (wins > bestWins) {
+                                    bestWins = wins
+                                    bestTeam = teamKey
+                                  }
+                                }
+                              })
+                              
+                              if (bestTeam) {
+                                playerBestTeam[player] = { team: bestTeam, wins: bestWins }
+                              }
+                            })
 
+                            // Sort players by their best team's performance
+                            const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
+                              (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
+                            )
+
+                            // Categorize players based on their best team performance
+                            const maxWins = Math.max(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
+                            const minWins = Math.min(...sortedPlayers.map(p => playerBestTeam[p]?.wins || 0))
+                            
+                            console.log('Player best teams:', playerBestTeam)
+                            console.log('Max wins:', maxWins, 'Min wins:', minWins)
+                            
+                            // Winners: players who reached 5 wins
+                            const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
+                            
+                            console.log('Winners:', winners)
+                            
+                            // For remaining players (non-winners), categorize by score
+                            const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+                            
                             let runners: string[] = []
                             let survivors: string[] = []
                             let losers: string[] = []
-
-                            if (hasWinners) {
-                              if (nonWinnerPlayers.length > 0) {
-                                const scores = nonWinnerPlayers.map(p => playerBestScore[p] ?? 0)
-
-                                // Strong tie check: if ALL remaining players share the same score → NO runner-up (all losers)
-                                const allSame = nonWinnerPlayers.length > 0 &&
-                                  nonWinnerPlayers.every(p => (playerBestScore[p] ?? 0) === (playerBestScore[nonWinnerPlayers[0]] ?? 0))
-
-                                if (allSame) {
-                                  runners = []
-                                  survivors = []
-                                  losers = nonWinnerPlayers
-                                } else {
-                                  const maxScore = Math.max(...scores)
-                                  const minScore = Math.min(...scores)
-
-                                  runners = nonWinnerPlayers.filter(p => (playerBestScore[p] ?? 0) === maxScore)
-                                  losers = nonWinnerPlayers.filter(p => (playerBestScore[p] ?? 0) === minScore)
-                                  survivors = nonWinnerPlayers.filter(p => !runners.includes(p) && !losers.includes(p))
-                                }
-                              }
-                            } else {
-                              // Ongoing: top score = runners (blue), bottom score = losers (red), middle = survivors (grey)
-                              const playersArr = Array.from(allPlayers)
-                              const scores = playersArr.map(p => playerBestScore[p] || 0)
-                              const maxScore = Math.max(...scores)
-                              const minScore = Math.min(...scores)
-
-                              if (maxScore === minScore) {
-                                // Everyone tied -> treat all as losers (your rule)
+                            
+                            if (nonWinners.length > 0) {
+                              const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
+                              const maxNonWinnerScore = Math.max(...nonWinnerScores)
+                              const minNonWinnerScore = Math.min(...nonWinnerScores)
+                              
+                              // Runners-up: non-winners with highest score
+                              runners = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
+                              
+                              // If runners-up score equals the minimum score, they're all losers instead
+                              if (maxNonWinnerScore === minNonWinnerScore) {
+                                losers = runners
                                 runners = []
-                                survivors = []
-                                losers = playersArr
                               } else {
-                                runners = playersArr.filter(p => (playerBestScore[p] || 0) === maxScore)
-                                losers = playersArr.filter(p => (playerBestScore[p] || 0) === minScore)
-                                survivors = playersArr.filter(p => !runners.includes(p) && !losers.includes(p))
+                                // Survivors: middle tier
+                                survivors = nonWinners.filter(p => 
+                                  !runners.includes(p) && 
+                                  (playerBestTeam[p]?.wins || 0) > minNonWinnerScore
+                                )
+                                
+                                // Losers: lowest score
+                                losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
                               }
                             }
+                            
+                            console.log('Runners:', runners)
+                            console.log('Survivors:', survivors)
+                            console.log('Losers:', losers)
 
-                            type Badge = { player: string, tier: number, cls: string }
-                            const badges: Badge[] = []
-
-                            const pushTier = (arr: string[], tier: number, cls: string) => {
-                              arr.forEach(player => badges.push({ player, tier, cls }))
+                            const renderPlayerBadges = (players: string[], colorClass: string) => {
+                              return players.map(p => (
+                                <span key={p} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                  {p}
+                                </span>
+                              ))
                             }
-
-                            // Tier order = best achievement first
-                            pushTier(Array.from(winnersPlayers), 1, 'bg-green-600')
-                            pushTier(runners, 2, 'bg-blue-600')
-                            pushTier(survivors, 3, 'bg-slate-600')
-                            pushTier(losers, 4, 'bg-red-600')
-
-                            // De-dupe (winner overrides any other tier, etc.)
-                            const bestByPlayer: Record<string, Badge> = {}
-                            badges.forEach(b => {
-                              const existing = bestByPlayer[b.player]
-                              if (!existing || b.tier < existing.tier) bestByPlayer[b.player] = b
-                            })
-
-                            const finalBadges = Object.values(bestByPlayer).sort(
-                              (a, b) => a.tier - b.tier || a.player.localeCompare(b.player)
-                            )
-
+                            
                             return (
                               <div className="flex gap-1 flex-wrap mb-3">
-                                {finalBadges.map(b => (
-                                  <span key={b.player} className={`${b.cls} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
-                                    {b.player}
-                                  </span>
-                                ))}
+                                {renderPlayerBadges(winners, 'bg-green-600')}
+                                {renderPlayerBadges(runners, 'bg-blue-600')}
+                                {renderPlayerBadges(survivors, 'bg-slate-600')}
+                                {renderPlayerBadges(losers, 'bg-red-600')}
                               </div>
                             )
                           })()}
 
                           {/* Premium Expand Button - Darker */}
                           <button
-                            onClick={() => toggleExpandGame(game.id)}
-                            className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide shadow-[0_4px_8px_rgba(29,78,216,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] transition-all"
+                            onClick={() => toggleExpandGame(game.id, game.game_date, game.team1!, game.team2!)}
+                            className="w-full mt-3 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold tracking-wide shadow-[0_4px_12px_rgba(29,78,216,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                           >
                             {expandedGame === game.id ? '▲ COLLAPSE ROUNDS' : '▼ EXPAND ROUNDS'}
                           </button>
 
                           {/* Expandable round history - Chronological order */}
                           {expandedGame === game.id && (
-                            <div className="mt-3 bg-slate-900/50 p-2 rounded-lg">
-                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Most Recent First)</h4>
+                            <div className="mt-3 bg-slate-900/50 p-4 rounded-lg">
+                              <h4 className="text-sm font-bold text-slate-300 mb-3 text-center">All Matches (Chronological)</h4>
                               {gameRounds.length === 0 ? (
                                 <div className="text-xs text-slate-500 text-center">Loading rounds...</div>
                               ) : (
                                 <div className="space-y-2">
                                   {(() => {
-                                    const roundsAsc = gameRounds.slice().sort((a, b) =>
-                                      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                                    )
-                                    if (roundsAsc.length === 0) return null
+                                    const teamScores: Record<string, number> = {}
 
-                                    const scores: Record<string, number> = {}
-                                    const snapshots = roundsAsc.map(round => {
-                                      const t1 = round.team1!.slice().sort().join('&')
-                                      const t2 = round.team2!.slice().sort().join('&')
-                                      if (!scores[t1]) scores[t1] = 0
-                                      if (!scores[t2]) scores[t2] = 0
-                                      if (round.winning_team === 1) scores[t1]++
-                                      else if (round.winning_team === 2) scores[t2]++
-
-                                      // shallow copy snapshot after this round
-                                      return { round, scores: { ...scores } }
-                                    })
-
-                                    return snapshots.reverse().map(({ round, scores }) => {
+                                    // Go through rounds chronologically
+                                    return gameRounds.map((round) => {
                                       const team1Key = round.team1!.slice().sort().join('&')
                                       const team2Key = round.team2!.slice().sort().join('&')
+                                      
+                                      if (!teamScores[team1Key]) teamScores[team1Key] = 0
+                                      if (!teamScores[team2Key]) teamScores[team2Key] = 0
+                                      
+                                      // Add win to the winning team
+                                      if (round.winning_team === 1) teamScores[team1Key]++
+                                      else if (round.winning_team === 2) teamScores[team2Key]++
 
                                       return (
-                                        <div key={round.id} className="bg-slate-800/50 p-2 rounded-lg flex items-center justify-between">
-                                          <div className="grid grid-cols-[max-content_auto_max-content] gap-2 items-center text-xs font-bold flex-1 whitespace-nowrap">
+                                        <div key={round.id} className="bg-slate-800/50 p-3 rounded-lg">
+                                          <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center text-sm font-bold">
                                             <div className={`text-right ${round.winning_team === 1 ? 'text-green-400' : 'text-red-400'}`}>
                                               <span>{round.team1!.join(' & ')}</span>
-                                              <span className="text-amber-400 ml-2">({scores[team1Key] || 0})</span>
+                                              <span className="text-amber-400 ml-2">({teamScores[team1Key]})</span>
                                             </div>
                                             <span className="text-amber-400 text-center px-2">vs</span>
                                             <div className={`text-left ${round.winning_team === 2 ? 'text-green-400' : 'text-red-400'}`}>
-                                              <span className="text-amber-400 mr-2">({scores[team2Key] || 0})</span>
+                                              <span className="text-amber-400 mr-2">({teamScores[team2Key]})</span>
                                               <span>{round.team2!.join(' & ')}</span>
                                             </div>
                                           </div>
@@ -1476,12 +1375,12 @@ gamesForStats.forEach(game => {
                               {p}
                             </span>
                           ))}
-                          {game.runners_up?.map(p => (
+                          {game.runners_up?.filter(p => !game.winners?.includes(p)).map(p => (
                             <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
                               {p}
                             </span>
                           ))}
-                          {game.losers?.map(p => (
+                          {game.losers?.filter(p => !game.winners?.includes(p) && !game.runners_up?.includes(p)).map(p => (
                             <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
                               {p}
                             </span>
@@ -1495,17 +1394,17 @@ gamesForStats.forEach(game => {
                               {p}
                             </span>
                           ))}
-                          {game.runners_up?.map(p => (
+                          {game.runners_up?.filter(p => !game.winners?.includes(p)).map(p => (
                             <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
                               {p}
                             </span>
                           ))}
-                          {game.survivors?.map(p => (
+                          {game.survivors?.filter(p => !game.winners?.includes(p) && !game.runners_up?.includes(p)).map(p => (
                             <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
                               {p}
                             </span>
                           ))}
-                          {game.losers?.map(p => (
+                          {game.losers?.filter(p => !game.winners?.includes(p) && !game.runners_up?.includes(p) && !game.survivors?.includes(p)).map(p => (
                             <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
                               {p}
                             </span>
