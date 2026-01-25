@@ -277,7 +277,8 @@ export default function ScoringPage() {
             winners: results.winners,
             runners_up: results.runnersUp,
             survivors: results.survivors,
-            losers: results.losers
+            losers: results.losers,
+            threshold: newSession.threshold
           } as any)
         
         if (error) {
