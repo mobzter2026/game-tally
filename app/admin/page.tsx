@@ -344,7 +344,7 @@ const addGame = async () => {
         created_at: timestamp,
       }
 
-      const { error } = await supabase.from('games').insert(gameData))
+      const { error } = await supabase.from('games').insert(gameData)
       if (error) {
         console.error(error)
         alert('Error adding game. Check console.')
@@ -376,7 +376,7 @@ const addGame = async () => {
         created_at: timestamp,
       }
 
-      const { error } = await supabase.from('games').insert(gameData))
+      const { error } = await supabase.from('games').insert(gameData)
       if (error) {
         console.error(error)
         alert('Error adding game. Check console.')
@@ -419,7 +419,7 @@ const addGame = async () => {
 
   const saveGameDate = async (gameId: string) => {
     if (!editGameDate) return
-    const { error } = await supabase.from('games').update({ game_date: editGameDate }).eq('id', gameId))
+    const { error } = await supabase.from('games').update({ game_date: editGameDate }).eq('id', gameId)
     if (error) {
       console.error(error)
       alert('Error updating date')
