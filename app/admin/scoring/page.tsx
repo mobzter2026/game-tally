@@ -130,22 +130,26 @@ export default function ScoringPage() {
   const updateScore = (player: string, delta: number) => {
     setScores(prev => {
       const newScore = Math.max(0, (prev[player] || 0) + delta)
-      const updatedScores = { ...prev, [player]: newScore }
-      
-      // Auto-complete for Monopoly/Tai Ti when someone reaches threshold
-      if (newSession.game === 'Monopoly' || newSession.game === 'Tai Ti') {
-        const maxScore = Math.max(...Object.values(updatedScores))
-        
-        // Check if anyone hit the threshold
-        if (maxScore >= newSession.threshold) {
-          // Automatically calculate results
-          setTimeout(() => calculateResults(updatedScores), 100)
-        }
-      }
-      
-      return updatedScores
+      return { ...prev, [player]: newScore }
     })
   }
+
+  // Auto-complete Monopoly/Tai Ti when threshold is reached
+  useEffect(() => {
+    if (!gameStarted) return
+    if (newSession.game !== 'Monopoly' && newSession.game !== 'Tai Ti') return
+    
+    const maxScore = Math.max(...Object.values(scores))
+    
+    if (maxScore >= newSession.threshold) {
+      // Small delay to ensure state is updated
+      const timer = setTimeout(() => {
+        calculateResults(scores)
+      }, 150)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [scores, gameStarted, newSession.game, newSession.threshold])
 
   const calculateResults = (finalScores: Record<string, number>) => {
     const sortedPlayers = Object.entries(finalScores)
