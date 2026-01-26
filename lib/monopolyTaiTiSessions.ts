@@ -64,11 +64,6 @@ function isMonopolyOrTaiTiRound(g: Game, gameType: 'Monopoly' | 'Tai Ti') {
   )
 }
 
-/**
- * Build Monopoly/Tai Ti sessions by scanning rounds in chronological order per day.
- * A session ends when ANY player reaches the threshold (default 3, or 5 if configured).
- * Sessions are grouped by: same date + same players.
- */
 export function buildMonopolyTaiTiSessions(
   allGames: Game[],
   gameType: 'Monopoly' | 'Tai Ti'
@@ -90,18 +85,14 @@ export function buildMonopolyTaiTiSessions(
     const playerWins: Record<string, number> = {}
     const allPlayers = game.players_in_game || []
     
-    // Initialize player win counts
     allPlayers.forEach(p => (playerWins[p] = 0))
     
-    // Count wins from first game
     game.winners?.forEach(p => {
       playerWins[p] = (playerWins[p] || 0) + 1
     })
 
-    // Read threshold from the first game (defaults to 3 if not set)
-    const threshold = game.threshold || 3
+    const threshold = (game as any).threshold || 3
 
-    // Look for subsequent rounds on same day with same players
     for (const nextGame of rounds) {
       if (used.has(nextGame.id)) continue
       if (nextGame.game_date !== game.game_date) continue
@@ -112,21 +103,17 @@ export function buildMonopolyTaiTiSessions(
 
       if (!samePlayers) continue
 
-      // Add to session
       session.push(nextGame)
       used.add(nextGame.id)
 
-      // Update win counts
       nextGame.winners?.forEach(p => {
         playerWins[p] = (playerWins[p] || 0) + 1
       })
 
-      // Check if someone hit threshold
       const maxWins = Math.max(...Object.values(playerWins))
       if (maxWins >= threshold) break
     }
 
-    // Sort rounds chronologically
     session.sort(
       (a, b) => new Date(a.created_at ?? '').getTime() - new Date(b.created_at ?? '').getTime()
     )
@@ -151,7 +138,6 @@ export function buildMonopolyTaiTiSessions(
     })
   }
 
-  // Newest first for display
   return sessions.sort(
     (a, b) =>
       new Date(b.endAtIso ?? `${b.gameDate}T00:00:00Z`).getTime() -
