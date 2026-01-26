@@ -344,7 +344,7 @@ const addGame = async () => {
         created_at: timestamp,
       }
 
-      const { error } = await supabase.from('games').insert(gameData)
+      const { error } = await supabase.from('games').insert(gameData as any)
       if (error) {
         console.error(error)
         alert('Error adding game. Check console.')
@@ -376,7 +376,7 @@ const addGame = async () => {
         created_at: timestamp,
       }
 
-      const { error } = await supabase.from('games').insert(gameData)
+      const { error } = await supabase.from('games').insert(gameData as any)
       if (error) {
         console.error(error)
         alert('Error adding game. Check console.')
@@ -419,7 +419,7 @@ const addGame = async () => {
 
   const saveGameDate = async (gameId: string) => {
     if (!editGameDate) return
-    const { error } = await supabase.from('games').update({ game_date: editGameDate }).eq('id', gameId)
+    const { error } = await supabase.from('games').update({ game_date: editGameDate } as any).eq('id', gameId)
     if (error) {
       console.error(error)
       alert('Error updating date')
@@ -443,12 +443,7 @@ const addGame = async () => {
   const saveSessionDate = async (sessionKey: string, ids: string[]) => {
     if (!editSessionDate) return
     // Update ALL rows in this session (keeps session integrity)
-    const updates = ids.map(id => 
-      supabase
-        .from('games')
-        .update({ game_date: editSessionDate })
-        .eq('id', id)
-    )
+    const updates = ids.map(id => supabase.from('games').update({ game_date: editSessionDate } as any).eq('id', id))
     const results = await Promise.all(updates)
     const firstErr = results.find(r => (r as any).error)?.error
     if (firstErr) {
