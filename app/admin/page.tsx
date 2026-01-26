@@ -443,12 +443,16 @@ const addGame = async () => {
   const saveSessionDate = async (sessionKey: string, ids: string[]) => {
     if (!editSessionDate) return
     // Update ALL rows in this session (keeps session integrity)
+<<<<<<< HEAD
     const updates = ids.map(id => 
       supabase
         .from('games')
         .update({ game_date: editSessionDate })
         .eq('id', id)
     )
+=======
+    const updates = ids.map(id => supabase.from('games').update({ game_date: editSessionDate } as any).eq('id', id))
+>>>>>>> 502a53688b9def605cd0386c3646edcf315c4eaa
     const results = await Promise.all(updates)
     const firstErr = results.find(r => (r as any).error)?.error
     if (firstErr) {
