@@ -419,7 +419,8 @@ const addGame = async () => {
 
   const saveGameDate = async (gameId: string) => {
     if (!editGameDate) return
-    const { error } = await (supabase.from('games').update({ game_date: editGameDate }).eq('id', gameId) as any)
+    // @ts-ignore - Supabase type inference issue
+    const { error } = await supabase.from('games').update({ game_date: editGameDate }).eq('id', gameId)
     if (error) {
       console.error(error)
       alert('Error updating date')
@@ -443,7 +444,8 @@ const addGame = async () => {
   const saveSessionDate = async (sessionKey: string, ids: string[]) => {
     if (!editSessionDate) return
     // Update ALL rows in this session (keeps session integrity)
-    const updates = ids.map(id => (supabase.from('games').update({ game_date: editSessionDate }).eq('id', id) as any))
+    // @ts-ignore - Supabase type inference issue
+    const updates = ids.map(id => supabase.from('games').update({ game_date: editSessionDate }).eq('id', id))
     const results = await Promise.all(updates)
     const firstErr = results.find(r => (r as any).error)?.error
     if (firstErr) {
