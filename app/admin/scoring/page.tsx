@@ -130,7 +130,20 @@ export default function ScoringPage() {
   const updateScore = (player: string, delta: number) => {
     setScores(prev => {
       const newScore = Math.max(0, (prev[player] || 0) + delta)
-      return { ...prev, [player]: newScore }
+      const updatedScores = { ...prev, [player]: newScore }
+      
+      // Auto-complete for Monopoly/Tai Ti when someone reaches threshold
+      if (newSession.game === 'Monopoly' || newSession.game === 'Tai Ti') {
+        const maxScore = Math.max(...Object.values(updatedScores))
+        
+        // Check if anyone hit the threshold
+        if (maxScore >= newSession.threshold) {
+          // Automatically calculate results
+          setTimeout(() => calculateResults(updatedScores), 100)
+        }
+      }
+      
+      return updatedScores
     })
   }
 
@@ -277,8 +290,7 @@ export default function ScoringPage() {
             winners: results.winners,
             runners_up: results.runnersUp,
             survivors: results.survivors,
-            losers: results.losers,
-            threshold: newSession.threshold
+            losers: results.losers
           } as any)
         
         if (error) {
@@ -762,20 +774,24 @@ export default function ScoringPage() {
                 ))}
               </div>
 
-              <Button
-                onClick={() => {
-                  if (newSession.game === 'Shithead') {
-                    calculateShitheadResults(scores)
-                  } else {
-                    calculateResults(scores)
-                  }
-                }}
-                variant="pop"
-                color="blue"
-                className="w-full py-2.5 rounded-xl font-bold text-base"
-              >
-                🏁 End Round
-              </Button>
+              {/* Show End Round button only for Shithead (Monopoly/Tai Ti auto-complete) */}
+              {newSession.game === 'Shithead' && (
+                <Button
+                  onClick={() => calculateShitheadResults(scores)}
+                  variant="pop"
+                  color="blue"
+                  className="w-full py-2.5 rounded-xl font-bold text-base"
+                >
+                  🏁 End Round
+                </Button>
+              )}
+              
+              {/* Info text for Monopoly/Tai Ti */}
+              {(newSession.game === 'Monopoly' || newSession.game === 'Tai Ti') && (
+                <div className="text-center text-sm text-slate-300 bg-slate-800/50 p-2 rounded-lg">
+                  🎯 First to {newSession.threshold} wins! Game auto-completes.
+                </div>
+              )}
             </div>
           )
         ) : (
