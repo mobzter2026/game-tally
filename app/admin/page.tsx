@@ -254,8 +254,8 @@ export default function AdminDashboard() {
   }
 
   const rungSessions = useMemo(() => buildRungSessions(games, 5), [games])
-  const monopolySessions = useMemo(() => buildFirstToNSessions(games, 'Monopoly', 3), [games])
-  const taitiSessions = useMemo(() => buildFirstToNSessions(games, 'Tai Ti', 3), [games])
+  const monopolySessions = useMemo(() => buildFirstToNSessions(games, 'Monopoly'), [games])
+  const taitiSessions = useMemo(() => buildFirstToNSessions(games, 'Tai Ti'), [games])
 
   const recentItems: RecentItem[] = useMemo(() => {
     const items: RecentItem[] = []
@@ -1110,3 +1110,4 @@ return (
     </div>
   )
 }
+
