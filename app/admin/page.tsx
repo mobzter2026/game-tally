@@ -125,7 +125,7 @@ function buildRungSessions(allGames: Game[], targetWins = 5): RungSession[] {
   })
 }
 
-function buildFirstToNSessions(allGames: Game[], gameType: 'Monopoly' | 'Tai Ti', targetWins = 3): FirstToNSession[] {
+function buildFirstToNSessions(allGames: Game[], gameType: 'Monopoly' | 'Tai Ti', ): FirstToNSession[] {
   const games = allGames
     .filter(g => g.game_type === gameType && Array.isArray(g.winners) && (g.winners?.length || 0) > 0)
     .slice()
@@ -146,6 +146,9 @@ function buildFirstToNSessions(allGames: Game[], gameType: 'Monopoly' | 'Tai Ti'
       const dayGames = byDate[date]
       let startIdx = 0
       let wins: Record<string, number> = {}
+      
+      // Read threshold from first game
+      const targetWins = (dayGames[0] as any).threshold || 3
 
       const flush = (endIdxInclusive: number) => {
         const chunk = dayGames.slice(startIdx, endIdxInclusive + 1)
@@ -251,8 +254,8 @@ export default function AdminDashboard() {
   }
 
   const rungSessions = useMemo(() => buildRungSessions(games, 5), [games])
-  const monopolySessions = useMemo(() => buildFirstToNSessions(games, 'Monopoly', 3), [games])
-  const taitiSessions = useMemo(() => buildFirstToNSessions(games, 'Tai Ti', 3), [games])
+  const monopolySessions = useMemo(() => buildFirstToNSessions(games, 'Monopoly'), [games])
+  const taitiSessions = useMemo(() => buildFirstToNSessions(games, 'Tai Ti'), [games])
 
   const recentItems: RecentItem[] = useMemo(() => {
     const items: RecentItem[] = []
@@ -846,21 +849,49 @@ return (
                         </div>
                       </div>
 
-                      {/* Summary badges (winners = reached 3) */}
+                      {/* Summary badges (winners/runners/survivors/losers) */}
                       <div className="flex gap-1 flex-wrap mb-2">
-                        {allPlayers.map(p => {
-                          const w = s.playerWins[p] || 0
-                          const isW = w >= 3
-                          return (
-                            <span
-                              key={p}
-                              className={`${isW ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded text-xs font-semibold`}
-                              title={`${w} wins in session`}
-                            >
-                              {p}
-                            </span>
-                          )
-                        })}
+                        {(() => {
+                          // Read threshold from first game
+                          const threshold = (s.games[0] as any).threshold || 3
+                          const maxWins = Math.max(...Object.values(s.playerWins))
+                          const minWins = Math.min(...Object.values(s.playerWins))
+                          
+                          // Calculate tiers
+                          const winners = allPlayers.filter(p => (s.playerWins[p] || 0) === maxWins)
+                          const losers = allPlayers.filter(p => (s.playerWins[p] || 0) === minWins && minWins < maxWins)
+                          const remaining = allPlayers.filter(p => !winners.includes(p) && !losers.includes(p))
+                          
+                          let runners: string[] = []
+                          let survivors: string[] = []
+                          
+                          if (remaining.length > 0) {
+                            const maxRemaining = Math.max(...remaining.map(p => s.playerWins[p] || 0))
+                            runners = remaining.filter(p => (s.playerWins[p] || 0) === maxRemaining)
+                            survivors = remaining.filter(p => !runners.includes(p))
+                          }
+                          
+                          return allPlayers.map(p => {
+                            const wins = s.playerWins[p] || 0
+                            const color = winners.includes(p) 
+                              ? 'bg-green-600' 
+                              : runners.includes(p)
+                              ? 'bg-blue-600'
+                              : survivors.includes(p)
+                              ? 'bg-slate-600'
+                              : 'bg-red-600'
+                            
+                            return (
+                              <span
+                                key={p}
+                                className={`${color} text-white px-2 py-1 rounded text-xs font-semibold`}
+                                title={`${wins}/${threshold} wins in session`}
+                              >
+                                {p}
+                              </span>
+                            )
+                          })
+                        })()}
                       </div>
 
                       <button

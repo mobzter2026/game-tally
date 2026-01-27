@@ -85,11 +85,60 @@ export default function Home() {
     const allGames = gamesData as Game[]
     const displayGames: DisplayGame[] = []
 
+<<<<<<< HEAD
     // Process Monopoly sessions
     const monopolySessions = buildMonopolyTaiTiSessions(allGames, 'Monopoly')
     monopolySessions
       .filter(session => session.isComplete)
       .forEach(session => {
+=======
+      // Detect achievements
+      const latestWinnerData = getLatestWinnerType(gamesData)
+      setLatestWinner(latestWinnerData)
+
+      const streakData = detectShitheadStreak(gamesData)
+      setShitheadStreak(streakData)
+    }
+    setLoading(false)
+  }
+
+  /* ---------------------------------------------
+     COMBINE ALL COMPLETED SESSIONS
+  --------------------------------------------- */
+
+  const getAllCompletedSessions = () => {
+    const completedGames: Array<Game & { sessionKey?: string }> = []
+
+    // Add completed Rung sessions
+    const completedRung = rungSessions.filter(s => s.isComplete)
+    console.log('🎭 Rung sessions:', rungSessions.length, 'complete:', completedRung.length)
+    completedRung.forEach(session => {
+        const lastRound = session.rounds[session.rounds.length - 1]
+        const allPlayers = Array.from(new Set(session.rounds.flatMap(r => [...(r.team1 || []), ...(r.team2 || [])])))
+        
+        completedGames.push({
+          ...lastRound,
+          id: session.key,
+          sessionKey: session.key,
+          game_type: 'Rung',
+          players_in_game: allPlayers,
+          winners: session.tiers.winners,
+          runners_up: session.tiers.runners,
+          survivors: session.tiers.survivors,
+          losers: session.tiers.losers,
+          game_date: session.gameDate,
+          created_at: session.endAtIso || lastRound.created_at
+        })
+      })
+
+    // Add completed Monopoly sessions
+    const completedMonopoly = monopolySessions.filter(s => s.isComplete)
+    console.log('🎲 Monopoly sessions:', monopolySessions.length, 'complete:', completedMonopoly.length)
+    if (monopolySessions.length > 0) {
+      console.log('Monopoly session example:', monopolySessions[0])
+    }
+    completedMonopoly.forEach(session => {
+>>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
         const lastRound = session.rounds[session.rounds.length - 1]
         displayGames.push({
           id: session.key,
@@ -105,11 +154,18 @@ export default function Home() {
         })
       })
 
+<<<<<<< HEAD
     // Process Tai Ti sessions
     const taitiSessions = buildMonopolyTaiTiSessions(allGames, 'Tai Ti')
     taitiSessions
       .filter(session => session.isComplete)
       .forEach(session => {
+=======
+    // Add completed Tai Ti sessions
+    const completedTaiTi = taitiSessions.filter(s => s.isComplete)
+    console.log('🀄 Tai Ti sessions:', taitiSessions.length, 'complete:', completedTaiTi.length)
+    completedTaiTi.forEach(session => {
+>>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
         const lastRound = session.rounds[session.rounds.length - 1]
         displayGames.push({
           id: session.key,
@@ -125,10 +181,79 @@ export default function Home() {
         })
       })
 
+<<<<<<< HEAD
     // Add other game types (Blackjack, Shithead, Rung) - they're single games, not sessions
     const otherGames = allGames.filter(
       g => g.game_type !== 'Monopoly' && g.game_type !== 'Tai Ti'
     )
+=======
+    // Add Blackjack games
+    console.log('🃏 Blackjack games:', blackjackGames.length)
+    blackjackGames.forEach(game => completedGames.push(game))
+
+    // Add Shithead games
+    console.log('💩 Shithead games:', shitheadGames.length)
+    shitheadGames.forEach(game => completedGames.push(game))
+    
+    console.log('📊 Total completed games:', completedGames.length)
+
+    return completedGames
+  }
+
+  /* ---------------------------------------------
+     FILTER HANDLERS
+  --------------------------------------------- */
+
+  const togglePlayerFilter = (player: string) => {
+    if (selectedPlayers.includes(player)) {
+      setSelectedPlayers(selectedPlayers.filter(p => p !== player))
+    } else {
+      setSelectedPlayers([...selectedPlayers, player])
+    }
+  }
+
+  const selectAllPlayers = () => {
+    setSelectedPlayers([...PLAYERS])
+  }
+
+  const clearPlayers = () => {
+    setSelectedPlayers([])
+  }
+
+  const selectGameType = (gameType: string) => {
+    setSelectedGameType(gameType)
+  }
+
+  /* ---------------------------------------------
+     CALCULATE STATS WITH FILTERS
+  --------------------------------------------- */
+
+  const getFilteredCompletedGames = () => {
+    let filtered = getAllCompletedSessions()
+
+    if (selectedPlayers.length > 0) {
+      filtered = filterGamesByPlayers(filtered, selectedPlayers)
+    }
+
+    if (selectedGameType !== 'All Games') {
+      filtered = filterGamesByType(filtered, selectedGameType)
+    }
+
+    return filtered
+  }
+
+  const soloStats = calculatePlayerStats(
+    getFilteredCompletedGames(),
+    selectedPlayers
+  )
+
+  /* ---------------------------------------------
+     RUNG TEAM STATS
+  --------------------------------------------- */
+
+  const getRungTeamStats = () => {
+    const teams: Record<string, any> = {}
+>>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
     
     otherGames.forEach(game => {
       displayGames.push({
