@@ -238,8 +238,51 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
   }
 
+  const getRungTeamStats = () => {
+    const teamStats: Record<string, { wins: number, losses: number, games: number }> = {}
+    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
+
+    rungGames.forEach(game => {
+      if (!game.players_in_game || game.players_in_game.length === 0) return
+
+      // Create team key from winners (they were on the same team)
+      if (game.winners && game.winners.length > 0) {
+        const winningTeam = game.winners.slice().sort().join(' + ')
+        if (!teamStats[winningTeam]) {
+          teamStats[winningTeam] = { wins: 0, losses: 0, games: 0 }
+        }
+        teamStats[winningTeam].wins++
+        teamStats[winningTeam].games++
+      }
+
+      // Create team key from losers
+      if (game.losers && game.losers.length > 0) {
+        const losingTeam = game.losers.slice().sort().join(' + ')
+        if (!teamStats[losingTeam]) {
+          teamStats[losingTeam] = { wins: 0, losses: 0, games: 0 }
+        }
+        teamStats[losingTeam].losses++
+        teamStats[losingTeam].games++
+      }
+    })
+
+    return Object.entries(teamStats)
+      .map(([team, stats]) => ({
+        team,
+        wins: stats.wins,
+        losses: stats.losses,
+        games: stats.games,
+        winRate: stats.games > 0 
+          ? ((stats.wins / stats.games) * 100).toFixed(0) 
+          : '0'
+      }))
+      .filter(t => t.games > 0)
+      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+  }
+
   const playerStats = getPlayerStats()
   const rungStats = getRungStats()
+  const rungTeamStats = getRungTeamStats()
   const recentGames = filteredGames.slice(0, 20)
 
   if (loading) {
@@ -385,15 +428,15 @@ export default function PublicView() {
         {activeTab === 'rung' && (
           <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Solo Performance</h2>
-              <p className="text-slate-400 text-sm mt-1">Individual Rung Stats</p>
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Duo Dominance</h2>
+              <p className="text-slate-400 text-sm mt-1">Team Performance Records</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700 bg-slate-900">
                     <th className="text-center p-4 w-20">Rank</th>
-                    <th className="text-left p-4">Player</th>
+                    <th className="text-left p-4">Team</th>
                     <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
                     <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
                     <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
@@ -401,23 +444,23 @@ export default function PublicView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rungStats.length === 0 ? (
+                  {rungTeamStats.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center p-8 text-slate-400">
-                        No Rung games played yet.
+                        No Rung teams have played yet.
                       </td>
                     </tr>
                   ) : (
-                    rungStats.map((player, idx) => (
-                      <tr key={player.player} className="border-b border-slate-700/50 hover:bg-purple-800/20 transition-all">
+                    rungTeamStats.map((teamStat, idx) => (
+                      <tr key={teamStat.team} className="border-b border-slate-700/50 hover:bg-purple-800/20 transition-all">
                         <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
                           {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
                         </td>
-                        <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
-                        <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
-                        <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                        <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                        <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{teamStat.team}</td>
+                        <td className="text-center p-2 md:p-4 text-sm md:text-base">{teamStat.games}</td>
+                        <td className="text-center p-4 text-green-400 font-bold">{teamStat.wins}</td>
+                        <td className="text-center p-4 text-red-400 font-bold">{teamStat.losses}</td>
+                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{teamStat.winRate}%</td>
                       </tr>
                     ))
                   )}
