@@ -29,7 +29,6 @@ export default function AdminDashboard() {
   const [newGame, setNewGame] = useState({
     type: '',
     date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().slice(0, 5),
     players: [] as string[],
     winners: [] as string[],
     runnersUp: [] as string[],
@@ -103,8 +102,6 @@ export default function AdminDashboard() {
   const clearPlayers = () => setNewGame({ ...newGame, players: [] })
 
   const addGame = async () => {
-    const timestamp = new Date(`${newGame.date}T${newGame.time}:00`).toISOString()
-
     if (newGame.players.length === 0) {
       alert('Please select at least one player')
       return
@@ -118,8 +115,7 @@ export default function AdminDashboard() {
       runners_up: newGame.runnersUp.length > 0 ? newGame.runnersUp : null,
       survivors: newGame.survivors.length > 0 ? newGame.survivors : null,
       losers: newGame.losers.length > 0 ? newGame.losers : null,
-      created_by: user?.email,
-      created_at: timestamp
+      created_by: user?.email
     }
 
     const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -132,7 +128,6 @@ export default function AdminDashboard() {
     setNewGame({
       type: '',
       date: new Date().toISOString().split('T')[0],
-      time: new Date().toTimeString().slice(0, 5),
       players: [],
       winners: [],
       runnersUp: [],
@@ -200,15 +195,15 @@ export default function AdminDashboard() {
             Admin Dashboard
           </h1>
           <p className="text-slate-300 mb-4 text-sm">Manage game results</p>
-          <div className="flex gap-2 justify-center flex-wrap">
+          <div className="flex gap-2 justify-center">
             <Button onClick={() => router.push('/admin/scoring')} variant="pop" color="blue" className="px-4 py-2 text-sm">
-              🎯 Live Scoring
+              Live Scores
             </Button>
             <Button onClick={() => router.push('/')} variant="pop" color="purple" className="px-4 py-2 text-sm">
-              📊 View Leaderboard
+              Leaderboard
             </Button>
             <Button onClick={handleSignOut} variant="pop" color="red" className="px-4 py-2 text-sm">
-              🚪 Sign Out
+              Exit
             </Button>
           </div>
         </div>
@@ -247,15 +242,6 @@ export default function AdminDashboard() {
                     className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                 </div>
-                <div>
-                  <label className="block mb-2 text-xs font-bold">Time</label>
-                  <input
-                    type="time"
-                    value={newGame.time}
-                    onChange={(e) => setNewGame({ ...newGame, time: e.target.value })}
-                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                  />
-                </div>
               </div>
 
               <div>
@@ -272,7 +258,7 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="grid grid-cols-3 gap-2">
                   {PLAYERS.map(p => (
                     <Button
                       key={p}
@@ -280,7 +266,7 @@ export default function AdminDashboard() {
                       variant="frosted"
                       color="purple"
                       selected={newGame.players.includes(p)}
-                      className="px-3 py-1.5 text-xs"
+                      className="px-3 py-2 text-sm font-semibold"
                     >
                       {p}
                     </Button>
