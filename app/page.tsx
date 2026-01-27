@@ -509,6 +509,8 @@ export default function PublicView() {
                 </table>
               </div>
             </div>
+            </>
+            )}
           </>
         )}
 
