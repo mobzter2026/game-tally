@@ -310,24 +310,6 @@ export default function PublicView() {
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">
             "{QUOTES[currentQuote]}"
           </p>
-
-          {/* Hall of Fame/Shame Buttons */}
-          <div className="flex gap-2 mb-3 justify-center flex-wrap mt-4">
-            <Button
-              onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
-              variant="pop"
-              className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
-            >
-              ⭐ Hall of Fame
-            </Button>
-            <Button
-              onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
-              variant="pop"
-              className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-rose-600 to-rose-900"
-            >
-              🤡 Hall of Shame
-            </Button>
-          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -446,7 +428,25 @@ export default function PublicView() {
                       The Ultimate Backstab Board
                     </span> 🔪
                   </h2>
-                  <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
+                  <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional..... Betrayal Mandatory</p>
+
+                  {/* Hall of Fame/Shame Buttons */}
+                  <div className="flex gap-2 mb-3 justify-center flex-wrap">
+                    <Button
+                      onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
+                      variant="pop"
+                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+                    >
+                      ⭐ Hall of Fame
+                    </Button>
+                    <Button
+                      onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
+                      variant="pop"
+                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
+                    >
+                      🤡 Hall of Shame
+                    </Button>
+                  </div>
 
                   <p className="text-slate-400 text-xs sm:text-sm mb-2">
                     🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti  ⬩  💩 Shithead  ⬩  🎭 Rung
