@@ -146,11 +146,11 @@ function buildFirstToNSessions(allGames: Game[], gameType: 'Monopoly' | 'Tai Ti'
       const dayGames = byDate[date]
       let startIdx = 0
       let wins: Record<string, number> = {}
-
-      const flush = (endIdxInclusive: number) => {
+      
       // Read threshold from first game
       const targetWins = (dayGames[0] as any).threshold || 3
 
+      const flush = (endIdxInclusive: number) => {
         const chunk = dayGames.slice(startIdx, endIdxInclusive + 1)
         const winnerPlayers = Object.keys(wins).filter(p => (wins[p] || 0) >= targetWins)
         const endAtIso = chunk.length ? ((chunk[chunk.length - 1].created_at as any) || null) : null
