@@ -148,9 +148,9 @@ export default function LeaderboardModular() {
     const completedGames: Array<Game & { sessionKey?: string }> = []
 
     // Add completed Rung sessions
-    rungSessions
-      .filter(s => s.isComplete)
-      .forEach(session => {
+    const completedRung = rungSessions.filter(s => s.isComplete)
+    console.log('🎭 Rung sessions:', rungSessions.length, 'complete:', completedRung.length)
+    completedRung.forEach(session => {
         const lastRound = session.rounds[session.rounds.length - 1]
         const allPlayers = Array.from(new Set(session.rounds.flatMap(r => [...(r.team1 || []), ...(r.team2 || [])])))
         
@@ -170,9 +170,12 @@ export default function LeaderboardModular() {
       })
 
     // Add completed Monopoly sessions
-    monopolySessions
-      .filter(s => s.isComplete)
-      .forEach(session => {
+    const completedMonopoly = monopolySessions.filter(s => s.isComplete)
+    console.log('🎲 Monopoly sessions:', monopolySessions.length, 'complete:', completedMonopoly.length)
+    if (monopolySessions.length > 0) {
+      console.log('Monopoly session example:', monopolySessions[0])
+    }
+    completedMonopoly.forEach(session => {
         const lastRound = session.rounds[session.rounds.length - 1]
         
         completedGames.push({
@@ -190,9 +193,9 @@ export default function LeaderboardModular() {
       })
 
     // Add completed Tai Ti sessions
-    taitiSessions
-      .filter(s => s.isComplete)
-      .forEach(session => {
+    const completedTaiTi = taitiSessions.filter(s => s.isComplete)
+    console.log('🀄 Tai Ti sessions:', taitiSessions.length, 'complete:', completedTaiTi.length)
+    completedTaiTi.forEach(session => {
         const lastRound = session.rounds[session.rounds.length - 1]
         
         completedGames.push({
@@ -210,10 +213,14 @@ export default function LeaderboardModular() {
       })
 
     // Add Blackjack games
+    console.log('🃏 Blackjack games:', blackjackGames.length)
     blackjackGames.forEach(game => completedGames.push(game))
 
     // Add Shithead games
+    console.log('💩 Shithead games:', shitheadGames.length)
     shitheadGames.forEach(game => completedGames.push(game))
+    
+    console.log('📊 Total completed games:', completedGames.length)
 
     return completedGames
   }
