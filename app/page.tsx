@@ -57,6 +57,7 @@ export default function PublicView() {
   const [currentQuote, setCurrentQuote] = useState(0)
   const [activeTab, setActiveTab] = useState<'individual' | 'rung' | 'recent'>('individual')
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
+  const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
   const supabase = createClient()
 
   useEffect(() => {
@@ -309,6 +310,24 @@ export default function PublicView() {
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">
             "{QUOTES[currentQuote]}"
           </p>
+
+          {/* Hall of Fame/Shame Buttons */}
+          <div className="flex gap-2 mb-3 justify-center flex-wrap mt-4">
+            <Button
+              onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
+              variant="pop"
+              className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+            >
+              ⭐ Hall of Fame
+            </Button>
+            <Button
+              onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
+              variant="pop"
+              className="px-4 py-2 text-sm font-bold bg-gradient-to-br from-rose-600 to-rose-900"
+            >
+              🤡 Hall of Shame
+            </Button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -349,6 +368,75 @@ export default function PublicView() {
         {/* Solo Kings Tab */}
         {activeTab === 'individual' && (
           <>
+            {hallView !== 'none' ? (
+              <>
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    onClick={() => setHallView('none')}
+                    variant="pop"
+                    color="blue"
+                    className="px-4 py-2"
+                  >
+                    ◀ Back to Overall Leaderboard
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {INDIVIDUAL_GAMES.map(gameType => {
+                    const gameStats = playerStats.filter(p => {
+                      const gameGames = filteredGames.filter(g => 
+                        g.game_type === gameType && 
+                        g.players_in_game?.includes(p.player)
+                      )
+                      return gameGames.length > 0
+                    })
+                    
+                    const displayStats = hallView === 'fame'
+                      ? gameStats.slice(0, 3)
+                      : gameStats.slice(-3).reverse()
+
+                    return (
+                      <div key={gameType} className="rounded-xl shadow-2xl overflow-hidden bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+                        <div className={`p-4 border-b border-slate-700 ${hallView === 'fame' ? 'bg-green-900' : 'bg-gray-800'}`}>
+                          <h3 className="text-xl font-bold whitespace-nowrap">{GAME_EMOJIS[gameType]} {gameType}</h3>
+                          <p className="text-slate-200 text-xs mt-1">
+                            {hallView === 'fame' ? 'Top 3 Players' : 'Bottom 3 Players'}
+                          </p>
+                        </div>
+                        <div className="p-4">
+                          {displayStats.length === 0 ? (
+                            <div className="text-center text-slate-400 py-4">No games played</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {displayStats.map((player, idx) => {
+                                const actualIdx = hallView === 'fame' ? idx : gameStats.length - 3 + idx
+                                return (
+                                  <div key={player.player} className="flex items-center justify-between bg-purple-900/50 p-3 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)]">
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-2xl">
+                                        {hallView === 'fame' 
+                                          ? (idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉')
+                                          : `${gameStats.length - idx}`
+                                        }
+                                      </span>
+                                      <span className="font-bold">{player.player}</span>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-yellow-400 font-bold text-lg">{player.winRate}%</div>
+                                      <div className="text-xs text-slate-400">{player.gamesPlayed} games</div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
             {/* Leaderboard */}
             <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <div className="p-4 border-b border-slate-700">
@@ -428,8 +516,8 @@ export default function PublicView() {
         {activeTab === 'rung' && (
           <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Duo Dominance</h2>
-              <p className="text-slate-400 text-sm mt-1">Team Performance Records</p>
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Power Pairs</h2>
+              <p className="text-slate-400 text-sm mt-1">Where partnerships rise or fall together</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -437,16 +525,15 @@ export default function PublicView() {
                   <tr className="border-b border-slate-700 bg-slate-900">
                     <th className="text-center p-4 w-20">Rank</th>
                     <th className="text-left p-4">Team</th>
-                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
-                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
-                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Games Won</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Games Lost</th>
                     <th className="text-center p-2 md:p-4 text-sm md:text-base">Win%</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rungTeamStats.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center p-8 text-slate-400">
+                      <td colSpan={5} className="text-center p-8 text-slate-400">
                         No Rung teams have played yet.
                       </td>
                     </tr>
@@ -457,7 +544,6 @@ export default function PublicView() {
                           {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
                         </td>
                         <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{teamStat.team}</td>
-                        <td className="text-center p-2 md:p-4 text-sm md:text-base">{teamStat.games}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{teamStat.wins}</td>
                         <td className="text-center p-4 text-red-400 font-bold">{teamStat.losses}</td>
                         <td className="text-center p-4 text-yellow-400 font-bold text-xl">{teamStat.winRate}%</td>
