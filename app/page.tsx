@@ -43,6 +43,7 @@ interface PlayerStats {
   runnersUp: number
   survivals: number
   losses: number
+  weightedScore: number
   winRate: string
 }
 
@@ -137,7 +138,8 @@ export default function PublicView() {
         wins: 0, 
         runnersUp: 0, 
         survivals: 0, 
-        losses: 0
+        losses: 0,
+        weightedScore: 0
       }
     })
 
@@ -149,15 +151,24 @@ export default function PublicView() {
       }
 
       if (game.winners) game.winners.forEach(w => {
-        if (stats[w]) stats[w].wins++
+        if (stats[w]) {
+          stats[w].wins++
+          stats[w].weightedScore += 1.0  // 100%
+        }
       })
 
       if (game.runners_up) game.runners_up.forEach(r => {
-        if (stats[r]) stats[r].runnersUp++
+        if (stats[r]) {
+          stats[r].runnersUp++
+          stats[r].weightedScore += 0.4  // 40%
+        }
       })
 
       if (game.survivors) game.survivors.forEach(s => {
-        if (stats[s]) stats[s].survivals++
+        if (stats[s]) {
+          stats[s].survivals++
+          stats[s].weightedScore += 0.1  // 10%
+        }
       })
 
       if (game.losers) game.losers.forEach(l => {
@@ -170,7 +181,7 @@ export default function PublicView() {
         player: p,
         ...stats[p],
         winRate: stats[p].gamesPlayed > 0 
-          ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) 
+          ? ((stats[p].weightedScore / stats[p].gamesPlayed) * 100).toFixed(0) 
           : '0'
       }))
       .filter(p => p.gamesPlayed > 0)
