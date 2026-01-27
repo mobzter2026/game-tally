@@ -36,6 +36,8 @@ const GAME_EMOJIS: Record<string, string> = {
   'Rung': '🎭'
 }
 
+const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
+
 interface PlayerStats {
   player: string
   gamesPlayed: number
@@ -53,6 +55,8 @@ export default function PublicView() {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [showFloatingFilter, setShowFloatingFilter] = useState(false)
   const [currentQuote, setCurrentQuote] = useState(0)
+  const [activeTab, setActiveTab] = useState<'individual' | 'rung' | 'recent'>('individual')
+  const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const supabase = createClient()
 
   useEffect(() => {
@@ -123,6 +127,10 @@ export default function PublicView() {
       })
     }
 
+    if (selectedGameType !== 'All Games') {
+      filtered = filtered.filter(g => g.game_type === selectedGameType)
+    }
+
     return filtered
   }
 
@@ -188,7 +196,50 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
   }
 
+  const getRungStats = () => {
+    const stats: Record<string, any> = {}
+    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+
+    activePlayers.forEach(p => {
+      stats[p] = { 
+        gamesPlayed: 0, 
+        wins: 0, 
+        losses: 0
+      }
+    })
+
+    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
+
+    rungGames.forEach(game => {
+      if (game.players_in_game) {
+        game.players_in_game.forEach(p => {
+          if (stats[p]) stats[p].gamesPlayed++
+        })
+      }
+
+      if (game.winners) game.winners.forEach(w => {
+        if (stats[w]) stats[w].wins++
+      })
+
+      if (game.losers) game.losers.forEach(l => {
+        if (stats[l]) stats[l].losses++
+      })
+    })
+
+    return activePlayers
+      .map(p => ({
+        player: p,
+        ...stats[p],
+        winRate: stats[p].gamesPlayed > 0 
+          ? ((stats[p].wins / stats[p].gamesPlayed) * 100).toFixed(0) 
+          : '0'
+      }))
+      .filter(p => p.gamesPlayed > 0)
+      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+  }
+
   const playerStats = getPlayerStats()
+  const rungStats = getRungStats()
   const recentGames = filteredGames.slice(0, 20)
 
   if (loading) {
@@ -217,119 +268,225 @@ export default function PublicView() {
           </p>
         </div>
 
-        {/* Leaderboard */}
-        <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-          <div className="p-4 border-b border-slate-700">
-            <div className="text-center">
-              <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
-                <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
-                  The Ultimate Backstab Board
-                </span> 🔪
-              </h2>
-              <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
-            </div>
-          </div>
+        {/* Tab Navigation */}
+        <div className="mb-6 mt-2 flex justify-center">
+          <div className="flex gap-2 max-w-full px-2 justify-center">
+            <Button
+              onClick={() => setActiveTab('individual')}
+              variant="frosted"
+              color="purple"
+              selected={activeTab === 'individual'}
+              className="flex-1 min-w-[80px] sm:min-w-[90px] px-2 py-1.5 text-xs sm:text-sm whitespace-nowrap text-left text-white font-bold"
+            >
+              Solo Kings
+            </Button>
 
-          <div className="overflow-x-auto backdrop-blur-sm">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.1)]">
-                  <th className="text-center p-4 w-20">Rank</th>
-                  <th className="text-left p-4">Player</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Survived</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
-                  <th className="text-center p-2 md:p-4 text-sm md:text-base">Win%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {playerStats.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center p-8 text-slate-400">
-                      No games played yet.
-                    </td>
-                  </tr>
-                ) : (
-                  playerStats.map((player, idx) => (
-                    <tr key={player.player} className="border-b border-slate-700/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all">
-                      <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
-                      </td>
-                      <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
-                      <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
-                      <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
-                      <td className="text-center p-4 text-blue-400 font-bold">{player.runnersUp}</td>
-                      <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
-                      <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
-                      <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            <Button
+              onClick={() => setActiveTab('rung')}
+              variant="frosted"
+              color="purple"
+              selected={activeTab === 'rung'}
+              className="flex-1 min-w-[100px] sm:min-w-[110px] px-2 py-1.5 text-xs sm:text-sm whitespace-nowrap text-left text-white font-bold"
+            >
+              Rung - Duo
+            </Button>
+
+            <Button
+              onClick={() => setActiveTab('recent')}
+              variant="frosted"
+              color="purple"
+              selected={activeTab === 'recent'}
+              className="flex-1 min-w-[110px] sm:min-w-[130px] px-2 py-1.5 text-xs sm:text-sm whitespace-nowrap text-left text-white font-bold"
+            >
+              Recent Games
+            </Button>
           </div>
         </div>
 
-        {/* Recent Games */}
-        <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-          <div className="flex flex-col items-center mb-4 gap-2">
-            <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-              📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
-            </h2>
-            <div className="text-sm">
-              <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
-              <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
-              <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Survivors</span>
-              <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
+        {/* Solo Kings Tab */}
+        {activeTab === 'individual' && (
+          <>
+            {/* Leaderboard */}
+            <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+              <div className="p-4 border-b border-slate-700">
+                <div className="text-center">
+                  <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
+                    <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
+                      The Ultimate Backstab Board
+                    </span> 🔪
+                  </h2>
+                  <p className="text-slate-400 text-sm mb-3 italic">Friendship Optional, Betrayal Mandatory</p>
+
+                  <p className="text-slate-400 text-xs sm:text-sm mb-2">
+                    🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti  ⬩  💩 Shithead  ⬩  🎭 Rung
+                  </p>
+                  <p className="text-slate-400 text-xs mb-3">
+                    🏆 Wins: 100%  ⬩  🏃 2nd: 40%  ⬩  🤟🏼 Survival: 10%
+                  </p>
+                  <select
+                    value={selectedGameType}
+                    onChange={(e) => setSelectedGameType(e.target.value)}
+                    className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
+                  >
+                    <option value="All Games">🎰 All Games</option>
+                    {INDIVIDUAL_GAMES.map(game => (
+                      <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
+                    ))}
+                    <option value="Rung">🎭 Rung</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto backdrop-blur-sm">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.1)]">
+                      <th className="text-center p-4 w-20">Rank</th>
+                      <th className="text-left p-4">Player</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Survived</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                      <th className="text-center p-2 md:p-4 text-sm md:text-base">Win%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {playerStats.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center p-8 text-slate-400">
+                          No games played yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      playerStats.map((player, idx) => (
+                        <tr key={player.player} className="border-b border-slate-700/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all">
+                          <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
+                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
+                          </td>
+                          <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
+                          <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
+                          <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                          <td className="text-center p-4 text-blue-400 font-bold">{player.runnersUp}</td>
+                          <td className="text-center p-4 text-slate-400 font-bold">{player.survivals}</td>
+                          <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                          <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Rung Tab */}
+        {activeTab === 'rung' && (
+          <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <div className="p-6 border-b border-slate-700">
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Solo Performance</h2>
+              <p className="text-slate-400 text-sm mt-1">Individual Rung Stats</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-700 bg-slate-900">
+                    <th className="text-center p-4 w-20">Rank</th>
+                    <th className="text-left p-4">Player</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Losses</th>
+                    <th className="text-center p-2 md:p-4 text-sm md:text-base">Win%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rungStats.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center p-8 text-slate-400">
+                        No Rung games played yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    rungStats.map((player, idx) => (
+                      <tr key={player.player} className="border-b border-slate-700/50 hover:bg-purple-800/20 transition-all">
+                        <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
+                          {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
+                        </td>
+                        <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
+                        <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
+                        <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
+                        <td className="text-center p-4 text-red-400 font-bold">{player.losses}</td>
+                        <td className="text-center p-4 text-yellow-400 font-bold text-xl">{player.winRate}%</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
-            {recentGames.length === 0 ? (
-              <div className="col-span-2 text-center p-8 text-slate-400">
-                No games found
+        )}
+
+        {/* Recent Games Tab */}
+        {activeTab === 'recent' && (
+          <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
+            <div className="flex flex-col items-center mb-4 gap-2">
+              <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
+                📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
+              </h2>
+              <div className="text-sm">
+                <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
+                <span className="inline-block bg-blue-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">2nd</span>
+                <span className="inline-block bg-slate-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Survivors</span>
+                <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
               </div>
-            ) : (
-              recentGames.map(game => (
-                <div 
-                  key={game.id} 
-                  className="rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]"
-                >
-                  <div className="mb-3">
-                    <div className="font-bold text-base text-slate-300 mb-1">
-                      {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
-                      {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
+              {recentGames.length === 0 ? (
+                <div className="col-span-2 text-center p-8 text-slate-400">
+                  No games found
+                </div>
+              ) : (
+                recentGames.map(game => (
+                  <div 
+                    key={game.id} 
+                    className="rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]"
+                  >
+                    <div className="mb-3">
+                      <div className="font-bold text-base text-slate-300 mb-1">
+                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
+                        {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1 flex-wrap">
+                      {game.winners?.map(p => (
+                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                          {p}
+                        </span>
+                      ))}
+                      {game.runners_up?.map(p => (
+                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                          {p}
+                        </span>
+                      ))}
+                      {game.survivors?.map(p => (
+                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                          {p}
+                        </span>
+                      ))}
+                      {game.losers?.map(p => (
+                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                          {p}
+                        </span>
+                      ))}
                     </div>
                   </div>
-
-                  <div className="flex gap-1 flex-wrap">
-                    {game.winners?.map(p => (
-                      <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                        {p}
-                      </span>
-                    ))}
-                    {game.runners_up?.map(p => (
-                      <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                        {p}
-                      </span>
-                    ))}
-                    {game.survivors?.map(p => (
-                      <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                        {p}
-                      </span>
-                    ))}
-                    {game.losers?.map(p => (
-                      <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Floating Filter Button */}
         <button
