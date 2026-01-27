@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Game } from '@/lib/types'
-import { buildMonopolyTaiTiSessions, MonopolyTaiTiSession } from '@/lib/monopolyTaiTiSessions'
 
 const ROTATING_QUOTES = [
   "Where Legends Rise and Egos Die",
@@ -14,266 +13,86 @@ const ROTATING_QUOTES = [
   "The Hall of Fame Is Full—Try the Shame Section"
 ]
 
-const AGGRESSIVE_QUOTES = [
-  "Confidence is great. Delusion? Even better.",
-  "Don't worry, participation trophies count… somewhere.",
-  "Some players rise. Others… well, you're here.",
-  "Your dignity called… it's filing a complaint.",
-  "Hope your therapy sessions are ready.",
-  "Crushing dreams since Day One.",
-  "You either win or become a cautionary tale.",
-  "Fame is earned. Shame? You've got that covered.",
-  "Still convinced you're good? Adorable.",
-  "At this point, even chance pities you.",
-  "Winning is hard. Losing? You've mastered it.",
-  "Better luck next… who are we kidding?",
-  "Every match you lose adds to the legend… of failure.",
-  "Some are born great. Others just show up and hope.",
-  "The leaderboard remembers everything. Sleep tight.",
-  "You miss 100% of the shots you take… somehow.",
-  "Victory loves preparation. You brought vibes.",
-  "Stats don't lie, but we wish they did for your sake."
-]
-
-type DisplayGame = {
-  id: string
-  game_type: string
-  game_date: string
-  created_at: string
-  winners: string[]
-  runners_up: string[]
-  survivors: string[]
-  losers: string[]
-  isSession?: boolean
-  roundCount?: number
+interface PlayerStats {
+  name: string
+  totalGames: number
+  wins: number
+  runnersUp: number
+  survivors: number
+  losses: number
+  winRate: number
 }
 
 export default function Home() {
-  const [recentGames, setRecentGames] = useState<DisplayGame[]>([])
+  const [games, setGames] = useState<Game[]>([])
+  const [stats, setStats] = useState<PlayerStats[]>([])
   const [subtitle, setSubtitle] = useState(ROTATING_QUOTES[0])
 
   useEffect(() => {
-    let quoteIndex = 0
+    let idx = 0
     const interval = setInterval(() => {
-      quoteIndex = (quoteIndex + 1) % (ROTATING_QUOTES.length + AGGRESSIVE_QUOTES.length)
-      if (quoteIndex < ROTATING_QUOTES.length) {
-        setSubtitle(ROTATING_QUOTES[quoteIndex])
-      } else {
-        setSubtitle(AGGRESSIVE_QUOTES[quoteIndex - ROTATING_QUOTES.length])
-      }
-    }, quoteIndex < ROTATING_QUOTES.length ? 5000 : 10000)
+      idx = (idx + 1) % ROTATING_QUOTES.length
+      setSubtitle(ROTATING_QUOTES[idx])
+    }, 5000)
     return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
     fetchData()
-    const sub = supabase
+    const channel = supabase
       .channel('games')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, fetchData)
       .subscribe()
-    return () => { sub.unsubscribe() }
+    return () => { channel.unsubscribe() }
   }, [])
 
   async function fetchData() {
-    const { data: gamesData } = await supabase
+    const { data } = await supabase
       .from('games')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (!gamesData) return
+    if (!data) return
 
-    const allGames = gamesData as Game[]
-    const displayGames: DisplayGame[] = []
+    const allGames = data as Game[]
+    setGames(allGames.slice(0, 10))
 
-<<<<<<< HEAD
-    // Process Monopoly sessions
-    const monopolySessions = buildMonopolyTaiTiSessions(allGames, 'Monopoly')
-    monopolySessions
-      .filter(session => session.isComplete)
-      .forEach(session => {
-=======
-      // Detect achievements
-      const latestWinnerData = getLatestWinnerType(gamesData)
-      setLatestWinner(latestWinnerData)
+    // Calculate player stats
+    const playerMap = new Map<string, PlayerStats>()
 
-      const streakData = detectShitheadStreak(gamesData)
-      setShitheadStreak(streakData)
-    }
-    setLoading(false)
-  }
+    allGames.forEach(game => {
+      const allPlayers = game.players_in_game || []
+      
+      allPlayers.forEach(player => {
+        if (!playerMap.has(player)) {
+          playerMap.set(player, {
+            name: player,
+            totalGames: 0,
+            wins: 0,
+            runnersUp: 0,
+            survivors: 0,
+            losses: 0,
+            winRate: 0
+          })
+        }
 
-  /* ---------------------------------------------
-     COMBINE ALL COMPLETED SESSIONS
-  --------------------------------------------- */
+        const stats = playerMap.get(player)!
+        stats.totalGames++
 
-  const getAllCompletedSessions = () => {
-    const completedGames: Array<Game & { sessionKey?: string }> = []
-
-    // Add completed Rung sessions
-    const completedRung = rungSessions.filter(s => s.isComplete)
-    console.log('🎭 Rung sessions:', rungSessions.length, 'complete:', completedRung.length)
-    completedRung.forEach(session => {
-        const lastRound = session.rounds[session.rounds.length - 1]
-        const allPlayers = Array.from(new Set(session.rounds.flatMap(r => [...(r.team1 || []), ...(r.team2 || [])])))
-        
-        completedGames.push({
-          ...lastRound,
-          id: session.key,
-          sessionKey: session.key,
-          game_type: 'Rung',
-          players_in_game: allPlayers,
-          winners: session.tiers.winners,
-          runners_up: session.tiers.runners,
-          survivors: session.tiers.survivors,
-          losers: session.tiers.losers,
-          game_date: session.gameDate,
-          created_at: session.endAtIso || lastRound.created_at
-        })
-      })
-
-    // Add completed Monopoly sessions
-    const completedMonopoly = monopolySessions.filter(s => s.isComplete)
-    console.log('🎲 Monopoly sessions:', monopolySessions.length, 'complete:', completedMonopoly.length)
-    if (monopolySessions.length > 0) {
-      console.log('Monopoly session example:', monopolySessions[0])
-    }
-    completedMonopoly.forEach(session => {
->>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
-        const lastRound = session.rounds[session.rounds.length - 1]
-        displayGames.push({
-          id: session.key,
-          game_type: 'Monopoly',
-          game_date: session.gameDate,
-          created_at: session.endAtIso || lastRound.created_at || '',
-          winners: session.tiers.winners,
-          runners_up: session.tiers.runners,
-          survivors: session.tiers.survivors,
-          losers: session.tiers.losers,
-          isSession: true,
-          roundCount: session.roundCount
-        })
-      })
-
-<<<<<<< HEAD
-    // Process Tai Ti sessions
-    const taitiSessions = buildMonopolyTaiTiSessions(allGames, 'Tai Ti')
-    taitiSessions
-      .filter(session => session.isComplete)
-      .forEach(session => {
-=======
-    // Add completed Tai Ti sessions
-    const completedTaiTi = taitiSessions.filter(s => s.isComplete)
-    console.log('🀄 Tai Ti sessions:', taitiSessions.length, 'complete:', completedTaiTi.length)
-    completedTaiTi.forEach(session => {
->>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
-        const lastRound = session.rounds[session.rounds.length - 1]
-        displayGames.push({
-          id: session.key,
-          game_type: 'Tai Ti',
-          game_date: session.gameDate,
-          created_at: session.endAtIso || lastRound.created_at || '',
-          winners: session.tiers.winners,
-          runners_up: session.tiers.runners,
-          survivors: session.tiers.survivors,
-          losers: session.tiers.losers,
-          isSession: true,
-          roundCount: session.roundCount
-        })
-      })
-
-<<<<<<< HEAD
-    // Add other game types (Blackjack, Shithead, Rung) - they're single games, not sessions
-    const otherGames = allGames.filter(
-      g => g.game_type !== 'Monopoly' && g.game_type !== 'Tai Ti'
-    )
-=======
-    // Add Blackjack games
-    console.log('🃏 Blackjack games:', blackjackGames.length)
-    blackjackGames.forEach(game => completedGames.push(game))
-
-    // Add Shithead games
-    console.log('💩 Shithead games:', shitheadGames.length)
-    shitheadGames.forEach(game => completedGames.push(game))
-    
-    console.log('📊 Total completed games:', completedGames.length)
-
-    return completedGames
-  }
-
-  /* ---------------------------------------------
-     FILTER HANDLERS
-  --------------------------------------------- */
-
-  const togglePlayerFilter = (player: string) => {
-    if (selectedPlayers.includes(player)) {
-      setSelectedPlayers(selectedPlayers.filter(p => p !== player))
-    } else {
-      setSelectedPlayers([...selectedPlayers, player])
-    }
-  }
-
-  const selectAllPlayers = () => {
-    setSelectedPlayers([...PLAYERS])
-  }
-
-  const clearPlayers = () => {
-    setSelectedPlayers([])
-  }
-
-  const selectGameType = (gameType: string) => {
-    setSelectedGameType(gameType)
-  }
-
-  /* ---------------------------------------------
-     CALCULATE STATS WITH FILTERS
-  --------------------------------------------- */
-
-  const getFilteredCompletedGames = () => {
-    let filtered = getAllCompletedSessions()
-
-    if (selectedPlayers.length > 0) {
-      filtered = filterGamesByPlayers(filtered, selectedPlayers)
-    }
-
-    if (selectedGameType !== 'All Games') {
-      filtered = filterGamesByType(filtered, selectedGameType)
-    }
-
-    return filtered
-  }
-
-  const soloStats = calculatePlayerStats(
-    getFilteredCompletedGames(),
-    selectedPlayers
-  )
-
-  /* ---------------------------------------------
-     RUNG TEAM STATS
-  --------------------------------------------- */
-
-  const getRungTeamStats = () => {
-    const teams: Record<string, any> = {}
->>>>>>> 8e02281a1e5a243bd230eaf695cf4403d8510838
-    
-    otherGames.forEach(game => {
-      displayGames.push({
-        id: game.id,
-        game_type: game.game_type,
-        game_date: game.game_date,
-        created_at: game.created_at || '',
-        winners: game.winners || [],
-        runners_up: game.runners_up || [],
-        survivors: game.survivors || [],
-        losers: game.losers || []
+        if (game.winners?.includes(player)) stats.wins++
+        else if (game.runners_up?.includes(player)) stats.runnersUp++
+        else if (game.survivors?.includes(player)) stats.survivors++
+        else if (game.losers?.includes(player)) stats.losses++
       })
     })
 
-    // Sort by created_at timestamp
-    displayGames.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
+    const playerStats = Array.from(playerMap.values()).map(p => ({
+      ...p,
+      winRate: p.totalGames > 0 ? (p.wins / p.totalGames) * 100 : 0
+    }))
 
-    setRecentGames(displayGames.slice(0, 10))
+    playerStats.sort((a, b) => b.winRate - a.winRate)
+    setStats(playerStats)
   }
 
   return (
@@ -290,46 +109,78 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        {/* Recent Showdowns */}
+        {/* Leaderboard */}
+        <div className="backdrop-blur-xl bg-gradient-to-br from-purple-900/40 to-fuchsia-900/40 rounded-2xl border border-purple-500/30 p-6 shadow-2xl">
+          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
+            Leaderboard
+          </h2>
+
+          {stats.length === 0 ? (
+            <p className="text-center text-purple-300 py-8">No games yet</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-purple-300 text-sm border-b border-purple-500/30">
+                    <th className="text-left p-3">Rank</th>
+                    <th className="text-left p-3">Player</th>
+                    <th className="text-center p-3">W</th>
+                    <th className="text-center p-3">R</th>
+                    <th className="text-center p-3">S</th>
+                    <th className="text-center p-3">L</th>
+                    <th className="text-center p-3">Win%</th>
+                    <th className="text-center p-3">Games</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.map((player, idx) => (
+                    <tr key={player.name} className="border-b border-purple-500/10 hover:bg-purple-500/10 transition-colors">
+                      <td className="p-3 text-purple-200 font-semibold">#{idx + 1}</td>
+                      <td className="p-3 text-white font-medium">{player.name}</td>
+                      <td className="p-3 text-center text-green-400">{player.wins}</td>
+                      <td className="p-3 text-center text-blue-400">{player.runnersUp}</td>
+                      <td className="p-3 text-center text-gray-400">{player.survivors}</td>
+                      <td className="p-3 text-center text-red-400">{player.losses}</td>
+                      <td className="p-3 text-center text-purple-300">{player.winRate.toFixed(1)}%</td>
+                      <td className="p-3 text-center text-purple-200">{player.totalGames}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Games */}
         <div className="backdrop-blur-xl bg-gradient-to-br from-slate-800/40 to-purple-900/40 rounded-2xl border border-purple-500/30 p-6 shadow-2xl">
           <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
             Recent Showdowns
           </h2>
-          
-          {recentGames.length === 0 ? (
-            <p className="text-center text-purple-300 py-8">No games recorded yet</p>
+
+          {games.length === 0 ? (
+            <p className="text-center text-purple-300 py-8">No games yet</p>
           ) : (
             <div className="grid gap-4">
-              {recentGames.map((game) => (
+              {games.map((game) => (
                 <div 
                   key={game.id} 
                   className="backdrop-blur-sm bg-gradient-to-r from-purple-800/30 to-fuchsia-800/30 rounded-xl border border-purple-500/20 p-4 hover:border-purple-400/40 transition-all shadow-lg"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {game.game_type === 'Blackjack' ? '🃏' :
-                         game.game_type === 'Monopoly' ? '🎩' :
-                         game.game_type === 'Tai Ti' ? '🎴' :
-                         game.game_type === 'Shithead' ? '💩' :
-                         game.game_type === 'Rung' ? '🤝' : '🎮'}
-                      </span>
-                      <div>
-                        <h3 className="text-xl font-bold text-white">
-                          {game.game_type}
-                          {game.isSession && (
-                            <span className="ml-2 text-xs bg-purple-500/30 px-2 py-1 rounded">
-                              {game.roundCount} rounds
-                            </span>
-                          )}
-                        </h3>
-                        <p className="text-sm text-purple-300">
-                          {new Date(game.created_at).toLocaleDateString()} at{' '}
-                          {new Date(game.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">
+                      {game.game_type === 'Blackjack' ? '🃏' :
+                       game.game_type === 'Monopoly' ? '🎩' :
+                       game.game_type === 'Tai Ti' ? '🎴' :
+                       game.game_type === 'Shithead' ? '💩' :
+                       game.game_type === 'Rung' ? '🤝' : '🎮'}
+                    </span>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{game.game_type}</h3>
+                      <p className="text-sm text-purple-300">
+                        {new Date(game.created_at).toLocaleDateString()} at{' '}
+                        {new Date(game.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
                     </div>
                   </div>
 
