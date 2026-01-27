@@ -71,7 +71,15 @@ export default function AdminDashboard() {
       .from('games')
       .select('*')
       .order('created_at', { ascending: false })
-    if (data) setGames(data as Game[])
+    
+    if (data) {
+      // Filter out incomplete games (games without winners/losers data)
+      const completeGames = (data as Game[]).filter(game => {
+        return (game.winners && game.winners.length > 0) || 
+               (game.losers && game.losers.length > 0)
+      })
+      setGames(completeGames)
+    }
   }
 
   const handleSignOut = async () => {

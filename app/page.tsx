@@ -84,7 +84,13 @@ export default function PublicView() {
       .order('created_at', { ascending: false })
 
     if (data) {
-      setGames(data as Game[])
+      // Filter out incomplete games (games without winners/losers data)
+      const completeGames = (data as Game[]).filter(game => {
+        // Keep games that have at least winners OR losers
+        return (game.winners && game.winners.length > 0) || 
+               (game.losers && game.losers.length > 0)
+      })
+      setGames(completeGames)
     }
     setLoading(false)
   }
