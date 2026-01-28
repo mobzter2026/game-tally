@@ -240,30 +240,35 @@ export default function PublicView() {
   }
 
   const getRungTeamStats = () => {
-    const teamStats: Record<string, { wins: number, losses: number, games: number }> = {}
+    const teamStats: Record<string, { wins: number, losses: number, rounds: number }> = {}
     const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
 
     rungGames.forEach(game => {
-      if (!game.players_in_game || game.players_in_game.length === 0) return
+      // Only count rounds that have team1, team2, and winning_team (these are individual rounds)
+      if (game.team1 && game.team2 && game.winning_team) {
+        const team1Key = game.team1.slice().sort().join(' + ')
+        const team2Key = game.team2.slice().sort().join(' + ')
 
-      // Create team key from winners (they were on the same team)
-      if (game.winners && game.winners.length > 0) {
-        const winningTeam = game.winners.slice().sort().join(' + ')
-        if (!teamStats[winningTeam]) {
-          teamStats[winningTeam] = { wins: 0, losses: 0, games: 0 }
+        // Initialize teams if not exists
+        if (!teamStats[team1Key]) {
+          teamStats[team1Key] = { wins: 0, losses: 0, rounds: 0 }
         }
-        teamStats[winningTeam].wins++
-        teamStats[winningTeam].games++
-      }
+        if (!teamStats[team2Key]) {
+          teamStats[team2Key] = { wins: 0, losses: 0, rounds: 0 }
+        }
 
-      // Create team key from losers
-      if (game.losers && game.losers.length > 0) {
-        const losingTeam = game.losers.slice().sort().join(' + ')
-        if (!teamStats[losingTeam]) {
-          teamStats[losingTeam] = { wins: 0, losses: 0, games: 0 }
+        // Count wins and losses for this round
+        if (game.winning_team === 1) {
+          teamStats[team1Key].wins++
+          teamStats[team1Key].rounds++
+          teamStats[team2Key].losses++
+          teamStats[team2Key].rounds++
+        } else if (game.winning_team === 2) {
+          teamStats[team2Key].wins++
+          teamStats[team2Key].rounds++
+          teamStats[team1Key].losses++
+          teamStats[team1Key].rounds++
         }
-        teamStats[losingTeam].losses++
-        teamStats[losingTeam].games++
       }
     })
 
@@ -272,12 +277,12 @@ export default function PublicView() {
         team,
         wins: stats.wins,
         losses: stats.losses,
-        games: stats.games,
-        winRate: stats.games > 0 
-          ? ((stats.wins / stats.games) * 100).toFixed(0) 
+        rounds: stats.rounds,
+        winRate: stats.rounds > 0 
+          ? ((stats.wins / stats.rounds) * 100).toFixed(0) 
           : '0'
       }))
-      .filter(t => t.games > 0)
+      .filter(t => t.rounds > 0)
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
   }
 
