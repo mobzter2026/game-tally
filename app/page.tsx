@@ -433,14 +433,14 @@ export default function PublicView() {
                   {/* Hall of Fame/Shame Buttons */}
                   <div className="flex gap-2 mb-3 justify-center flex-wrap">
                     <Button
-                      onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
+                      onClick={() => setHallView('fame')}
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
                     >
                       ⭐ Hall of Fame
                     </Button>
                     <Button
-                      onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
+                      onClick={() => setHallView('shame')}
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
                     >
