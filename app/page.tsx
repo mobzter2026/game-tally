@@ -243,11 +243,16 @@ export default function PublicView() {
     const teamStats: Record<string, { wins: number, losses: number, rounds: number }> = {}
     const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
 
+    console.log('Total Rung games:', rungGames.length)
+    console.log('Sample game:', rungGames[0])
+
     rungGames.forEach(game => {
       // Count rounds that have team1, team2, and winning_team (individual rounds)
       if (game.team1 && game.team2 && game.winning_team !== null && game.winning_team !== undefined) {
         const team1Key = game.team1.slice().sort().join(' + ')
         const team2Key = game.team2.slice().sort().join(' + ')
+
+        console.log('Processing round:', { team1Key, team2Key, winning_team: game.winning_team })
 
         // Initialize teams if not exists
         if (!teamStats[team1Key]) {
@@ -271,6 +276,8 @@ export default function PublicView() {
         }
       }
     })
+
+    console.log('Team stats:', teamStats)
 
     return Object.entries(teamStats)
       .map(([team, stats]) => ({
