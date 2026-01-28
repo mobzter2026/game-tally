@@ -350,38 +350,6 @@ export default function PublicView() {
         {/* Solo Kings Tab */}
         {activeTab === 'individual' && (
           <>
-            {/* Leaderboard Header with Hall Buttons */}
-            <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-              <div className="p-4 border-b border-slate-700">
-                <div className="text-center">
-                  <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
-                    <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
-                      The Ultimate Backstab Board
-                    </span> 🔪
-                  </h2>
-                  <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional..... Betrayal Mandatory</p>
-
-                  {/* Hall of Fame/Shame Buttons */}
-                  <div className="flex gap-2 mb-3 justify-center flex-wrap">
-                    <Button
-                      onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
-                      variant="pop"
-                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
-                    >
-                      ⭐ Hall of Fame
-                    </Button>
-                    <Button
-                      onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
-                      variant="pop"
-                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
-                    >
-                      🤡 Hall of Shame
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {hallView !== 'none' ? (
               <>
                 <div className="mb-4 flex justify-end">
@@ -451,13 +419,39 @@ export default function PublicView() {
               </>
             ) : (
               <>
-            {/* Leaderboard Table */}
+            {/* Leaderboard */}
             <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
               <div className="p-4 border-b border-slate-700">
                 <div className="text-center">
-                  <p className="text-slate-400 text-xs sm:text-sm mb-2">
-                    🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti  ⬩  💩 Shithead  ⬩  🎭 Rung
-                  </p>
+                  <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
+                    <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
+                      The Ultimate Backstab Board
+                    </span> 🔪
+                  </h2>
+                  <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional..... Betrayal Mandatory</p>
+
+                  {/* Hall of Fame/Shame Buttons */}
+                  <div className="flex gap-2 mb-3 justify-center flex-wrap">
+                    <Button
+                      onClick={() => setHallView(hallView === 'fame' ? 'none' : 'fame')}
+                      variant="pop"
+                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+                    >
+                      ⭐ Hall of Fame
+                    </Button>
+                    <Button
+                      onClick={() => setHallView(hallView === 'shame' ? 'none' : 'shame')}
+                      variant="pop"
+                      className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
+                    >
+                      🤡 Hall of Shame
+                    </Button>
+                  </div>
+
+                  <div className="text-slate-400 text-xs sm:text-sm mb-2 font-bold">
+                    <div className="mb-1">🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti</div>
+                    <div>💩 Shithead  ⬩  🎭 Rung</div>
+                  </div>
                   <p className="text-slate-400 text-xs mb-3">
                     🏆 Wins: 100%  ⬩  🏃 2nd: 40%  ⬩  🤟🏼 Survival: 10%
                   </p>
