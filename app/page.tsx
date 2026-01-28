@@ -244,8 +244,8 @@ export default function PublicView() {
     const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
 
     rungGames.forEach(game => {
-      // Only count rounds that have team1, team2, and winning_team (these are individual rounds)
-      if (game.team1 && game.team2 && game.winning_team) {
+      // Count rounds that have team1, team2, and winning_team (individual rounds)
+      if (game.team1 && game.team2 && game.winning_team !== null && game.winning_team !== undefined) {
         const team1Key = game.team1.slice().sort().join(' + ')
         const team2Key = game.team2.slice().sort().join(' + ')
 
@@ -587,33 +587,35 @@ export default function PublicView() {
                 recentGames.map(game => (
                   <div 
                     key={game.id} 
-                    className="rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]"
+                    className="rounded-xl p-4 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[100px]"
                   >
-                    <div className="mb-3">
-                      <div className="font-bold text-base text-slate-300 mb-1">
-                        {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
-                        {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="font-bold text-base text-white">
+                        {GAME_EMOJIS[game.game_type]} {game.game_type}
+                      </div>
+                      <div className="text-slate-400 text-xs text-right">
+                        {new Date(game.game_date).toLocaleDateString()}
                       </div>
                     </div>
 
-                    <div className="flex gap-1 flex-wrap">
+                    <div className="grid grid-cols-6 gap-1">
                       {game.winners?.map(p => (
-                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.runners_up?.map(p => (
-                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.survivors?.map(p => (
-                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.losers?.map(p => (
-                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
