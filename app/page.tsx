@@ -12,28 +12,28 @@ const QUOTES = [
   "It's not about winning, it's about making others lose.",
   "Every card tells a story of betrayal.",
   "Where loyalty dies and legends are born.",
-  "Every loss is just character building… and humiliation.",
-  "If at first you don't succeed… shuffle and try again.",
+  "Every loss is just character buildingâ€¦ and humiliation.",
+  "If at first you don't succeedâ€¦ shuffle and try again.",
   "Victory is earned. Humiliation is free.",
   "Some are born winners. Others are just funny losers.",
   "The table is a battlefield. Your ego is the weapon.",
-  "You can't control luck… but you can ruin everyone else's day.",
+  "You can't control luckâ€¦ but you can ruin everyone else's day.",
   "Pain is temporary. Bragging rights are forever.",
   "Hope your therapy sessions are ready.",
   "One table. Many casualties.",
   "Lose today. Regret tomorrow. Cry later.",
-  "Your dignity called… it's filing a complaint.",
+  "Your dignity calledâ€¦ it's filing a complaint.",
   "Lose today. Learn tomorrow. Dominate next time.",
-  "Winners rise. Everyone else takes notes… or cry.",
+  "Winners rise. Everyone else takes notesâ€¦ or cry.",
   "Step up or step aside."
 ]
 
 const GAME_EMOJIS: Record<string, string> = {
-  'Blackjack': '🃏',
-  'Monopoly': '🎲',
-  'Tai Ti': '🀄',
-  'Shithead': '💩',
-  'Rung': '🎭'
+  'Blackjack': 'ðŸƒ',
+  'Monopoly': 'ðŸŽ²',
+  'Tai Ti': 'ðŸ€„',
+  'Shithead': 'ðŸ’©',
+  'Rung': 'ðŸŽ­'
 }
 
 const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
@@ -92,11 +92,13 @@ export default function PublicView() {
     if (data) {
       // Filter out incomplete games
       const completeGames = (data as Game[]).filter(game => {
-        // For Rung: keep rounds with team data OR session summaries with winners/losers
+        // For Rung: keep BOTH individual rounds AND session summaries
+        // - Rounds have: team1, team2, winning_team (for duo stats)
+        // - Sessions have: winners, losers (for display and player stats)
         if (game.game_type === 'Rung') {
-          return (game.team1 && game.team2 && game.winning_team !== null) || 
-                 (game.winners && game.winners.length > 0) || 
-                 (game.losers && game.losers.length > 0)
+          const hasRoundData = game.team1 && game.team2 && game.winning_team !== null && game.winning_team !== undefined
+          const hasSessionData = (game.winners && game.winners.length > 0) || (game.losers && game.losers.length > 0)
+          return hasRoundData || hasSessionData
         }
         // For other games: keep games with at least winners OR losers
         return (game.winners && game.winners.length > 0) || 
@@ -158,7 +160,17 @@ export default function PublicView() {
       }
     })
 
-    filteredGames.forEach(game => {
+    // Count ALL games including Rung sessions (but not individual Rung rounds)
+    const gamesForStats = filteredGames.filter(g => {
+      // For Rung: only count session summaries (with winners/losers), not individual rounds
+      if (g.game_type === 'Rung') {
+        return (g.winners && g.winners.length > 0) || (g.losers && g.losers.length > 0)
+      }
+      // For other games: count all
+      return true
+    })
+
+    gamesForStats.forEach(game => {
       if (game.players_in_game) {
         game.players_in_game.forEach(p => {
           if (stats[p]) stats[p].gamesPlayed++
@@ -295,7 +307,14 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungStats = getRungStats()
   const rungTeamStats = getRungTeamStats()
-  const recentGames = filteredGames.slice(0, 20)
+  const recentGames = filteredGames.filter(g => {
+    // For Rung: only show session summaries (with winners/losers), not individual rounds
+    if (g.game_type === 'Rung') {
+      return (g.winners && g.winners.length > 0) || (g.losers && g.losers.length > 0)
+    }
+    // For other games: show all
+    return true
+  }).slice(0, 20)
 
   if (loading) {
     return (
@@ -315,7 +334,7 @@ export default function PublicView() {
             </span>
             <br />
             <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-              LEADERBOARD 🏆
+              LEADERBOARD ðŸ†
             </span>
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">
@@ -370,7 +389,7 @@ export default function PublicView() {
                     color="blue"
                     className="px-4 py-2"
                   >
-                    ◀ Back to Overall Leaderboard
+                    â—€ Back to Overall Leaderboard
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -407,7 +426,7 @@ export default function PublicView() {
                                     <div className="flex items-center gap-3">
                                       <span className="text-2xl">
                                         {hallView === 'fame' 
-                                          ? (idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉')
+                                          ? (idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : 'ðŸ¥‰')
                                           : `${gameStats.length - idx}`
                                         }
                                       </span>
@@ -437,7 +456,7 @@ export default function PublicView() {
                   <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
                     <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
                       The Ultimate Backstab Board
-                    </span> 🔪
+                    </span> ðŸ”ª
                   </h2>
                   <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional..... Betrayal Mandatory</p>
 
@@ -448,34 +467,34 @@ export default function PublicView() {
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
                     >
-                      ⭐ Hall of Fame
+                      â­ Hall of Fame
                     </Button>
                     <Button
                       onClick={() => setHallView('shame')}
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
                     >
-                      🤡 Hall of Shame
+                      ðŸ¤¡ Hall of Shame
                     </Button>
                   </div>
 
                   <div className="text-slate-400 text-xs sm:text-sm mb-2 font-bold">
-                    <div className="mb-1">🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti</div>
-                    <div>💩 Shithead  ⬩  🎭 Rung</div>
+                    <div className="mb-1">ðŸƒ Blackjack  â¬©  ðŸŽ² Monopoly  â¬©  ðŸ€„ Tai Ti</div>
+                    <div>ðŸ’© Shithead  â¬©  ðŸŽ­ Rung</div>
                   </div>
                   <p className="text-slate-400 text-xs mb-3">
-                    🏆 Wins: 100%  ⬩  🏃 2nd: 40%  ⬩  🤟🏼 Survival: 10%
+                    ðŸ† Wins: 100%  â¬©  ðŸƒ 2nd: 40%  â¬©  ðŸ¤ŸðŸ¼ Survival: 10%
                   </p>
                   <select
                     value={selectedGameType}
                     onChange={(e) => setSelectedGameType(e.target.value)}
                     className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
                   >
-                    <option value="All Games">🎰 All Games</option>
+                    <option value="All Games">ðŸŽ° All Games</option>
                     {INDIVIDUAL_GAMES.map(game => (
                       <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                     ))}
-                    <option value="Rung">🎭 Rung</option>
+                    <option value="Rung">ðŸŽ­ Rung</option>
                   </select>
                 </div>
               </div>
@@ -505,7 +524,7 @@ export default function PublicView() {
                       playerStats.map((player, idx) => (
                         <tr key={player.player} className="border-b border-slate-700/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all">
                           <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
+                            {idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : idx === 2 ? 'ðŸ¥‰' : `${idx + 1}`}
                           </td>
                           <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
                           <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
@@ -530,7 +549,7 @@ export default function PublicView() {
         {activeTab === 'rung' && (
           <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Power Pairs</h2>
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">ðŸŽ­ Rung - Power Pairs</h2>
               <p className="text-slate-400 text-sm mt-1">Where partnerships rise or fall together</p>
             </div>
             <div className="overflow-x-auto">
@@ -555,7 +574,7 @@ export default function PublicView() {
                     rungTeamStats.map((teamStat, idx) => (
                       <tr key={teamStat.team} className="border-b border-slate-700/50 hover:bg-purple-800/20 transition-all">
                         <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                          {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
+                          {idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : idx === 2 ? 'ðŸ¥‰' : `${idx + 1}`}
                         </td>
                         <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{teamStat.team}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{teamStat.wins}</td>
@@ -575,7 +594,7 @@ export default function PublicView() {
           <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="flex flex-col items-center mb-4 gap-2">
               <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-                📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
+                ðŸ“œ <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
               </h2>
               <div className="text-sm">
                 <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
