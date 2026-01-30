@@ -2,39 +2,31 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Button from '@/Components/Button'
 
 export default function UserLogin() {
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please enter both email and password')
+    if (!password) {
+      setError('Please enter password')
       return
     }
 
     setLoading(true)
     setError('')
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (signInError) {
-      setError('Invalid email or password')
+    // Simple password check - change this to your user password
+    if (password === 'user123') {
+      router.push('/admin/scoring')
+    } else {
+      setError('Incorrect password')
+      setPassword('')
       setLoading(false)
-      return
     }
-
-    // Redirect to scoring page
-    router.push('/admin/scoring')
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -53,19 +45,6 @@ export default function UserLogin() {
 
           <form onSubmit={handleSubmit} className="p-6">
             <div className="mb-4">
-              <label className="block mb-2 text-sm font-bold">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center"
-                placeholder="Enter email"
-                autoFocus
-                disabled={loading}
-              />
-            </div>
-
-            <div className="mb-4">
               <label className="block mb-2 text-sm font-bold">Password</label>
               <input
                 type="password"
@@ -79,6 +58,7 @@ export default function UserLogin() {
                 }}
                 className="w-full p-3 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center"
                 placeholder="Enter password"
+                autoFocus
                 disabled={loading}
               />
             </div>

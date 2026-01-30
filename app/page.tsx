@@ -215,6 +215,69 @@ export default function PublicView() {
       .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
   }
 
+  const getPlayerStatsForGame = (gameType: string): PlayerStats[] => {
+    const stats: Record<string, any> = {}
+    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+
+    activePlayers.forEach(p => {
+      stats[p] = { 
+        gamesPlayed: 0, 
+        wins: 0, 
+        runnersUp: 0, 
+        survivals: 0, 
+        losses: 0,
+        weightedScore: 0
+      }
+    })
+
+    // Filter games by type
+    const gamesForType = filteredGames.filter(g => g.game_type === gameType)
+
+    gamesForType.forEach(game => {
+      if (game.players_in_game) {
+        game.players_in_game.forEach(p => {
+          if (stats[p]) stats[p].gamesPlayed++
+        })
+      }
+
+      if (game.winners) game.winners.forEach(w => {
+        if (stats[w]) {
+          stats[w].wins++
+          stats[w].weightedScore += 1.0
+        }
+      })
+
+      if (game.runners_up) game.runners_up.forEach(r => {
+        if (stats[r]) {
+          stats[r].runnersUp++
+          stats[r].weightedScore += 0.4
+        }
+      })
+
+      if (game.survivors) game.survivors.forEach(s => {
+        if (stats[s]) {
+          stats[s].survivals++
+          stats[s].weightedScore += 0.1
+        }
+      })
+
+      if (game.losers) game.losers.forEach(l => {
+        if (stats[l]) stats[l].losses++
+      })
+    })
+
+    return activePlayers
+      .map(p => ({
+        player: p,
+        ...stats[p],
+        winRate: stats[p].gamesPlayed > 0 
+          ? ((stats[p].weightedScore / stats[p].gamesPlayed) * 100).toFixed(0) 
+          : '0'
+      }))
+      .filter(p => p.gamesPlayed > 0)
+      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+  }
+
   const getRungStats = () => {
     const stats: Record<string, any> = {}
     const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
