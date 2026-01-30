@@ -394,13 +394,7 @@ export default function PublicView() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {INDIVIDUAL_GAMES.map(gameType => {
-                    const gameStats = playerStats.filter(p => {
-                      const gameGames = filteredGames.filter(g => 
-                        g.game_type === gameType && 
-                        g.players_in_game?.includes(p.player)
-                      )
-                      return gameGames.length > 0
-                    })
+                    const gameStats = getPlayerStatsForGame(gameType)
                     
                     const displayStats = hallView === 'fame'
                       ? gameStats.slice(0, 3)
