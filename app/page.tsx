@@ -708,6 +708,8 @@ export default function PublicView() {
 
         <div className="text-center mt-8 space-x-4">
           <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
+          <span className="text-slate-600">|</span>
+          <a href="/user/login" className="text-slate-400 hover:text-slate-200 text-sm">User Login</a>
         </div>
       </div>
     </div>
