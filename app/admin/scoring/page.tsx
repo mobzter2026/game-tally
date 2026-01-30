@@ -5,12 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 import Button from '@/Components/Button'
 
 const PLAYERS = ['Riz', 'Mobz', 'T', 'Saf', 'Faizan', 'Yusuf']
-const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Shithead', 'Blackjack']
+const SCORE_GAMES = ['Monopoly', 'Tai Ti', 'Shithead', 'Blackjack', 'Rung']
 const GAME_EMOJIS: Record<string, string> = {
   'Blackjack': '🃏',
   'Monopoly': '🎲',
   'Tai Ti': '🀄',
-  'Shithead': '💩'
+  'Shithead': '💩',
+  'Rung': '🎭'
 }
 
 interface Session {
@@ -43,6 +44,14 @@ export default function ScoringPage() {
     players: []
   })
 
+  // Rung-specific state
+  const [rungTeam1, setRungTeam1] = useState<string[]>([])
+  const [rungTeam2, setRungTeam2] = useState<string[]>([])
+  const [rungRounds, setRungRounds] = useState<Array<{team1: string[], team2: string[], winner: number}>>([])
+  const [currentRound, setCurrentRound] = useState(0)
+  const [team1Score, setTeam1Score] = useState(0)
+  const [team2Score, setTeam2Score] = useState(0)
+
   useEffect(() => {
     setLoading(false)
   }, [])
@@ -67,6 +76,85 @@ export default function ScoringPage() {
 
   const clearPlayers = () => {
     setNewSession({ ...newSession, players: [] })
+  }
+
+  // Rung team management
+  const toggleRungTeam1 = (player: string) => {
+    if (rungTeam1.includes(player)) {
+      setRungTeam1(rungTeam1.filter(p => p !== player))
+    } else if (rungTeam1.length < 2) {
+      setRungTeam1([...rungTeam1, player])
+    }
+  }
+
+  const toggleRungTeam2 = (player: string) => {
+    if (rungTeam2.includes(player)) {
+      setRungTeam2(rungTeam2.filter(p => p !== player))
+    } else if (rungTeam2.length < 2) {
+      setRungTeam2([...rungTeam2, player])
+    }
+  }
+
+  const recordRungRound = (winningTeam: number) => {
+    const newRound = {
+      team1: [...rungTeam1],
+      team2: [...rungTeam2],
+      winner: winningTeam
+    }
+    setRungRounds([...rungRounds, newRound])
+    setCurrentRound(currentRound + 1)
+    
+    if (winningTeam === 1) {
+      setTeam1Score(team1Score + 1)
+    } else {
+      setTeam2Score(team2Score + 1)
+    }
+  }
+
+  const saveRungSession = async () => {
+    if (rungRounds.length === 0) {
+      alert('No rounds to save!')
+      return
+    }
+
+    // Save each individual round
+    for (const round of rungRounds) {
+      await supabase.from('games').insert({
+        game_type: 'Rung',
+        game_date: newSession.date,
+        players_in_game: [...round.team1, ...round.team2],
+        team1: round.team1,
+        team2: round.team2,
+        winning_team: round.winner,
+        winners: null,
+        losers: null
+      })
+    }
+
+    // Save session summary
+    const allPlayers = [...new Set([...rungTeam1, ...rungTeam2])]
+    const winners = team1Score > team2Score ? rungTeam1 : rungTeam2
+    const losers = team1Score > team2Score ? rungTeam2 : rungTeam1
+
+    await supabase.from('games').insert({
+      game_type: 'Rung',
+      game_date: newSession.date,
+      players_in_game: allPlayers,
+      winners: winners,
+      losers: losers,
+      team1: null,
+      team2: null,
+      winning_team: null
+    })
+
+    // Reset
+    setRungRounds([])
+    setRungTeam1([])
+    setRungTeam2([])
+    setTeam1Score(0)
+    setTeam2Score(0)
+    setCurrentRound(0)
+    alert('Rung session saved!')
   }
 
   const startNewRound = () => {
@@ -250,46 +338,144 @@ export default function ScoringPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {newSession.players.length === 0 ? (
-                <Button onClick={selectAllPlayers} variant="pop" color="blue" className="flex-1 h-9 text-sm">
-                  ♠ Deal All
-                </Button>
-              ) : (
-                <Button onClick={clearPlayers} variant="pop" color="red" className="flex-1 h-9 text-sm">
-                  ✖ Clear
-                </Button>
-              )}
-            </div>
+            {newSession.game === 'Rung' ? (
+              <>
+                {/* Rung Team Selection */}
+                <div className="space-y-3">
+                  <div className="bg-purple-900/30 p-3 rounded-lg">
+                    <h3 className="text-sm font-bold text-center mb-2">Team 1 ({rungTeam1.length}/2)</h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {PLAYERS.map(p => (
+                        <Button
+                          key={p}
+                          onClick={() => toggleRungTeam1(p)}
+                          variant="frosted"
+                          color="purple"
+                          selected={rungTeam1.includes(p)}
+                          disabled={rungTeam2.includes(p)}
+                          className="h-9 text-sm font-semibold"
+                        >
+                          {p}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {PLAYERS.map(p => (
+                  <div className="bg-blue-900/30 p-3 rounded-lg">
+                    <h3 className="text-sm font-bold text-center mb-2">Team 2 ({rungTeam2.length}/2)</h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {PLAYERS.map(p => (
+                        <Button
+                          key={p}
+                          onClick={() => toggleRungTeam2(p)}
+                          variant="frosted"
+                          color="purple"
+                          selected={rungTeam2.includes(p)}
+                          disabled={rungTeam1.includes(p)}
+                          className="h-9 text-sm font-semibold"
+                        >
+                          {p}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {rungTeam1.length === 2 && rungTeam2.length === 2 && (
+                  <>
+                    <div className="bg-slate-900/50 p-4 rounded-lg">
+                      <h3 className="text-center font-bold mb-3">
+                        Round {currentRound + 1} - Score: {team1Score} - {team2Score}
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          onClick={() => recordRungRound(1)}
+                          variant="pop"
+                          color="purple"
+                          className="py-3 text-sm font-bold"
+                        >
+                          {rungTeam1.join(' + ')} Won
+                        </Button>
+                        <Button
+                          onClick={() => recordRungRound(2)}
+                          variant="pop"
+                          color="purple"
+                          className="py-3 text-sm font-bold"
+                        >
+                          {rungTeam2.join(' + ')} Won
+                        </Button>
+                      </div>
+                    </div>
+
+                    {rungRounds.length > 0 && (
+                      <div className="bg-slate-900/50 p-3 rounded-lg">
+                        <h4 className="text-sm font-bold mb-2">Rounds History ({rungRounds.length})</h4>
+                        <div className="space-y-1 text-xs">
+                          {rungRounds.map((round, idx) => (
+                            <div key={idx} className="text-slate-300">
+                              Round {idx + 1}: {round.winner === 1 ? round.team1.join(' + ') : round.team2.join(' + ')} won
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={saveRungSession}
+                      disabled={rungRounds.length === 0}
+                      variant="pop"
+                      color="blue"
+                      className="w-full py-3 text-base font-bold"
+                    >
+                      💾 Save Rung Session
+                    </Button>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  {newSession.players.length === 0 ? (
+                    <Button onClick={selectAllPlayers} variant="pop" color="blue" className="flex-1 h-9 text-sm">
+                      ♠ Deal All
+                    </Button>
+                  ) : (
+                    <Button onClick={clearPlayers} variant="pop" color="red" className="flex-1 h-9 text-sm">
+                      ✖ Clear
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {PLAYERS.map(p => (
+                    <Button
+                      key={p}
+                      onClick={() => togglePlayer(p)}
+                      variant="frosted"
+                      color="purple"
+                      selected={newSession.players.includes(p)}
+                      className="h-9 text-sm font-semibold"
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                </div>
+
                 <Button
-                  key={p}
-                  onClick={() => togglePlayer(p)}
+                  onClick={startNewRound}
+                  disabled={newSession.players.length === 0}
                   variant="frosted"
                   color="purple"
-                  selected={newSession.players.includes(p)}
-                  className="h-9 text-sm font-semibold"
+                  className={`w-full py-2.5 rounded-xl font-bold text-base ${
+                    newSession.players.length > 0
+                      ? 'ring-2 ring-amber-400 shadow-[inset_0_0_10px_rgba(255,170,0,0.85),0_0_18px_rgba(255,170,0,0.9),0_0_32px_rgba(255,170,0,0.55)]'
+                      : ''
+                  }`}
                 >
-                  {p}
+                  👊 Let the Madness Begin
                 </Button>
-              ))}
-            </div>
-
-            <Button
-              onClick={startNewRound}
-              disabled={newSession.players.length === 0}
-              variant="frosted"
-              color="purple"
-              className={`w-full py-2.5 rounded-xl font-bold text-base ${
-                newSession.players.length > 0
-                  ? 'ring-2 ring-amber-400 shadow-[inset_0_0_10px_rgba(255,170,0,0.85),0_0_18px_rgba(255,170,0,0.9),0_0_32px_rgba(255,170,0,0.55)]'
-                  : ''
-              }`}
-            >
-              👊 Let the Madness Begin
-            </Button>
+              </>
+            )}
           </div>
         ) : !gameComplete ? (
           newSession.game === 'Blackjack' ? (
