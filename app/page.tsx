@@ -603,7 +603,7 @@ export default function PublicView() {
                 <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Loser</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto justify-items-center">
               {recentGames.length === 0 ? (
                 <div className="col-span-2 text-center p-8 text-slate-400">
                   No games found
@@ -623,24 +623,24 @@ export default function PublicView() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-6 gap-1">
+                    <div className="grid grid-cols-6 gap-1.5">
                       {game.winners?.map(p => (
-                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-green-600 text-white px-2.5 py-1.5 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.runners_up?.map(p => (
-                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-blue-600 text-white px-2.5 py-1.5 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.survivors?.map(p => (
-                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-slate-600 text-white px-2.5 py-1.5 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.losers?.map(p => (
-                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-red-600 text-white px-2.5 py-1.5 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
