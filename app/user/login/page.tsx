@@ -53,7 +53,7 @@ export default function UserLogin() {
             <Button
               type="submit"
               variant="pop"
-              color="green"
+              color="blue"
               className="w-full py-3 text-lg font-bold"
             >
               🎯 Enter Scoring
