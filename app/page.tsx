@@ -92,11 +92,13 @@ export default function PublicView() {
     if (data) {
       // Filter out incomplete games
       const completeGames = (data as Game[]).filter(game => {
-        // For Rung: keep rounds with team data OR session summaries with winners/losers
+        // For Rung: keep BOTH individual rounds AND session summaries
+        // - Rounds have: team1, team2, winning_team (for duo stats)
+        // - Sessions have: winners, losers (for display and player stats)
         if (game.game_type === 'Rung') {
-          return (game.team1 && game.team2 && game.winning_team !== null) || 
-                 (game.winners && game.winners.length > 0) || 
-                 (game.losers && game.losers.length > 0)
+          const hasRoundData = game.team1 && game.team2 && game.winning_team !== null && game.winning_team !== undefined
+          const hasSessionData = (game.winners && game.winners.length > 0) || (game.losers && game.losers.length > 0)
+          return hasRoundData || hasSessionData
         }
         // For other games: keep games with at least winners OR losers
         return (game.winners && game.winners.length > 0) || 
@@ -158,7 +160,17 @@ export default function PublicView() {
       }
     })
 
-    filteredGames.forEach(game => {
+    // Count ALL games including Rung sessions (but not individual Rung rounds)
+    const gamesForStats = filteredGames.filter(g => {
+      // For Rung: only count session summaries (with winners/losers), not individual rounds
+      if (g.game_type === 'Rung') {
+        return (g.winners && g.winners.length > 0) || (g.losers && g.losers.length > 0)
+      }
+      // For other games: count all
+      return true
+    })
+
+    gamesForStats.forEach(game => {
       if (game.players_in_game) {
         game.players_in_game.forEach(p => {
           if (stats[p]) stats[p].gamesPlayed++
@@ -295,7 +307,14 @@ export default function PublicView() {
   const playerStats = getPlayerStats()
   const rungStats = getRungStats()
   const rungTeamStats = getRungTeamStats()
-  const recentGames = filteredGames.slice(0, 20)
+  const recentGames = filteredGames.filter(g => {
+    // For Rung: only show session summaries (with winners/losers), not individual rounds
+    if (g.game_type === 'Rung') {
+      return (g.winners && g.winners.length > 0) || (g.losers && g.losers.length > 0)
+    }
+    // For other games: show all
+    return true
+  }).slice(0, 20)
 
   if (loading) {
     return (
