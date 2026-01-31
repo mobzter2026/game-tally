@@ -982,10 +982,10 @@ export default function PublicView() {
                           <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= overallPlayerStats.length - 3 ? 'bg-purple-900/15' : '')} shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all`}>
                             <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(overallPlayerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
-                              {player.player}
                               {player.player === lastShitheadLoser && (
-                                <span className="inline-block animate-bounce ml-2 text-2xl">💩</span>
+                                <span className="inline-block animate-bounce mr-2 text-xl">💩</span>
                               )}
+                              {player.player}
                             </td>
                             <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                             <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
@@ -1096,29 +1096,149 @@ export default function PublicView() {
                         </div>
                       </div>
 
-                      {/* Display for all games including Rung */}
-                      <div className="flex gap-1 flex-wrap">
-                        {game.winners?.map(p => (
-                          <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                            {p}
-                          </span>
-                        ))}
-                        {game.runners_up?.map(p => (
-                          <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                            {p}
-                          </span>
-                        ))}
-                        {game.survivors?.map(p => (
-                          <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                            {p}
-                          </span>
-                        ))}
-                        {game.losers?.map(p => (
-                          <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                            {p}
-                          </span>
-                        ))}
-                      </div>
+                      {/* Special display for Rung games - show player badges based on best team performance */}
+                      {game.game_type === 'Rung' && game.team1 && game.team2 ? (
+                        <div className="flex gap-1 flex-wrap">
+                          {(() => {
+                            // Get all rounds for this session
+                            const sessionRounds = games.filter(g => 
+                              g.game_type === 'Rung' && 
+                              g.game_date === game.game_date &&
+                              g.winning_team !== null &&
+                              g.team1 && g.team2
+                            )
+
+                            // Calculate team scores
+                            const teamWins: Record<string, number> = {}
+                            const allTeams = new Set<string>()
+                            
+                            sessionRounds.forEach(round => {
+                              const team1Key = round.team1!.slice().sort().join('&')
+                              const team2Key = round.team2!.slice().sort().join('&')
+                              
+                              allTeams.add(team1Key)
+                              allTeams.add(team2Key)
+                              
+                              if (!teamWins[team1Key]) teamWins[team1Key] = 0
+                              if (!teamWins[team2Key]) teamWins[team2Key] = 0
+                              
+                              if (round.winning_team === 1) teamWins[team1Key]++
+                              else if (round.winning_team === 2) teamWins[team2Key]++
+                            })
+
+                            // For each player, find their best team
+                            const allPlayers = new Set<string>()
+                            allTeams.forEach(teamKey => {
+                              teamKey.split('&').forEach(p => allPlayers.add(p))
+                            })
+
+                            const playerBestTeam: Record<string, { team: string, wins: number }> = {}
+                            
+                            allPlayers.forEach(player => {
+                              let bestWins = -1
+                              let bestTeam = ''
+                              
+                              allTeams.forEach(teamKey => {
+                                if (teamKey.split('&').includes(player)) {
+                                  const wins = teamWins[teamKey] || 0
+                                  if (wins > bestWins) {
+                                    bestWins = wins
+                                    bestTeam = teamKey
+                                  }
+                                }
+                              })
+                              
+                              if (bestTeam) {
+                                playerBestTeam[player] = { team: bestTeam, wins: bestWins }
+                              }
+                            })
+
+                            // Sort players by their best team's performance
+                            const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
+                              (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
+                            )
+
+                            // Categorize players
+                            const playerScores = sortedPlayers.map(p => playerBestTeam[p]?.wins || 0)
+                            const maxScore = Math.max(...playerScores)
+                            const minScore = Math.min(...playerScores)
+                            
+                            // Winners: reached 5
+                            const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
+                            
+                            // Non-winners
+                            const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+                            const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
+                            const maxNonWinnerScore = nonWinnerScores.length > 0 ? Math.max(...nonWinnerScores) : 0
+                            const minNonWinnerScore = nonWinnerScores.length > 0 ? Math.min(...nonWinnerScores) : 0
+                            
+                            let runners: string[] = []
+                            let survivors: string[] = []
+                            let losers: string[] = []
+                            
+                            if (nonWinners.length > 0) {
+                              // Runners-up: highest score among non-winners
+                              runners = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
+                              
+                              // If all non-winners have same score, they're all losers
+                              if (maxNonWinnerScore === minNonWinnerScore) {
+                                losers = runners
+                                runners = []
+                              } else {
+                                // Losers: lowest score
+                                losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
+                                
+                                // Survivors: everyone else in between
+                                survivors = nonWinners.filter(p => 
+                                  !runners.includes(p) && 
+                                  !losers.includes(p)
+                                )
+                              }
+                            }
+
+                            const renderPlayerBadges = (players: string[], colorClass: string) => {
+                              return players.map(p => (
+                                <span key={p} className={`${colorClass} text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all`}>
+                                  {p}
+                                </span>
+                              ))
+                            }
+                            
+                            return (
+                              <>
+                                {renderPlayerBadges(winners, 'bg-green-600')}
+                                {renderPlayerBadges(runners, 'bg-blue-600')}
+                                {renderPlayerBadges(survivors, 'bg-slate-600')}
+                                {renderPlayerBadges(losers, 'bg-red-600')}
+                              </>
+                            )
+                          })()}
+                        </div>
+                      ) : (
+                        /* Regular games display */
+                        <div className="flex gap-1 flex-wrap">
+                          {game.winners?.map(p => (
+                            <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.runners_up?.map(p => (
+                            <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.survivors?.map(p => (
+                            <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                          {game.losers?.map(p => (
+                            <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )
                 })
