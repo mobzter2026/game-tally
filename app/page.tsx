@@ -12,28 +12,28 @@ const QUOTES = [
   "It's not about winning, it's about making others lose.",
   "Every card tells a story of betrayal.",
   "Where loyalty dies and legends are born.",
-  "Every loss is just character buildingâ€¦ and humiliation.",
-  "If at first you don't succeedâ€¦ shuffle and try again.",
+  "Every loss is just character building… and humiliation.",
+  "If at first you don't succeed… shuffle and try again.",
   "Victory is earned. Humiliation is free.",
   "Some are born winners. Others are just funny losers.",
   "The table is a battlefield. Your ego is the weapon.",
-  "You can't control luckâ€¦ but you can ruin everyone else's day.",
+  "You can't control luck… but you can ruin everyone else's day.",
   "Pain is temporary. Bragging rights are forever.",
   "Hope your therapy sessions are ready.",
   "One table. Many casualties.",
   "Lose today. Regret tomorrow. Cry later.",
-  "Your dignity calledâ€¦ it's filing a complaint.",
+  "Your dignity called… it's filing a complaint.",
   "Lose today. Learn tomorrow. Dominate next time.",
-  "Winners rise. Everyone else takes notesâ€¦ or cry.",
+  "Winners rise. Everyone else takes notes… or cry.",
   "Step up or step aside."
 ]
 
 const GAME_EMOJIS: Record<string, string> = {
-  'Blackjack': 'ðŸƒ',
-  'Monopoly': 'ðŸŽ²',
-  'Tai Ti': 'ðŸ€„',
-  'Shithead': 'ðŸ’©',
-  'Rung': 'ðŸŽ­'
+  'Blackjack': '🃏',
+  'Monopoly': '🎲',
+  'Tai Ti': '🀄',
+  'Shithead': '💩',
+  'Rung': '🎭'
 }
 
 const INDIVIDUAL_GAMES = ['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead']
@@ -58,7 +58,6 @@ export default function PublicView() {
   const [activeTab, setActiveTab] = useState<'individual' | 'rung' | 'recent'>('individual')
   const [selectedGameType, setSelectedGameType] = useState<string>('All Games')
   const [hallView, setHallView] = useState<'none' | 'fame' | 'shame'>('none')
-  const [lastShitheadLoser, setLastShitheadLoser] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -106,20 +105,8 @@ export default function PublicView() {
                (game.losers && game.losers.length > 0)
       })
       setGames(completeGames)
-      findLastShitheadLoser(completeGames)
     }
     setLoading(false)
-  }
-
-  const findLastShitheadLoser = (games: Game[]) => {
-    // Find the most recent Shithead game
-    const shitheadGames = games.filter(g => g.game_type === 'Shithead')
-    if (shitheadGames.length > 0) {
-      const lastGame = shitheadGames[0] // Most recent (already sorted desc)
-      if (lastGame.losers && lastGame.losers.length > 0) {
-        setLastShitheadLoser(lastGame.losers[0])
-      }
-    }
   }
 
   const togglePlayerFilter = (player: string) => {
@@ -208,6 +195,69 @@ export default function PublicView() {
         if (stats[s]) {
           stats[s].survivals++
           stats[s].weightedScore += 0.1  // 10%
+        }
+      })
+
+      if (game.losers) game.losers.forEach(l => {
+        if (stats[l]) stats[l].losses++
+      })
+    })
+
+    return activePlayers
+      .map(p => ({
+        player: p,
+        ...stats[p],
+        winRate: stats[p].gamesPlayed > 0 
+          ? ((stats[p].weightedScore / stats[p].gamesPlayed) * 100).toFixed(0) 
+          : '0'
+      }))
+      .filter(p => p.gamesPlayed > 0)
+      .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+  }
+
+  const getPlayerStatsForGame = (gameType: string): PlayerStats[] => {
+    const stats: Record<string, any> = {}
+    const activePlayers = selectedPlayers.length > 0 ? selectedPlayers : PLAYERS
+
+    activePlayers.forEach(p => {
+      stats[p] = { 
+        gamesPlayed: 0, 
+        wins: 0, 
+        runnersUp: 0, 
+        survivals: 0, 
+        losses: 0,
+        weightedScore: 0
+      }
+    })
+
+    // Filter games by type
+    const gamesForType = filteredGames.filter(g => g.game_type === gameType)
+
+    gamesForType.forEach(game => {
+      if (game.players_in_game) {
+        game.players_in_game.forEach(p => {
+          if (stats[p]) stats[p].gamesPlayed++
+        })
+      }
+
+      if (game.winners) game.winners.forEach(w => {
+        if (stats[w]) {
+          stats[w].wins++
+          stats[w].weightedScore += 1.0
+        }
+      })
+
+      if (game.runners_up) game.runners_up.forEach(r => {
+        if (stats[r]) {
+          stats[r].runnersUp++
+          stats[r].weightedScore += 0.4
+        }
+      })
+
+      if (game.survivors) game.survivors.forEach(s => {
+        if (stats[s]) {
+          stats[s].survivals++
+          stats[s].weightedScore += 0.1
         }
       })
 
@@ -347,7 +397,7 @@ export default function PublicView() {
             </span>
             <br />
             <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-              LEADERBOARD ðŸ†
+              LEADERBOARD 🏆
             </span>
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm md:text-base italic transition-opacity duration-500 whitespace-nowrap overflow-hidden text-ellipsis px-2">
@@ -402,18 +452,12 @@ export default function PublicView() {
                     color="blue"
                     className="px-4 py-2"
                   >
-                    â—€ Back to Overall Leaderboard
+                    ◀ Back to Overall Leaderboard
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {INDIVIDUAL_GAMES.map(gameType => {
-                    const gameStats = playerStats.filter(p => {
-                      const gameGames = filteredGames.filter(g => 
-                        g.game_type === gameType && 
-                        g.players_in_game?.includes(p.player)
-                      )
-                      return gameGames.length > 0
-                    })
+                    const gameStats = getPlayerStatsForGame(gameType)
                     
                     const displayStats = hallView === 'fame'
                       ? gameStats.slice(0, 3)
@@ -439,7 +483,7 @@ export default function PublicView() {
                                     <div className="flex items-center gap-3">
                                       <span className="text-2xl">
                                         {hallView === 'fame' 
-                                          ? (idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : 'ðŸ¥‰')
+                                          ? (idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉')
                                           : `${gameStats.length - idx}`
                                         }
                                       </span>
@@ -469,7 +513,7 @@ export default function PublicView() {
                   <h2 className="text-lg sm:text-2xl font-bold mb-1 whitespace-nowrap" style={{fontVariant: 'small-caps'}}>
                     <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] uppercase">
                       The Ultimate Backstab Board
-                    </span> ðŸ”ª
+                    </span> 🔪
                   </h2>
                   <p className="text-slate-400 text-sm mb-2 italic">Friendship Optional..... Betrayal Mandatory</p>
 
@@ -480,34 +524,34 @@ export default function PublicView() {
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
                     >
-                      â­ Hall of Fame
+                      ⭐ Hall of Fame
                     </Button>
                     <Button
                       onClick={() => setHallView('shame')}
                       variant="pop"
                       className="px-3 py-1.5 text-xs font-bold bg-gradient-to-br from-rose-600 to-rose-900"
                     >
-                      ðŸ¤¡ Hall of Shame
+                      🤡 Hall of Shame
                     </Button>
                   </div>
 
                   <div className="text-slate-400 text-xs sm:text-sm mb-2 font-bold">
-                    <div className="mb-1">ðŸƒ Blackjack  â¬©  ðŸŽ² Monopoly  â¬©  ðŸ€„ Tai Ti</div>
-                    <div>ðŸ’© Shithead  â¬©  ðŸŽ­ Rung</div>
+                    <div className="mb-1">🃏 Blackjack  ⬩  🎲 Monopoly  ⬩  🀄 Tai Ti</div>
+                    <div>💩 Shithead  ⬩  🎭 Rung</div>
                   </div>
                   <p className="text-slate-400 text-xs mb-3">
-                    ðŸ† Wins: 100%  â¬©  ðŸƒ 2nd: 40%  â¬©  ðŸ¤ŸðŸ¼ Survival: 10%
+                    🏆 Wins: 100%  ⬩  🏃 2nd: 40%  ⬩  🤟🏼 Survival: 10%
                   </p>
                   <select
                     value={selectedGameType}
                     onChange={(e) => setSelectedGameType(e.target.value)}
                     className="px-3 py-2 rounded-lg text-sm bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]"
                   >
-                    <option value="All Games">ðŸŽ° All Games</option>
+                    <option value="All Games">🎰 All Games</option>
                     {INDIVIDUAL_GAMES.map(game => (
                       <option key={game} value={game}>{GAME_EMOJIS[game]} {game}</option>
                     ))}
-                    <option value="Rung">ðŸŽ­ Rung</option>
+                    <option value="Rung">🎭 Rung</option>
                   </select>
                 </div>
               </div>
@@ -537,16 +581,9 @@ export default function PublicView() {
                       playerStats.map((player, idx) => (
                         <tr key={player.player} className="border-b border-slate-700/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all">
                           <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                            {idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : idx === 2 ? 'ðŸ¥‰' : `${idx + 1}`}
+                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
                           </td>
-                          <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
-                            <span className="inline-flex items-center gap-2">
-                              {player.player}
-                              {player.player === lastShitheadLoser && selectedGameType === 'Shithead' && (
-                                <span className="animate-bounce text-2xl">💩</span>
-                              )}
-                            </span>
-                          </td>
+                          <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{player.player}</td>
                           <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
                           <td className="text-center p-4 text-green-400 font-bold">{player.wins}</td>
                           <td className="text-center p-4 text-blue-400 font-bold">{player.runnersUp}</td>
@@ -569,7 +606,7 @@ export default function PublicView() {
         {activeTab === 'rung' && (
           <div className="rounded-xl shadow-2xl overflow-hidden mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="p-6 border-b border-slate-700">
-              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">ðŸŽ­ Rung - Power Pairs</h2>
+              <h2 className="text-xl md:text-2xl font-bold whitespace-nowrap">🎭 Rung - Power Pairs</h2>
               <p className="text-slate-400 text-sm mt-1">Where partnerships rise or fall together</p>
             </div>
             <div className="overflow-x-auto">
@@ -594,7 +631,7 @@ export default function PublicView() {
                     rungTeamStats.map((teamStat, idx) => (
                       <tr key={teamStat.team} className="border-b border-slate-700/50 hover:bg-purple-800/20 transition-all">
                         <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
-                          {idx === 0 ? 'ðŸ¥‡' : idx === 1 ? 'ðŸ¥ˆ' : idx === 2 ? 'ðŸ¥‰' : `${idx + 1}`}
+                          {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`}
                         </td>
                         <td className="p-2 md:p-4 font-bold text-lg md:text-xl">{teamStat.team}</td>
                         <td className="text-center p-4 text-green-400 font-bold">{teamStat.wins}</td>
@@ -614,7 +651,7 @@ export default function PublicView() {
           <div className="rounded-xl p-6 mb-8 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <div className="flex flex-col items-center mb-4 gap-2">
               <h2 className="text-xl font-bold mb-1 whitespace-nowrap">
-                ðŸ“œ <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
+                📜 <span className="bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">RECENT GAMES</span>
               </h2>
               <div className="text-sm">
                 <span className="inline-block bg-green-600 text-white px-2 py-0.5 rounded mr-2 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)]">Winner</span>
@@ -645,22 +682,22 @@ export default function PublicView() {
 
                     <div className="grid grid-cols-6 gap-1">
                       {game.winners?.map(p => (
-                        <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-green-600 text-white px-1.5 py-1 rounded text-[0.65rem] font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.runners_up?.map(p => (
-                        <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-blue-600 text-white px-1.5 py-1 rounded text-[0.65rem] font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.survivors?.map(p => (
-                        <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-slate-600 text-white px-1.5 py-1 rounded text-[0.65rem] font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
                       {game.losers?.map(p => (
-                        <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
+                        <span key={p} className="bg-red-600 text-white px-1.5 py-1 rounded text-[0.65rem] font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all text-center">
                           {p}
                         </span>
                       ))}
@@ -728,6 +765,8 @@ export default function PublicView() {
 
         <div className="text-center mt-8 space-x-4">
           <a href="/admin/login" className="text-slate-400 hover:text-slate-200 text-sm">Admin Login</a>
+          <span className="text-slate-600">|</span>
+          <a href="/user/login" className="text-slate-400 hover:text-slate-200 text-sm">User Login</a>
         </div>
       </div>
     </div>
