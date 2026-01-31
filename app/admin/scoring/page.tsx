@@ -131,17 +131,101 @@ export default function ScoringPage() {
       })
     }
 
-    // Save session summary
-    const allPlayers = [...new Set([...rungTeam1, ...rungTeam2])]
-    const winners = team1Score > team2Score ? rungTeam1 : rungTeam2
-    const losers = team1Score > team2Score ? rungTeam2 : rungTeam1
+    // Calculate session summary based on each player's BEST team performance
+    const teamWins: Record<string, number> = {}
+    const allTeams = new Set<string>()
+    
+    rungRounds.forEach(round => {
+      const team1Key = round.team1.slice().sort().join('&')
+      const team2Key = round.team2.slice().sort().join('&')
+      
+      allTeams.add(team1Key)
+      allTeams.add(team2Key)
+      
+      if (!teamWins[team1Key]) teamWins[team1Key] = 0
+      if (!teamWins[team2Key]) teamWins[team2Key] = 0
+      
+      if (round.winner === 1) teamWins[team1Key]++
+      else if (round.winner === 2) teamWins[team2Key]++
+    })
 
+    // For each player, find their best team
+    const allPlayers = new Set<string>()
+    allTeams.forEach(teamKey => {
+      teamKey.split('&').forEach(p => allPlayers.add(p))
+    })
+
+    const playerBestTeam: Record<string, { team: string, wins: number }> = {}
+    
+    allPlayers.forEach(player => {
+      let bestWins = -1
+      let bestTeam = ''
+      
+      allTeams.forEach(teamKey => {
+        if (teamKey.split('&').includes(player)) {
+          const wins = teamWins[teamKey] || 0
+          if (wins > bestWins) {
+            bestWins = wins
+            bestTeam = teamKey
+          }
+        }
+      })
+      
+      if (bestTeam) {
+        playerBestTeam[player] = { team: bestTeam, wins: bestWins }
+      }
+    })
+
+    // Sort players by their best team's performance
+    const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
+      (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
+    )
+
+    // Categorize players
+    const playerScores = sortedPlayers.map(p => playerBestTeam[p]?.wins || 0)
+    
+    // Winners: reached 5
+    const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
+    
+    // Non-winners
+    const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+    const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
+    const maxNonWinnerScore = nonWinnerScores.length > 0 ? Math.max(...nonWinnerScores) : 0
+    const minNonWinnerScore = nonWinnerScores.length > 0 ? Math.min(...nonWinnerScores) : 0
+    
+    let runnersUp: string[] = []
+    let survivors: string[] = []
+    let losers: string[] = []
+    
+    if (nonWinners.length > 0) {
+      // Runners-up: highest score among non-winners
+      runnersUp = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
+      
+      // If all non-winners have same score, they're all losers
+      if (maxNonWinnerScore === minNonWinnerScore) {
+        losers = runnersUp
+        runnersUp = []
+      } else {
+        // Losers: lowest score
+        losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
+        
+        // Survivors: everyone else in between
+        survivors = nonWinners.filter(p => 
+          !runnersUp.includes(p) && 
+          !losers.includes(p)
+        )
+      }
+    }
+
+    // Save session summary
     await (supabase.from('games').insert as any)({
       game_type: 'Rung',
       game_date: newSession.date,
-      players_in_game: allPlayers,
-      winners: winners,
-      losers: losers,
+      players_in_game: Array.from(allPlayers),
+      winners: winners.length > 0 ? winners : null,
+      runners_up: runnersUp.length > 0 ? runnersUp : null,
+      survivors: survivors.length > 0 ? survivors : null,
+      losers: losers.length > 0 ? losers : null,
       team1: null,
       team2: null,
       winning_team: null
