@@ -107,9 +107,9 @@ export default function PublicView() {
   const checkPerfectGameAndStreak = (gamesData: Game[]) => {
     const latestIndividualGame = gamesData.filter(g => g.game_type !== 'Rung')[0]
 
-    if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length === 1) {
+    if (latestIndividualGame && latestIndividualGame.winners && latestIndividualGame.winners.length >= 1) {
       const hasRunnerUps = latestIndividualGame.runners_up && latestIndividualGame.runners_up.length > 0
-      const isPerfect = !hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2
+      const isPerfect = !hasRunnerUps && latestIndividualGame.losers && latestIndividualGame.losers.length >= 2 && latestIndividualGame.winners.length === 1
 
       if (isPerfect) {
         setPerfectGame(latestIndividualGame)
@@ -983,7 +983,7 @@ export default function PublicView() {
                             <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(overallPlayerStats, idx, (p) => p.winRate)}</td>
                             <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
                               {player.player}
-                              {player.player === lastShitheadLoser && selectedGameType === 'Shithead' && (
+                              {player.player === lastShitheadLoser && (
                                 <span className="inline-block animate-bounce ml-2 text-2xl">💩</span>
                               )}
                             </td>
@@ -1096,59 +1096,29 @@ export default function PublicView() {
                         </div>
                       </div>
 
-                      {/* Special display for Rung games with team scores */}
-                      {game.game_type === 'Rung' && game.team1 && game.team2 ? (
-                        <>
-                          {(() => {
-                            const { team1Wins, team2Wins, totalRounds } = calculateRungWinners(game.game_date, game.team1, game.team2)
-                            const team1Won = team1Wins >= 5
-                            const team2Won = team2Wins >= 5
-                            
-                            return (
-                              <div className="space-y-2">
-                                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-                                  <div className={`text-right ${team1Won ? 'text-green-400' : 'text-red-400'} font-bold`}>
-                                    {game.team1.join(' & ')}
-                                  </div>
-                                  <div className="text-center">
-                                    <span className="text-amber-400 font-bold text-lg">{team1Wins} - {team2Wins}</span>
-                                  </div>
-                                  <div className={`text-left ${team2Won ? 'text-green-400' : 'text-red-400'} font-bold`}>
-                                    {game.team2.join(' & ')}
-                                  </div>
-                                </div>
-                                <div className="text-center text-xs text-slate-400">
-                                  {totalRounds} round{totalRounds !== 1 ? 's' : ''}
-                                </div>
-                              </div>
-                            )
-                          })()}
-                        </>
-                      ) : (
-                        /* Regular games display */
-                        <div className="flex gap-1 flex-wrap">
-                          {game.winners?.map(p => (
-                            <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                              {p}
-                            </span>
-                          ))}
-                          {game.runners_up?.map(p => (
-                            <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                              {p}
-                            </span>
-                          ))}
-                          {game.survivors?.map(p => (
-                            <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                              {p}
-                            </span>
-                          ))}
-                          {game.losers?.map(p => (
-                            <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
-                              {p}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {/* Display for all games including Rung */}
+                      <div className="flex gap-1 flex-wrap">
+                        {game.winners?.map(p => (
+                          <span key={p} className="bg-green-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                            {p}
+                          </span>
+                        ))}
+                        {game.runners_up?.map(p => (
+                          <span key={p} className="bg-blue-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                            {p}
+                          </span>
+                        ))}
+                        {game.survivors?.map(p => (
+                          <span key={p} className="bg-slate-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                            {p}
+                          </span>
+                        ))}
+                        {game.losers?.map(p => (
+                          <span key={p} className="bg-red-600 text-white px-2 py-1 rounded text-xs md:text-sm font-semibold shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] transition-all">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )
                 })
