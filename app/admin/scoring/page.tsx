@@ -119,7 +119,7 @@ export default function ScoringPage() {
 
     // Save each individual round
     for (const round of rungRounds) {
-      await supabase.from('games').insert({
+      await (supabase.from('games').insert as any)({
         game_type: 'Rung',
         game_date: newSession.date,
         players_in_game: [...round.team1, ...round.team2],
@@ -136,7 +136,7 @@ export default function ScoringPage() {
     const winners = team1Score > team2Score ? rungTeam1 : rungTeam2
     const losers = team1Score > team2Score ? rungTeam2 : rungTeam1
 
-    await supabase.from('games').insert({
+    await (supabase.from('games').insert as any)({
       game_type: 'Rung',
       game_date: newSession.date,
       players_in_game: allPlayers,
