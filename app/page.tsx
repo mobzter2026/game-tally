@@ -958,7 +958,7 @@ export default function PublicView() {
                     <thead>
                       <tr className="border-b border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 shadow-[0_4px_8px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.1)]">
                         <th className="text-center p-4 w-20">Rank</th>
-                        <th className="text-left p-4">Player</th>
+                        <th className="text-left p-4 min-w-[100px]">Player</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">Games</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">Wins</th>
                         <th className="text-center p-2 md:p-4 text-sm md:text-base">2nd</th>
@@ -980,11 +980,15 @@ export default function PublicView() {
                       ) : (
                         overallPlayerStats.map((player, idx) => (
                           <tr key={player.player} className={`border-b border-slate-700/50 ${idx < 3 ? 'bg-yellow-900/10' : (idx >= overallPlayerStats.length - 3 ? 'bg-purple-900/15' : '')} shadow-[inset_0_1px_2px_rgba(255,255,255,0.08)] hover:bg-purple-800/20 transition-all`}>
-                            <td className="p-2 md:p-4 text-center text-xl md:text-2xl">{getMedal(overallPlayerStats, idx, (p) => p.winRate)}</td>
+                            <td className="p-2 md:p-4 text-center text-xl md:text-2xl">
+                              <div className="flex items-center justify-center gap-1">
+                                {player.player === lastShitheadLoser && (
+                                  <span className="inline-block animate-bounce text-xl">💩</span>
+                                )}
+                                <span>{getMedal(overallPlayerStats, idx, (p) => p.winRate)}</span>
+                              </div>
+                            </td>
                             <td className="p-2 md:p-4 font-bold text-lg md:text-xl">
-                              {player.player === lastShitheadLoser && (
-                                <span className="inline-block animate-bounce mr-2 text-xl">💩</span>
-                              )}
                               {player.player}
                             </td>
                             <td className="text-center p-2 md:p-4 text-sm md:text-base">{player.gamesPlayed}</td>
