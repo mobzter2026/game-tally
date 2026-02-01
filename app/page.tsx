@@ -99,12 +99,17 @@ export default function PublicView() {
     const nonRungGames: Game[] = []
     
     games.forEach(game => {
-      if (game.game_type === 'Rung' && game.rung_session_id) {
-        if (!rungSessionMap[game.rung_session_id]) {
-          rungSessionMap[game.rung_session_id] = []
+      if (game.game_type === 'Rung') {
+        if (game.rung_session_id) {
+          // Has session ID - group it
+          if (!rungSessionMap[game.rung_session_id]) {
+            rungSessionMap[game.rung_session_id] = []
+          }
+          rungSessionMap[game.rung_session_id].push(game)
         }
-        rungSessionMap[game.rung_session_id].push(game)
+        // If Rung but no session ID, skip it entirely (old data or incomplete round)
       } else {
+        // Not Rung - include as-is
         nonRungGames.push(game)
       }
     })
