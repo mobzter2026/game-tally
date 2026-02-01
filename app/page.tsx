@@ -101,20 +101,23 @@ export default function PublicView() {
     games.forEach(game => {
       if (game.game_type === 'Rung') {
         if (game.rung_session_id) {
-          // Has session ID - group it
+          // New format: Has session ID - group it
           if (!rungSessionMap[game.rung_session_id]) {
             rungSessionMap[game.rung_session_id] = []
           }
           rungSessionMap[game.rung_session_id].push(game)
+        } else if (game.winners && game.winners.length > 0) {
+          // Old format: No session ID but has winners - it's already a session summary
+          nonRungGames.push(game)
         }
-        // If Rung but no session ID, skip it entirely (old data or incomplete round)
+        // If no session ID and no winners, skip (incomplete individual round)
       } else {
         // Not Rung - include as-is
         nonRungGames.push(game)
       }
     })
     
-    // Create aggregated session entries
+    // Create aggregated session entries for NEW Rung games
     const rungSessions: Game[] = []
     Object.entries(rungSessionMap).forEach(([sessionId, sessionGames]) => {
       if (sessionGames.length === 0) return
