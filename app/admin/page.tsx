@@ -87,12 +87,11 @@ export default function AdminDashboard() {
       
       for (const game of data as Game[]) {
         // Group Rung games by session
-        const gameWithSession = game as any
-        if (game.game_type === 'Rung' && gameWithSession.rung_session_id) {
-          if (!rungSessionMap[gameWithSession.rung_session_id]) {
-            rungSessionMap[gameWithSession.rung_session_id] = []
+        if (game.game_type === 'Rung' && game.rung_session_id) {
+          if (!rungSessionMap[game.rung_session_id]) {
+            rungSessionMap[game.rung_session_id] = []
           }
-          rungSessionMap[gameWithSession.rung_session_id].push(game)
+          rungSessionMap[game.rung_session_id].push(game)
         } else if (game.winners?.length || game.losers?.length) {
           // Non-Rung games or Rung without session - add directly
           processedGames.push(game)
