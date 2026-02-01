@@ -94,138 +94,6 @@ export default function PublicView() {
     setLoading(false)
   }
 
-  const groupRungSessions = (games: Game[]) => {
-    const rungSessionMap: Record<string, Game[]> = {}
-    const nonRungGames: Game[] = []
-    
-    console.log('groupRungSessions called with', games.length, 'games')
-    
-    games.forEach(game => {
-      if (game.game_type === 'Rung') {
-        if (game.rung_session_id) {
-          // New format: Has session ID - group it
-          if (!rungSessionMap[game.rung_session_id]) {
-            rungSessionMap[game.rung_session_id] = []
-          }
-          rungSessionMap[game.rung_session_id].push(game)
-        } else if (game.winners && game.winners.length > 0) {
-          // Old format: No session ID but has winners - it's already a session summary
-          nonRungGames.push(game)
-        }
-        // If no session ID and no winners, skip (incomplete individual round)
-      } else {
-        // Not Rung - include as-is
-        nonRungGames.push(game)
-      }
-    })
-    
-    console.log('Found', Object.keys(rungSessionMap).length, 'Rung sessions')
-    console.log('Found', nonRungGames.length, 'non-Rung games')
-    
-    // Create aggregated session entries for NEW Rung games
-    const rungSessions: Game[] = []
-    Object.entries(rungSessionMap).forEach(([sessionId, sessionGames]) => {
-      if (sessionGames.length === 0) return
-      
-      console.log('Processing session', sessionId, 'with', sessionGames.length, 'rounds')
-      
-      // Sort by created_at
-      sessionGames.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0).getTime()
-        const dateB = new Date(b.created_at || 0).getTime()
-        return dateA - dateB
-      })
-      
-      // Calculate individual player wins across all rounds
-      const playerWins: Record<string, number> = {}
-      
-      sessionGames.forEach(round => {
-        // NEW format: winners/losers arrays
-        if (round.winners && round.winners.length > 0) {
-          round.winners.forEach(player => {
-            playerWins[player] = (playerWins[player] || 0) + 1
-          })
-          round.losers?.forEach(player => {
-            if (!playerWins[player]) playerWins[player] = 0
-          })
-        }
-        // OLD format: team1/team2/winning_team
-        else if (round.team1 && round.team2 && round.winning_team) {
-          const winningTeam = round.winning_team === 1 ? round.team1 : round.team2
-          const losingTeam = round.winning_team === 1 ? round.team2 : round.team1
-          
-          winningTeam.forEach(player => {
-            playerWins[player] = (playerWins[player] || 0) + 1
-          })
-          losingTeam.forEach(player => {
-            if (!playerWins[player]) playerWins[player] = 0
-          })
-        }
-      })
-      
-      console.log('Player wins for session', sessionId, ':', playerWins)
-      
-      // Get unique win counts and categorize
-      const uniqueScores = [...new Set(Object.values(playerWins))].sort((a, b) => b - a)
-      
-      const finalWinners: string[] = []
-      const finalRunnersUp: string[] = []
-      const finalSurvivors: string[] = []
-      const finalLosers: string[] = []
-      
-      if (uniqueScores.length === 2) {
-        // Only 2 score levels: winners and losers
-        const highScore = uniqueScores[0]
-        Object.entries(playerWins).forEach(([player, wins]) => {
-          if (wins === highScore) {
-            finalWinners.push(player)
-          } else {
-            finalLosers.push(player)
-          }
-        })
-      } else if (uniqueScores.length >= 3) {
-        // 3+ score levels
-        const highScore = uniqueScores[0]
-        const secondScore = uniqueScores[1]
-        const lowScore = uniqueScores[uniqueScores.length - 1]
-        
-        Object.entries(playerWins).forEach(([player, wins]) => {
-          if (wins === highScore) {
-            finalWinners.push(player)
-          } else if (wins === secondScore) {
-            finalRunnersUp.push(player)
-          } else if (wins === lowScore) {
-            finalLosers.push(player)
-          } else {
-            finalSurvivors.push(player)
-          }
-        })
-      } else if (uniqueScores.length === 1) {
-        // Everyone tied (shouldn't happen)
-        Object.keys(playerWins).forEach(player => finalWinners.push(player))
-      }
-      
-      console.log('Final categories - Winners:', finalWinners, 'Runners-up:', finalRunnersUp, 'Survivors:', finalSurvivors, 'Losers:', finalLosers)
-      
-      // Create aggregated session entry
-      const allPlayers = Object.keys(playerWins)
-      rungSessions.push({
-        ...sessionGames[0],
-        id: sessionId,
-        players_in_game: allPlayers,
-        winners: finalWinners.length > 0 ? finalWinners : null,
-        runners_up: finalRunnersUp.length > 0 ? finalRunnersUp : null,
-        survivors: finalSurvivors.length > 0 ? finalSurvivors : null,
-        losers: finalLosers.length > 0 ? finalLosers : null,
-        rung_session_id: sessionId
-      })
-    })
-    
-    const result = [...nonRungGames, ...rungSessions]
-    console.log('Returning', result.length, 'total games (', nonRungGames.length, 'non-Rung +', rungSessions.length, 'Rung sessions)')
-    return result
-  }
-
   const findLastShitheadLoser = (games: Game[]) => {
     const shitheadGames = games.filter(g => g.game_type === 'Shithead')
     if (shitheadGames.length > 0) {
@@ -298,8 +166,7 @@ export default function PublicView() {
   }
 
   const getFilteredGames = () => {
-    // Group Rung sessions for individual/overall scoring
-    let filtered = groupRungSessions(games)
+    let filtered = games
 
     if (selectedPlayers.length > 0) {
       filtered = filtered.filter(game => {
@@ -446,6 +313,11 @@ export default function PublicView() {
     }
 
     allGames.forEach(game => {
+      // For Rung: only count session summaries (with winners), skip individual rounds
+      if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+        return // Skip individual round entries (these don't count for overall stats)
+      }
+
       if (game.players_in_game) {
         game.players_in_game.forEach(p => {
           if (stats[p]) stats[p].gamesPlayed++
@@ -558,14 +430,13 @@ export default function PublicView() {
   const getRungTeamStats = () => {
     const teamStats: any = {}
 
-    // Use RAW games (not grouped) for duo stats - each round counts
     // Only process individual Rung rounds (which have team1, team2, winning_team)
-    const rungRounds = games.filter(g => 
+    // Skip session summaries (which have winners but no team data)
+    const rungRounds = filteredGames.filter(g => 
       g.game_type === 'Rung' && 
       g.team1 && 
       g.team2 && 
-      g.winning_team &&
-      g.rung_session_id // Only rounds that are part of a session
+      g.winning_team
     )
     
     rungRounds.forEach(game => {
