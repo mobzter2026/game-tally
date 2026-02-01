@@ -38,6 +38,12 @@ export default function AdminDashboard() {
     team2: [] as string[]
   })
 
+  // Rung-specific state for round-by-round tracking
+  const [rungMode, setRungMode] = useState<'quick' | 'rounds'>('quick')
+  const [rungRounds, setRungRounds] = useState<Array<{team1: string[], team2: string[], winner: number}>>([])
+  const [currentRungTeam1, setCurrentRungTeam1] = useState<string[]>([])
+  const [currentRungTeam2, setCurrentRungTeam2] = useState<string[]>([])
+
   useEffect(() => {
     checkAuth()
   }, [])
@@ -109,8 +115,14 @@ export default function AdminDashboard() {
       return
     }
 
-    // For Rung games, validate team selection
-    if (newGame.type === 'Rung') {
+    // For Rung games in rounds mode, handle differently
+    if (newGame.type === 'Rung' && rungMode === 'rounds') {
+      await saveRungSession()
+      return
+    }
+
+    // For Rung games in quick mode, validate team selection
+    if (newGame.type === 'Rung' && rungMode === 'quick') {
       if (newGame.team1.length !== 2 || newGame.team2.length !== 2) {
         alert('Rung requires exactly 2 players per team')
         return
@@ -132,10 +144,12 @@ export default function AdminDashboard() {
       created_by: user?.email
     }
 
-    // Add team1 and team2 for Rung games
+    // For Rung quick mode: save as session summary (no team1/team2/winning_team)
     if (newGame.type === 'Rung') {
-      gameData.team1 = newGame.team1
-      gameData.team2 = newGame.team2
+      // This is a session summary - no team data
+      gameData.team1 = null
+      gameData.team2 = null
+      gameData.winning_team = null
     }
 
     const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -158,6 +172,164 @@ export default function AdminDashboard() {
     })
 
     fetchGames()
+  }
+
+  const saveRungSession = async () => {
+    if (rungRounds.length === 0) {
+      alert('No rounds to save! Please record at least one round.')
+      return
+    }
+
+    // Save each individual round
+    for (const round of rungRounds) {
+      await (supabase.from('games').insert as any)({
+        game_type: 'Rung',
+        game_date: newGame.date,
+        players_in_game: [...round.team1, ...round.team2],
+        team1: round.team1,
+        team2: round.team2,
+        winning_team: round.winner,
+        winners: null,
+        losers: null,
+        created_by: user?.email
+      })
+    }
+
+    // Calculate session summary (same logic as Scoring page)
+    const teamWins: Record<string, number> = {}
+    const allTeams = new Set<string>()
+    
+    rungRounds.forEach(round => {
+      const team1Key = round.team1.slice().sort().join('&')
+      const team2Key = round.team2.slice().sort().join('&')
+      
+      allTeams.add(team1Key)
+      allTeams.add(team2Key)
+      
+      if (!teamWins[team1Key]) teamWins[team1Key] = 0
+      if (!teamWins[team2Key]) teamWins[team2Key] = 0
+      
+      if (round.winner === 1) teamWins[team1Key]++
+      else if (round.winner === 2) teamWins[team2Key]++
+    })
+
+    // For each player, find their best team
+    const allPlayers = new Set<string>()
+    allTeams.forEach(teamKey => {
+      teamKey.split('&').forEach(p => allPlayers.add(p))
+    })
+
+    const playerBestTeam: Record<string, { team: string, wins: number }> = {}
+    
+    allPlayers.forEach(player => {
+      let bestWins = -1
+      let bestTeam = ''
+      
+      allTeams.forEach(teamKey => {
+        if (teamKey.split('&').includes(player)) {
+          const wins = teamWins[teamKey] || 0
+          if (wins > bestWins) {
+            bestWins = wins
+            bestTeam = teamKey
+          }
+        }
+      })
+      
+      if (bestTeam) {
+        playerBestTeam[player] = { team: bestTeam, wins: bestWins }
+      }
+    })
+
+    // Sort players by their best team's performance
+    const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
+      (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
+    )
+
+    // Categorize players
+    const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
+    const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
+    const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
+    const maxNonWinnerScore = nonWinnerScores.length > 0 ? Math.max(...nonWinnerScores) : 0
+    const minNonWinnerScore = nonWinnerScores.length > 0 ? Math.min(...nonWinnerScores) : 0
+    
+    let runnersUp: string[] = []
+    let survivors: string[] = []
+    let losers: string[] = []
+    
+    if (nonWinners.length > 0) {
+      runnersUp = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
+      
+      if (maxNonWinnerScore === minNonWinnerScore) {
+        losers = runnersUp
+        runnersUp = []
+      } else {
+        losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
+        survivors = nonWinners.filter(p => !runnersUp.includes(p) && !losers.includes(p))
+      }
+    }
+
+    // Save session summary
+    await (supabase.from('games').insert as any)({
+      game_type: 'Rung',
+      game_date: newGame.date,
+      players_in_game: Array.from(allPlayers),
+      winners: winners.length > 0 ? winners : null,
+      runners_up: runnersUp.length > 0 ? runnersUp : null,
+      survivors: survivors.length > 0 ? survivors : null,
+      losers: losers.length > 0 ? losers : null,
+      team1: null,
+      team2: null,
+      winning_team: null,
+      created_by: user?.email
+    })
+
+    // Reset
+    setRungRounds([])
+    setCurrentRungTeam1([])
+    setCurrentRungTeam2([])
+    setNewGame({
+      type: '',
+      date: new Date().toISOString().split('T')[0],
+      players: [],
+      winners: [],
+      runnersUp: [],
+      losers: [],
+      survivors: [],
+      team1: [],
+      team2: []
+    })
+    
+    alert('Rung session saved successfully!')
+    fetchGames()
+  }
+
+  const recordRungRound = (winningTeam: number) => {
+    if (currentRungTeam1.length !== 2 || currentRungTeam2.length !== 2) {
+      alert('Both teams must have exactly 2 players')
+      return
+    }
+
+    const newRound = {
+      team1: [...currentRungTeam1],
+      team2: [...currentRungTeam2],
+      winner: winningTeam
+    }
+    setRungRounds([...rungRounds, newRound])
+    
+    // Keep Team 1, clear Team 2 for next round (losers can swap)
+    setCurrentRungTeam2([])
+  }
+
+  const toggleRungTeam = (team: 'team1' | 'team2', player: string) => {
+    const currentTeam = team === 'team1' ? currentRungTeam1 : currentRungTeam2
+    const setTeam = team === 'team1' ? setCurrentRungTeam1 : setCurrentRungTeam2
+    const otherTeam = team === 'team1' ? currentRungTeam2 : currentRungTeam1
+
+    if (currentTeam.includes(player)) {
+      setTeam(currentTeam.filter(p => p !== player))
+    } else if (currentTeam.length < 2 && !otherTeam.includes(player)) {
+      setTeam([...currentTeam, player])
+    }
   }
 
   const deleteGame = async (id: string) => {
@@ -296,56 +468,160 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Team Selection for Rung */}
+              {/* Rung Mode Selection and Team Tracking */}
               {newGame.type === 'Rung' && (
-                <div className="space-y-3 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
-                  <p className="text-xs font-bold text-purple-300">🎭 Rung Team Selection</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block mb-2 text-xs font-bold">Team 1 ({newGame.team1.length}/2)</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {newGame.players.length === 0 ? (
-                          <p className="text-xs text-slate-500">Select players first</p>
-                        ) : (
-                          newGame.players.map(p => (
-                            <Button
-                              key={p}
-                              onClick={() => toggleArrayItem('team1', p)}
-                              variant="frosted"
-                              color={newGame.team1.includes(p) ? 'blue' : 'purple'}
-                              selected={newGame.team1.includes(p)}
-                              disabled={newGame.team2.includes(p) || (newGame.team1.length >= 2 && !newGame.team1.includes(p))}
-                              className="px-3 py-1.5 text-xs"
-                            >
-                              {p}
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-xs font-bold">Team 2 ({newGame.team2.length}/2)</label>
-                      <div className="flex gap-2 flex-wrap">
-                        {newGame.players.length === 0 ? (
-                          <p className="text-xs text-slate-500">Select players first</p>
-                        ) : (
-                          newGame.players.map(p => (
-                            <Button
-                              key={p}
-                              onClick={() => toggleArrayItem('team2', p)}
-                              variant="frosted"
-                              color={newGame.team2.includes(p) ? 'red' : 'purple'}
-                              selected={newGame.team2.includes(p)}
-                              disabled={newGame.team1.includes(p) || (newGame.team2.length >= 2 && !newGame.team2.includes(p))}
-                              className="px-3 py-1.5 text-xs"
-                            >
-                              {p}
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                <div className="space-y-4 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-purple-300">🎭 Rung Recording Mode</p>
+                    <select
+                      value={rungMode}
+                      onChange={(e) => setRungMode(e.target.value as 'quick' | 'rounds')}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold"
+                    >
+                      <option value="quick">Quick Entry (Final Result)</option>
+                      <option value="rounds">Round-by-Round Tracking</option>
+                    </select>
                   </div>
+
+                  {rungMode === 'quick' ? (
+                    // Quick mode - just select final teams and winners
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-2 text-xs font-bold">Team 1 ({newGame.team1.length}/2)</label>
+                          <div className="flex gap-2 flex-wrap">
+                            {newGame.players.length === 0 ? (
+                              <p className="text-xs text-slate-500">Select players first</p>
+                            ) : (
+                              newGame.players.map(p => (
+                                <Button
+                                  key={p}
+                                  onClick={() => toggleArrayItem('team1', p)}
+                                  variant="frosted"
+                                  color={newGame.team1.includes(p) ? 'blue' : 'purple'}
+                                  selected={newGame.team1.includes(p)}
+                                  disabled={newGame.team2.includes(p) || (newGame.team1.length >= 2 && !newGame.team1.includes(p))}
+                                  className="px-3 py-1.5 text-xs"
+                                >
+                                  {p}
+                                </Button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block mb-2 text-xs font-bold">Team 2 ({newGame.team2.length}/2)</label>
+                          <div className="flex gap-2 flex-wrap">
+                            {newGame.players.length === 0 ? (
+                              <p className="text-xs text-slate-500">Select players first</p>
+                            ) : (
+                              newGame.players.map(p => (
+                                <Button
+                                  key={p}
+                                  onClick={() => toggleArrayItem('team2', p)}
+                                  variant="frosted"
+                                  color={newGame.team2.includes(p) ? 'red' : 'purple'}
+                                  selected={newGame.team2.includes(p)}
+                                  disabled={newGame.team1.includes(p) || (newGame.team2.length >= 2 && !newGame.team2.includes(p))}
+                                  className="px-3 py-1.5 text-xs"
+                                >
+                                  {p}
+                                </Button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-400 italic">Quick mode: Select final teams, then mark winners below</p>
+                    </>
+                  ) : (
+                    // Rounds mode - track each round
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-2 text-xs font-bold">Team 1 ({currentRungTeam1.length}/2)</label>
+                          <div className="flex gap-2 flex-wrap">
+                            {PLAYERS.map(p => (
+                              <Button
+                                key={p}
+                                onClick={() => toggleRungTeam('team1', p)}
+                                variant="frosted"
+                                color={currentRungTeam1.includes(p) ? 'blue' : 'purple'}
+                                selected={currentRungTeam1.includes(p)}
+                                disabled={currentRungTeam2.includes(p) || (currentRungTeam1.length >= 2 && !currentRungTeam1.includes(p))}
+                                className="px-3 py-1.5 text-xs"
+                              >
+                                {p}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block mb-2 text-xs font-bold">Team 2 ({currentRungTeam2.length}/2)</label>
+                          <div className="flex gap-2 flex-wrap">
+                            {PLAYERS.map(p => (
+                              <Button
+                                key={p}
+                                onClick={() => toggleRungTeam('team2', p)}
+                                variant="frosted"
+                                color={currentRungTeam2.includes(p) ? 'red' : 'purple'}
+                                selected={currentRungTeam2.includes(p)}
+                                disabled={currentRungTeam1.includes(p) || (currentRungTeam2.length >= 2 && !currentRungTeam2.includes(p))}
+                                className="px-3 py-1.5 text-xs"
+                              >
+                                {p}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {currentRungTeam1.length === 2 && currentRungTeam2.length === 2 && (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => recordRungRound(1)}
+                            variant="pop"
+                            color="blue"
+                            className="flex-1 px-3 py-2 text-xs font-bold"
+                          >
+                            {currentRungTeam1.join(' + ')} Won Round
+                          </Button>
+                          <Button
+                            onClick={() => recordRungRound(2)}
+                            variant="pop"
+                            color="red"
+                            className="flex-1 px-3 py-2 text-xs font-bold"
+                          >
+                            {currentRungTeam2.join(' + ')} Won Round
+                          </Button>
+                        </div>
+                      )}
+
+                      {rungRounds.length > 0 && (
+                        <div className="mt-3 p-3 bg-slate-900/40 rounded">
+                          <h4 className="text-xs font-bold mb-2 text-purple-300">Rounds Recorded ({rungRounds.length})</h4>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {rungRounds.map((round, idx) => (
+                              <div key={idx} className="text-xs bg-purple-900/30 rounded p-1.5 flex justify-between">
+                                <span>Round {idx + 1}:</span>
+                                <div className="flex gap-2">
+                                  <span className={round.winner === 1 ? 'text-green-400 font-bold' : 'text-slate-400'}>
+                                    {round.team1.join(' + ')}
+                                  </span>
+                                  <span className="text-slate-500">vs</span>
+                                  <span className={round.winner === 2 ? 'text-green-400 font-bold' : 'text-slate-400'}>
+                                    {round.team2.join(' + ')}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-slate-400 italic">Record rounds until one team reaches 5 wins, then click "Add Game" to save session</p>
+                    </>
+                  )}
                 </div>
               )}
 
