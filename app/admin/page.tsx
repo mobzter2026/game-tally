@@ -252,7 +252,7 @@ export default function AdminDashboard() {
   const deleteGame = async (id: string) => {
     if (!confirm('Are you sure you want to delete this game?')) return
     
-    const { error } = await supabase.from('games').delete().eq('id', id)
+    const { error } = await (supabase.from('games').delete as any)().eq('id', id)
     
     if (error) {
       alert('Error deleting game')
@@ -272,9 +272,9 @@ export default function AdminDashboard() {
   const saveGameDateTime = async (id: string) => {
     const dateTime = new Date(`${editDate}T${editTime}:00`)
     
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('games')
-      .update({ 
+      .update as any)({ 
         game_date: editDate,
         created_at: dateTime.toISOString()
       })
