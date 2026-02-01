@@ -334,7 +334,7 @@ export default function AdminDashboard() {
                               key={p}
                               onClick={() => toggleArrayItem('team2', p)}
                               variant="frosted"
-                              color={newGame.team2.includes(p) ? 'pink' : 'purple'}
+                              color={newGame.team2.includes(p) ? 'red' : 'purple'}
                               selected={newGame.team2.includes(p)}
                               disabled={newGame.team1.includes(p) || (newGame.team2.length >= 2 && !newGame.team2.includes(p))}
                               className="px-3 py-1.5 text-xs"
