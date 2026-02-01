@@ -155,10 +155,11 @@ export default function AdminDashboard() {
     const { error } = await (supabase.from('games').insert as any)(gameData)
     if (error) {
       console.error('Error adding game:', error)
-      alert('Error adding game. Check console for details.')
+      alert(`❌ Error adding game:\n\n${error.message}\n\nCode: ${error.code}\n\nDetails: ${JSON.stringify(error.details)}`)
       return
     }
 
+    alert('✅ Game added successfully!')
     setNewGame({
       type: '',
       date: new Date().toISOString().split('T')[0],
@@ -180,24 +181,31 @@ export default function AdminDashboard() {
       return
     }
 
-    // Save each individual round
-    for (const round of rungRounds) {
-      await (supabase.from('games').insert as any)({
-        game_type: 'Rung',
-        game_date: newGame.date,
-        players_in_game: [...round.team1, ...round.team2],
-        team1: round.team1,
-        team2: round.team2,
-        winning_team: round.winner,
-        winners: null,
-        losers: null,
-        created_by: user?.email
-      })
-    }
+    try {
+      // Save each individual round
+      for (const round of rungRounds) {
+        const { error } = await (supabase.from('games').insert as any)({
+          game_type: 'Rung',
+          game_date: newGame.date,
+          players_in_game: [...round.team1, ...round.team2],
+          team1: round.team1,
+          team2: round.team2,
+          winning_team: round.winner,
+          winners: null,
+          losers: null,
+          created_by: user?.email
+        })
+        
+        if (error) {
+          console.error('Error saving round:', error)
+          alert(`Error saving round: ${error.message}`)
+          return
+        }
+      }
 
-    // Calculate session summary (same logic as Scoring page)
-    const teamWins: Record<string, number> = {}
-    const allTeams = new Set<string>()
+      // Calculate session summary (same logic as Scoring page)
+      const teamWins: Record<string, number> = {}
+      const allTeams = new Set<string>()
     
     rungRounds.forEach(round => {
       const team1Key = round.team1.slice().sort().join('&')
@@ -269,7 +277,7 @@ export default function AdminDashboard() {
     }
 
     // Save session summary
-    await (supabase.from('games').insert as any)({
+    const { error: summaryError } = await (supabase.from('games').insert as any)({
       game_type: 'Rung',
       game_date: newGame.date,
       players_in_game: Array.from(allPlayers),
@@ -282,6 +290,12 @@ export default function AdminDashboard() {
       winning_team: null,
       created_by: user?.email
     })
+    
+    if (summaryError) {
+      console.error('Error saving session summary:', summaryError)
+      alert(`Error saving session summary: ${summaryError.message}`)
+      return
+    }
 
     // Reset
     setRungRounds([])
@@ -301,6 +315,10 @@ export default function AdminDashboard() {
     
     alert('Rung session saved successfully!')
     fetchGames()
+    } catch (error: any) {
+      console.error('Error in saveRungSession:', error)
+      alert(`Failed to save Rung session: ${error.message}`)
+    }
   }
 
   const recordRungRound = (winningTeam: number) => {
