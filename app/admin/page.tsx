@@ -132,7 +132,7 @@ export default function AdminDashboard() {
       team2: rungScore.team2 + (winningTeam === 2 ? 1 : 0)
     }
 
-    // Generate session ID on first round
+    // Generate session ID on first round (for local tracking)
     let sessionId = rungSessionId
     if (!sessionId) {
       sessionId = `rung_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -148,23 +148,25 @@ export default function AdminDashboard() {
     setRungRounds([...rungRounds, newRound])
     setRungScore(newScore)
 
-    // Save round to database with session ID
+    // Determine winners and losers based on which team won
+    const winners = winningTeam === 1 ? currentRungTeam1 : currentRungTeam2
+    const losers = winningTeam === 1 ? currentRungTeam2 : currentRungTeam1
+
+    // Save ONE game record per round with winners/losers
     const { error } = await (supabase.from('games').insert as any)({
       game_type: 'Rung',
       game_date: newGame.date,
       players_in_game: [...currentRungTeam1, ...currentRungTeam2],
-      team1: currentRungTeam1,
-      team2: currentRungTeam2,
-      winning_team: winningTeam,
-      winners: null,
-      losers: null,
-      created_by: user?.email,
-      rung_session_id: sessionId
+      winners: winners,
+      losers: losers,
+      runners_up: null,
+      survivors: null,
+      created_by: user?.email
     })
 
     if (error) {
       console.error('Error saving round:', error)
-      alert('❌ Error saving round')
+      alert(`❌ Error saving round: ${error.message}`)
       return
     }
 
@@ -307,20 +309,31 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-950 to-purple-900">
       <div className="max-w-7xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">
-            Admin Dashboard
+        {/* Header */}
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">
+            ♠️ Points Royale ♠️
           </h1>
-          <Button onClick={handleSignOut} variant="frosted" color="red" className="px-4 py-2">
-            Sign Out
-          </Button>
+          <div className="flex gap-3 justify-center">
+            <Button 
+              onClick={() => router.push('/')}
+              variant="frosted" 
+              color="blue" 
+              className="px-4 py-2"
+            >
+              ← Back to Leaderboard
+            </Button>
+            <Button onClick={handleSignOut} variant="frosted" color="red" className="px-4 py-2">
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Add New Game */}
           <div className="rounded-xl p-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
             <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-              Add New Game
+              Let the Madness Begin 🔥
             </h2>
             <div className="space-y-4">
               <div>
@@ -335,7 +348,7 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block mb-2 text-xs font-bold">🎮 Game Type</label>
-                <div className="flex gap-2 flex-wrap">
+                <div className="grid grid-cols-3 gap-2">
                   {['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung'].map(type => (
                     <Button
                       key={type}
@@ -365,7 +378,7 @@ export default function AdminDashboard() {
                         </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="grid grid-cols-3 gap-2">
                       {PLAYERS.map(p => (
                         <Button
                           key={p}
