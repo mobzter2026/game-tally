@@ -152,7 +152,7 @@ export default function AdminDashboard() {
     const winners = winningTeam === 1 ? currentRungTeam1 : currentRungTeam2
     const losers = winningTeam === 1 ? currentRungTeam2 : currentRungTeam1
 
-    // Save ONE game record per round with winners/losers
+    // Save ONE game record per round with winners/losers and session ID
     const { error } = await (supabase.from('games').insert as any)({
       game_type: 'Rung',
       game_date: newGame.date,
@@ -161,7 +161,8 @@ export default function AdminDashboard() {
       losers: losers,
       runners_up: null,
       survivors: null,
-      created_by: user?.email
+      created_by: user?.email,
+      rung_session_id: sessionId
     })
 
     if (error) {
