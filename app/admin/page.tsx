@@ -81,12 +81,113 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
     
     if (data) {
-      // Filter out incomplete games (games without winners/losers data)
-      const completeGames = (data as Game[]).filter(game => {
-        return (game.winners && game.winners.length > 0) || 
-               (game.losers && game.losers.length > 0)
+      // Process games and group Rung sessions
+      const processedGames: Game[] = []
+      const rungSessionMap: Record<string, Game[]> = {}
+      
+      for (const game of data as Game[]) {
+        // Group Rung games by session
+        if (game.game_type === 'Rung' && game.rung_session_id) {
+          if (!rungSessionMap[game.rung_session_id]) {
+            rungSessionMap[game.rung_session_id] = []
+          }
+          rungSessionMap[game.rung_session_id].push(game)
+        } else if (game.winners?.length || game.losers?.length) {
+          // Non-Rung games or Rung without session - add directly
+          processedGames.push(game)
+        }
+      }
+      
+      // Process Rung sessions into single game entries with aggregated results
+      for (const [sessionId, sessionGames] of Object.entries(rungSessionMap)) {
+        if (sessionGames.length === 0) continue
+        
+        // Sort rounds by created_at to get chronological order
+        sessionGames.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0).getTime()
+          const dateB = new Date(b.created_at || 0).getTime()
+          return dateA - dateB
+        })
+        
+        // Calculate total wins per player across ALL teams they played on
+        const playerWins: Record<string, number> = {}
+        
+        sessionGames.forEach(round => {
+          round.winners?.forEach(player => {
+            playerWins[player] = (playerWins[player] || 0) + 1
+          })
+          round.losers?.forEach(player => {
+            if (!playerWins[player]) playerWins[player] = 0
+          })
+        })
+        
+        // Get unique win counts and sort them descending
+        const uniqueScores = [...new Set(Object.values(playerWins))].sort((a, b) => b - a)
+        
+        // Categorize based on score rankings
+        const finalWinners: string[] = []
+        const finalRunnersUp: string[] = []
+        const finalSurvivors: string[] = []
+        const finalLosers: string[] = []
+        
+        if (uniqueScores.length === 0) {
+          // No players? Skip
+        } else if (uniqueScores.length === 1) {
+          // Everyone has same score - all are tied (shouldn't happen in normal game)
+          Object.keys(playerWins).forEach(player => finalWinners.push(player))
+        } else if (uniqueScores.length === 2) {
+          // Only 2 score levels: winners and losers
+          const highScore = uniqueScores[0]
+          const lowScore = uniqueScores[1]
+          
+          Object.entries(playerWins).forEach(([player, wins]) => {
+            if (wins === highScore) {
+              finalWinners.push(player)
+            } else {
+              finalLosers.push(player)
+            }
+          })
+        } else {
+          // 3+ score levels: winners, runners-up, survivors (middle), losers
+          const highScore = uniqueScores[0]
+          const secondScore = uniqueScores[1]
+          const lowScore = uniqueScores[uniqueScores.length - 1]
+          
+          Object.entries(playerWins).forEach(([player, wins]) => {
+            if (wins === highScore) {
+              finalWinners.push(player)
+            } else if (wins === secondScore) {
+              finalRunnersUp.push(player)
+            } else if (wins === lowScore) {
+              finalLosers.push(player)
+            } else {
+              // Middle scores = survivors
+              finalSurvivors.push(player)
+            }
+          })
+        }
+        
+        // Create aggregated game entry
+        const allPlayers = Object.keys(playerWins)
+        processedGames.push({
+          ...sessionGames[0], // Use first round's metadata
+          id: sessionId, // Use session ID as game ID
+          players_in_game: allPlayers,
+          winners: finalWinners.length > 0 ? finalWinners : null,
+          runners_up: finalRunnersUp.length > 0 ? finalRunnersUp : null,
+          survivors: finalSurvivors.length > 0 ? finalSurvivors : null,
+          losers: finalLosers.length > 0 ? finalLosers : null
+        })
+      }
+      
+      // Sort by created_at
+      processedGames.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0).getTime()
+        const dateB = new Date(b.created_at || 0).getTime()
+        return dateB - dateA
       })
-      setGames(completeGames)
+      
+      setGames(processedGames)
     }
   }
 
