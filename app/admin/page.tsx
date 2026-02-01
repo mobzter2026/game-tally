@@ -33,7 +33,9 @@ export default function AdminDashboard() {
     winners: [] as string[],
     runnersUp: [] as string[],
     losers: [] as string[],
-    survivors: [] as string[]
+    survivors: [] as string[],
+    team1: [] as string[],
+    team2: [] as string[]
   })
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export default function AdminDashboard() {
   }
 
   const toggleArrayItem = (
-    key: 'players' | 'winners' | 'runnersUp' | 'losers' | 'survivors',
+    key: 'players' | 'winners' | 'runnersUp' | 'losers' | 'survivors' | 'team1' | 'team2',
     player: string
   ) => {
     const arr = newGame[key]
@@ -107,6 +109,18 @@ export default function AdminDashboard() {
       return
     }
 
+    // For Rung games, validate team selection
+    if (newGame.type === 'Rung') {
+      if (newGame.team1.length !== 2 || newGame.team2.length !== 2) {
+        alert('Rung requires exactly 2 players per team')
+        return
+      }
+      if (newGame.winners.length !== 2) {
+        alert('Please select exactly 2 winners (the winning team)')
+        return
+      }
+    }
+
     const gameData: any = {
       game_type: newGame.type,
       game_date: newGame.date,
@@ -116,6 +130,12 @@ export default function AdminDashboard() {
       survivors: newGame.survivors.length > 0 ? newGame.survivors : null,
       losers: newGame.losers.length > 0 ? newGame.losers : null,
       created_by: user?.email
+    }
+
+    // Add team1 and team2 for Rung games
+    if (newGame.type === 'Rung') {
+      gameData.team1 = newGame.team1
+      gameData.team2 = newGame.team2
     }
 
     const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -132,7 +152,9 @@ export default function AdminDashboard() {
       winners: [],
       runnersUp: [],
       losers: [],
-      survivors: []
+      survivors: [],
+      team1: [],
+      team2: []
     })
 
     fetchGames()
@@ -273,6 +295,59 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               </div>
+
+              {/* Team Selection for Rung */}
+              {newGame.type === 'Rung' && (
+                <div className="space-y-3 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                  <p className="text-xs font-bold text-purple-300">🎭 Rung Team Selection</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block mb-2 text-xs font-bold">Team 1 ({newGame.team1.length}/2)</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {newGame.players.length === 0 ? (
+                          <p className="text-xs text-slate-500">Select players first</p>
+                        ) : (
+                          newGame.players.map(p => (
+                            <Button
+                              key={p}
+                              onClick={() => toggleArrayItem('team1', p)}
+                              variant="frosted"
+                              color={newGame.team1.includes(p) ? 'blue' : 'purple'}
+                              selected={newGame.team1.includes(p)}
+                              disabled={newGame.team2.includes(p) || (newGame.team1.length >= 2 && !newGame.team1.includes(p))}
+                              className="px-3 py-1.5 text-xs"
+                            >
+                              {p}
+                            </Button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-xs font-bold">Team 2 ({newGame.team2.length}/2)</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {newGame.players.length === 0 ? (
+                          <p className="text-xs text-slate-500">Select players first</p>
+                        ) : (
+                          newGame.players.map(p => (
+                            <Button
+                              key={p}
+                              onClick={() => toggleArrayItem('team2', p)}
+                              variant="frosted"
+                              color={newGame.team2.includes(p) ? 'pink' : 'purple'}
+                              selected={newGame.team2.includes(p)}
+                              disabled={newGame.team1.includes(p) || (newGame.team2.length >= 2 && !newGame.team2.includes(p))}
+                              className="px-3 py-1.5 text-xs"
+                            >
+                              {p}
+                            </Button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {['winners', 'runnersUp', 'survivors', 'losers'].map(roleKey => (
                 <div key={roleKey}>
