@@ -17,6 +17,7 @@ export interface Database {
           created_at: string
           created_by: string | null
           session_id: string | null
+          rung_session_id: string | null
         }
         Insert: {
           id?: string
@@ -32,6 +33,7 @@ export interface Database {
           created_at?: string
           created_by?: string | null
           session_id?: string | null
+          rung_session_id?: string | null
         }
         Update: {
           id?: string
@@ -47,6 +49,7 @@ export interface Database {
           created_at?: string
           created_by?: string | null
           session_id?: string | null
+          rung_session_id?: string | null
         }
       }
       game_sessions: {
