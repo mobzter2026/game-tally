@@ -38,11 +38,12 @@ export default function AdminDashboard() {
     team2: [] as string[]
   })
 
-  // Rung-specific state for round-by-round tracking
-  const [rungMode, setRungMode] = useState<'quick' | 'rounds'>('quick')
+  // Rung state - simplified, no modes
   const [rungRounds, setRungRounds] = useState<Array<{team1: string[], team2: string[], winner: number}>>([])
   const [currentRungTeam1, setCurrentRungTeam1] = useState<string[]>([])
   const [currentRungTeam2, setCurrentRungTeam2] = useState<string[]>([])
+  const [rungScore, setRungScore] = useState({ team1: 0, team2: 0 })
+  const [rungSessionId, setRungSessionId] = useState<string>('')
 
   useEffect(() => {
     checkAuth()
@@ -106,8 +107,101 @@ export default function AdminDashboard() {
     }
   }
 
+  const toggleRungTeam1 = (player: string) => {
+    if (currentRungTeam1.includes(player)) {
+      setCurrentRungTeam1(currentRungTeam1.filter(p => p !== player))
+    } else if (currentRungTeam1.length < 2) {
+      setCurrentRungTeam1([...currentRungTeam1, player])
+    }
+  }
+
+  const toggleRungTeam2 = (player: string) => {
+    if (currentRungTeam2.includes(player)) {
+      setCurrentRungTeam2(currentRungTeam2.filter(p => p !== player))
+    } else if (currentRungTeam2.length < 2) {
+      setCurrentRungTeam2([...currentRungTeam2, player])
+    }
+  }
+
   const selectAllPlayers = () => setNewGame({ ...newGame, players: PLAYERS })
   const clearPlayers = () => setNewGame({ ...newGame, players: [] })
+
+  const recordRungRound = async (winningTeam: number) => {
+    const newScore = {
+      team1: rungScore.team1 + (winningTeam === 1 ? 1 : 0),
+      team2: rungScore.team2 + (winningTeam === 2 ? 1 : 0)
+    }
+
+    // Generate session ID on first round
+    let sessionId = rungSessionId
+    if (!sessionId) {
+      sessionId = `rung_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setRungSessionId(sessionId)
+    }
+
+    const newRound = {
+      team1: [...currentRungTeam1],
+      team2: [...currentRungTeam2],
+      winner: winningTeam
+    }
+
+    setRungRounds([...rungRounds, newRound])
+    setRungScore(newScore)
+
+    // Save round to database with session ID
+    const { error } = await (supabase.from('games').insert as any)({
+      game_type: 'Rung',
+      game_date: newGame.date,
+      players_in_game: [...currentRungTeam1, ...currentRungTeam2],
+      team1: currentRungTeam1,
+      team2: currentRungTeam2,
+      winning_team: winningTeam,
+      winners: null,
+      losers: null,
+      created_by: user?.email,
+      rung_session_id: sessionId
+    })
+
+    if (error) {
+      console.error('Error saving round:', error)
+      alert('❌ Error saving round')
+      return
+    }
+
+    // Check if game is over (first to 5)
+    if (newScore.team1 >= 5 || newScore.team2 >= 5) {
+      const winner = newScore.team1 >= 5 ? 'Team 1' : 'Team 2'
+      alert(`🏆 ${winner} wins the game! Final score: ${newScore.team1} - ${newScore.team2}`)
+      
+      // Reset Rung state
+      setRungRounds([])
+      setCurrentRungTeam1([])
+      setCurrentRungTeam2([])
+      setRungScore({ team1: 0, team2: 0 })
+      setRungSessionId('')
+      setNewGame({
+        ...newGame,
+        type: '',
+        players: [],
+        winners: [],
+        runnersUp: [],
+        losers: [],
+        survivors: [],
+        team1: [],
+        team2: []
+      })
+      
+      fetchGames()
+      return
+    }
+
+    // Keep winning team, clear losing team
+    if (winningTeam === 1) {
+      setCurrentRungTeam2([])
+    } else {
+      setCurrentRungTeam1([])
+    }
+  }
 
   const addGame = async () => {
     if (newGame.players.length === 0) {
@@ -115,22 +209,10 @@ export default function AdminDashboard() {
       return
     }
 
-    // For Rung games in rounds mode, handle differently
-    if (newGame.type === 'Rung' && rungMode === 'rounds') {
-      await saveRungSession()
+    // Don't use this for Rung - Rung uses recordRungRound
+    if (newGame.type === 'Rung') {
+      alert('Use the Team 1/Team 2 Wins buttons for Rung games')
       return
-    }
-
-    // For Rung games in quick mode, validate team selection
-    if (newGame.type === 'Rung' && rungMode === 'quick') {
-      if (newGame.team1.length !== 2 || newGame.team2.length !== 2) {
-        alert('Rung requires exactly 2 players per team')
-        return
-      }
-      if (newGame.winners.length !== 2) {
-        alert('Please select exactly 2 winners (the winning team)')
-        return
-      }
     }
 
     const gameData: any = {
@@ -142,14 +224,6 @@ export default function AdminDashboard() {
       survivors: newGame.survivors.length > 0 ? newGame.survivors : null,
       losers: newGame.losers.length > 0 ? newGame.losers : null,
       created_by: user?.email
-    }
-
-    // For Rung quick mode: save as session summary (no team1/team2/winning_team)
-    if (newGame.type === 'Rung') {
-      // This is a session summary - no team data
-      gameData.team1 = null
-      gameData.team2 = null
-      gameData.winning_team = null
     }
 
     const { error } = await (supabase.from('games').insert as any)(gameData)
@@ -175,192 +249,45 @@ export default function AdminDashboard() {
     fetchGames()
   }
 
-  const saveRungSession = async () => {
-    if (rungRounds.length === 0) {
-      alert('No rounds to save! Please record at least one round.')
-      return
-    }
-
-    try {
-      // Save each individual round
-      for (const round of rungRounds) {
-        const { error } = await (supabase.from('games').insert as any)({
-          game_type: 'Rung',
-          game_date: newGame.date,
-          players_in_game: [...round.team1, ...round.team2],
-          team1: round.team1,
-          team2: round.team2,
-          winning_team: round.winner,
-          winners: null,
-          losers: null,
-          created_by: user?.email
-        })
-        
-        if (error) {
-          console.error('Error saving round:', error)
-          alert(`Error saving round: ${error.message}`)
-          return
-        }
-      }
-
-      // Calculate session summary (same logic as Scoring page)
-      const teamWins: Record<string, number> = {}
-      const allTeams = new Set<string>()
-    
-    rungRounds.forEach(round => {
-      const team1Key = round.team1.slice().sort().join('&')
-      const team2Key = round.team2.slice().sort().join('&')
-      
-      allTeams.add(team1Key)
-      allTeams.add(team2Key)
-      
-      if (!teamWins[team1Key]) teamWins[team1Key] = 0
-      if (!teamWins[team2Key]) teamWins[team2Key] = 0
-      
-      if (round.winner === 1) teamWins[team1Key]++
-      else if (round.winner === 2) teamWins[team2Key]++
-    })
-
-    // For each player, find their best team
-    const allPlayers = new Set<string>()
-    allTeams.forEach(teamKey => {
-      teamKey.split('&').forEach(p => allPlayers.add(p))
-    })
-
-    const playerBestTeam: Record<string, { team: string, wins: number }> = {}
-    
-    allPlayers.forEach(player => {
-      let bestWins = -1
-      let bestTeam = ''
-      
-      allTeams.forEach(teamKey => {
-        if (teamKey.split('&').includes(player)) {
-          const wins = teamWins[teamKey] || 0
-          if (wins > bestWins) {
-            bestWins = wins
-            bestTeam = teamKey
-          }
-        }
-      })
-      
-      if (bestTeam) {
-        playerBestTeam[player] = { team: bestTeam, wins: bestWins }
-      }
-    })
-
-    // Sort players by their best team's performance
-    const sortedPlayers = Array.from(allPlayers).sort((a, b) => 
-      (playerBestTeam[b]?.wins || 0) - (playerBestTeam[a]?.wins || 0)
-    )
-
-    // Categorize players
-    const winners = sortedPlayers.filter(p => (playerBestTeam[p]?.wins || 0) >= 5)
-    const nonWinners = sortedPlayers.filter(p => !winners.includes(p))
-    const nonWinnerScores = nonWinners.map(p => playerBestTeam[p]?.wins || 0)
-    const maxNonWinnerScore = nonWinnerScores.length > 0 ? Math.max(...nonWinnerScores) : 0
-    const minNonWinnerScore = nonWinnerScores.length > 0 ? Math.min(...nonWinnerScores) : 0
-    
-    let runnersUp: string[] = []
-    let survivors: string[] = []
-    let losers: string[] = []
-    
-    if (nonWinners.length > 0) {
-      runnersUp = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === maxNonWinnerScore)
-      
-      if (maxNonWinnerScore === minNonWinnerScore) {
-        losers = runnersUp
-        runnersUp = []
-      } else {
-        losers = nonWinners.filter(p => (playerBestTeam[p]?.wins || 0) === minNonWinnerScore)
-        survivors = nonWinners.filter(p => !runnersUp.includes(p) && !losers.includes(p))
-      }
-    }
-
-    // Save session summary
-    const { error: summaryError } = await (supabase.from('games').insert as any)({
-      game_type: 'Rung',
-      game_date: newGame.date,
-      players_in_game: Array.from(allPlayers),
-      winners: winners.length > 0 ? winners : null,
-      runners_up: runnersUp.length > 0 ? runnersUp : null,
-      survivors: survivors.length > 0 ? survivors : null,
-      losers: losers.length > 0 ? losers : null,
-      team1: null,
-      team2: null,
-      winning_team: null,
-      created_by: user?.email
-    })
-    
-    if (summaryError) {
-      console.error('Error saving session summary:', summaryError)
-      alert(`Error saving session summary: ${summaryError.message}`)
-      return
-    }
-
-    // Reset
-    setRungRounds([])
-    setCurrentRungTeam1([])
-    setCurrentRungTeam2([])
-    setNewGame({
-      type: '',
-      date: new Date().toISOString().split('T')[0],
-      players: [],
-      winners: [],
-      runnersUp: [],
-      losers: [],
-      survivors: [],
-      team1: [],
-      team2: []
-    })
-    
-    alert('Rung session saved successfully!')
-    fetchGames()
-    } catch (error: any) {
-      console.error('Error in saveRungSession:', error)
-      alert(`Failed to save Rung session: ${error.message}`)
-    }
-  }
-
-  const recordRungRound = (winningTeam: number) => {
-    if (currentRungTeam1.length !== 2 || currentRungTeam2.length !== 2) {
-      alert('Both teams must have exactly 2 players')
-      return
-    }
-
-    const newRound = {
-      team1: [...currentRungTeam1],
-      team2: [...currentRungTeam2],
-      winner: winningTeam
-    }
-    setRungRounds([...rungRounds, newRound])
-    
-    // Keep Team 1, clear Team 2 for next round (losers can swap)
-    setCurrentRungTeam2([])
-  }
-
-  const toggleRungTeam = (team: 'team1' | 'team2', player: string) => {
-    const currentTeam = team === 'team1' ? currentRungTeam1 : currentRungTeam2
-    const setTeam = team === 'team1' ? setCurrentRungTeam1 : setCurrentRungTeam2
-    const otherTeam = team === 'team1' ? currentRungTeam2 : currentRungTeam1
-
-    if (currentTeam.includes(player)) {
-      setTeam(currentTeam.filter(p => p !== player))
-    } else if (currentTeam.length < 2 && !otherTeam.includes(player)) {
-      setTeam([...currentTeam, player])
-    }
-  }
-
   const deleteGame = async (id: string) => {
-    if (confirm('Are you sure you want to delete this game?')) {
-      await supabase.from('games').delete().eq('id', id)
-      fetchGames()
+    if (!confirm('Are you sure you want to delete this game?')) return
+    
+    const { error } = await supabase.from('games').delete().eq('id', id)
+    
+    if (error) {
+      alert('Error deleting game')
+      console.error(error)
+      return
     }
+    
+    fetchGames()
   }
 
   const startEditingGame = (game: Game) => {
     setEditingGame(game.id)
     setEditDate(game.game_date)
-    setEditTime(game.created_at ? new Date(game.created_at).toTimeString().slice(0, 5) : '00:00')
+    setEditTime(game.created_at ? new Date(game.created_at).toTimeString().slice(0, 5) : '12:00')
+  }
+
+  const saveGameDateTime = async (id: string) => {
+    const dateTime = new Date(`${editDate}T${editTime}:00`)
+    
+    const { error } = await supabase
+      .from('games')
+      .update({ 
+        game_date: editDate,
+        created_at: dateTime.toISOString()
+      })
+      .eq('id', id)
+    
+    if (error) {
+      alert('Error updating game')
+      console.error(error)
+      return
+    }
+    
+    setEditingGame(null)
+    fetchGames()
   }
 
   const cancelEditing = () => {
@@ -369,328 +296,247 @@ export default function AdminDashboard() {
     setEditTime('')
   }
 
-  const saveGameDateTime = async (gameId: string) => {
-    const timestamp = new Date(`${editDate}T${editTime}:00`).toISOString()
-    
-    const { error } = await (supabase
-      .from('games')
-      .update as any)({ 
-        game_date: editDate,
-        created_at: timestamp
-      })
-      .eq('id', gameId)
-
-    if (error) {
-      console.error('Error updating game:', error)
-      alert('Error updating game')
-    } else {
-      setEditingGame(null)
-      setEditDate('')
-      setEditTime('')
-      fetchGames()
-    }
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 flex items-center justify-center">
-        <div className="text-white text-2xl font-mono">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-950 to-purple-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 via-70% to-slate-950 text-white p-4 font-mono">
-      <div className="max-w-7xl mx-auto mt-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-950 to-purple-900">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">
             Admin Dashboard
           </h1>
-          <p className="text-slate-300 mb-4 text-sm">Manage game results</p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={() => router.push('/admin/scoring')} variant="pop" color="blue" className="px-4 py-2 text-sm">
-              Live Scores
-            </Button>
-            <Button onClick={() => router.push('/')} variant="pop" color="purple" className="px-4 py-2 text-sm">
-              Leaderboard
-            </Button>
-            <Button onClick={handleSignOut} variant="pop" color="red" className="px-4 py-2 text-sm">
-              Exit
-            </Button>
-          </div>
+          <Button onClick={handleSignOut} variant="frosted" color="red" className="px-4 py-2">
+            Sign Out
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Add Game Form */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Add New Game */}
           <div className="rounded-xl p-6 bg-gradient-to-b from-purple-900/50 to-slate-900/60 shadow-[0_12px_25px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(255,255,255,0.08)]">
-            <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-gray-100 via-gray-300 to-gray-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
               Add New Game
             </h2>
-            <p className="text-xs text-slate-400 mb-4">💡 Tip: For round-based games, use Live Scoring for better tracking</p>
-            
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block mb-2 text-xs font-bold">Game Type</label>
-                  <select
-                    value={newGame.type}
-                    onChange={(e) => setNewGame({ ...newGame, type: e.target.value })}
-                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold"
-                  >
-                    <option value="" disabled>Select a game</option>
-                    {Object.entries(GAME_EMOJIS).map(([gameType, emoji]) => (
-                      <option key={gameType} value={gameType}>
-                        {emoji} {gameType}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block mb-2 text-xs font-bold">Date</label>
-                  <input
-                    type="date"
-                    value={newGame.date}
-                    onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
-                    className="w-full p-2.5 bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 rounded-lg text-sm shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold text-center [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                  />
-                </div>
+              <div>
+                <label className="block mb-2 text-xs font-bold">📅 Date</label>
+                <input
+                  type="date"
+                  value={newGame.date}
+                  onChange={e => setNewGame({ ...newGame, date: e.target.value })}
+                  className="w-full p-2 rounded bg-purple-800/50 text-white border border-purple-500/50 text-sm"
+                />
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-xs font-bold">Players in Game</label>
-                  <div className="flex gap-2">
-                    <Button onClick={selectAllPlayers} variant="pop" color="blue" className="px-2 py-1 text-xs">
-                      Select All
-                    </Button>
-                    {newGame.players.length > 0 && (
-                      <Button onClick={clearPlayers} variant="pop" color="red" className="px-2 py-1 text-xs">
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {PLAYERS.map(p => (
+                <label className="block mb-2 text-xs font-bold">🎮 Game Type</label>
+                <div className="flex gap-2 flex-wrap">
+                  {['Blackjack', 'Monopoly', 'Tai Ti', 'Shithead', 'Rung'].map(type => (
                     <Button
-                      key={p}
-                      onClick={() => toggleArrayItem('players', p)}
+                      key={type}
+                      onClick={() => setNewGame({ ...newGame, type })}
                       variant="frosted"
-                      color="purple"
-                      selected={newGame.players.includes(p)}
-                      className="px-3 py-2 text-sm font-semibold"
+                      color={newGame.type === type ? 'purple' : 'blue'}
+                      selected={newGame.type === type}
+                      className="px-3 py-1.5 text-xs"
                     >
-                      {p}
+                      {GAME_EMOJIS[type]} {type}
                     </Button>
                   ))}
                 </div>
               </div>
 
-              {/* Rung Mode Selection and Team Tracking */}
-              {newGame.type === 'Rung' && (
-                <div className="space-y-4 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-purple-300">🎭 Rung Recording Mode</p>
-                    <select
-                      value={rungMode}
-                      onChange={(e) => setRungMode(e.target.value as 'quick' | 'rounds')}
-                      className="px-3 py-1.5 rounded-lg text-xs bg-gradient-to-br from-purple-700 via-purple-900 to-blue-900 shadow-[0_4px_8px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.25)] font-bold"
-                    >
-                      <option value="quick">Quick Entry (Final Result)</option>
-                      <option value="rounds">Round-by-Round Tracking</option>
-                    </select>
-                  </div>
-
-                  {rungMode === 'quick' ? (
-                    // Quick mode - just select final teams and winners
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block mb-2 text-xs font-bold">Team 1 ({newGame.team1.length}/2)</label>
-                          <div className="flex gap-2 flex-wrap">
-                            {newGame.players.length === 0 ? (
-                              <p className="text-xs text-slate-500">Select players first</p>
-                            ) : (
-                              newGame.players.map(p => (
-                                <Button
-                                  key={p}
-                                  onClick={() => toggleArrayItem('team1', p)}
-                                  variant="frosted"
-                                  color={newGame.team1.includes(p) ? 'blue' : 'purple'}
-                                  selected={newGame.team1.includes(p)}
-                                  disabled={newGame.team2.includes(p) || (newGame.team1.length >= 2 && !newGame.team1.includes(p))}
-                                  className="px-3 py-1.5 text-xs"
-                                >
-                                  {p}
-                                </Button>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-xs font-bold">Team 2 ({newGame.team2.length}/2)</label>
-                          <div className="flex gap-2 flex-wrap">
-                            {newGame.players.length === 0 ? (
-                              <p className="text-xs text-slate-500">Select players first</p>
-                            ) : (
-                              newGame.players.map(p => (
-                                <Button
-                                  key={p}
-                                  onClick={() => toggleArrayItem('team2', p)}
-                                  variant="frosted"
-                                  color={newGame.team2.includes(p) ? 'red' : 'purple'}
-                                  selected={newGame.team2.includes(p)}
-                                  disabled={newGame.team1.includes(p) || (newGame.team2.length >= 2 && !newGame.team2.includes(p))}
-                                  className="px-3 py-1.5 text-xs"
-                                >
-                                  {p}
-                                </Button>
-                              ))
-                            )}
-                          </div>
-                        </div>
+              {newGame.type !== 'Rung' && (
+                <>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs font-bold">👥 Players</label>
+                      <div className="flex gap-1">
+                        <Button onClick={selectAllPlayers} variant="frosted" color="blue" className="px-2 py-1 text-xs">
+                          All
+                        </Button>
+                        <Button onClick={clearPlayers} variant="frosted" color="red" className="px-2 py-1 text-xs">
+                          Clear
+                        </Button>
                       </div>
-                      <p className="text-xs text-slate-400 italic">Quick mode: Select final teams, then mark winners below</p>
-                    </>
-                  ) : (
-                    // Rounds mode - track each round
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block mb-2 text-xs font-bold">Team 1 ({currentRungTeam1.length}/2)</label>
-                          <div className="flex gap-2 flex-wrap">
-                            {PLAYERS.map(p => (
-                              <Button
-                                key={p}
-                                onClick={() => toggleRungTeam('team1', p)}
-                                variant="frosted"
-                                color={currentRungTeam1.includes(p) ? 'blue' : 'purple'}
-                                selected={currentRungTeam1.includes(p)}
-                                disabled={currentRungTeam2.includes(p) || (currentRungTeam1.length >= 2 && !currentRungTeam1.includes(p))}
-                                className="px-3 py-1.5 text-xs"
-                              >
-                                {p}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-xs font-bold">Team 2 ({currentRungTeam2.length}/2)</label>
-                          <div className="flex gap-2 flex-wrap">
-                            {PLAYERS.map(p => (
-                              <Button
-                                key={p}
-                                onClick={() => toggleRungTeam('team2', p)}
-                                variant="frosted"
-                                color={currentRungTeam2.includes(p) ? 'red' : 'purple'}
-                                selected={currentRungTeam2.includes(p)}
-                                disabled={currentRungTeam1.includes(p) || (currentRungTeam2.length >= 2 && !currentRungTeam2.includes(p))}
-                                className="px-3 py-1.5 text-xs"
-                              >
-                                {p}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {currentRungTeam1.length === 2 && currentRungTeam2.length === 2 && (
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => recordRungRound(1)}
-                            variant="pop"
-                            color="blue"
-                            className="flex-1 px-3 py-2 text-xs font-bold"
-                          >
-                            {currentRungTeam1.join(' + ')} Won Round
-                          </Button>
-                          <Button
-                            onClick={() => recordRungRound(2)}
-                            variant="pop"
-                            color="red"
-                            className="flex-1 px-3 py-2 text-xs font-bold"
-                          >
-                            {currentRungTeam2.join(' + ')} Won Round
-                          </Button>
-                        </div>
-                      )}
-
-                      {rungRounds.length > 0 && (
-                        <div className="mt-3 p-3 bg-slate-900/40 rounded">
-                          <h4 className="text-xs font-bold mb-2 text-purple-300">Rounds Recorded ({rungRounds.length})</h4>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
-                            {rungRounds.map((round, idx) => (
-                              <div key={idx} className="text-xs bg-purple-900/30 rounded p-1.5 flex justify-between">
-                                <span>Round {idx + 1}:</span>
-                                <div className="flex gap-2">
-                                  <span className={round.winner === 1 ? 'text-green-400 font-bold' : 'text-slate-400'}>
-                                    {round.team1.join(' + ')}
-                                  </span>
-                                  <span className="text-slate-500">vs</span>
-                                  <span className={round.winner === 2 ? 'text-green-400 font-bold' : 'text-slate-400'}>
-                                    {round.team2.join(' + ')}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <p className="text-xs text-slate-400 italic">Record rounds until one team reaches 5 wins, then click "Add Game" to save session</p>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {['winners', 'runnersUp', 'survivors', 'losers'].map(roleKey => (
-                <div key={roleKey}>
-                  <label className="block mb-2 text-xs font-bold">
-                    {roleKey === 'winners' ? '🏆 Winners' : 
-                     roleKey === 'runnersUp' ? '🥈 Runners-up' : 
-                     roleKey === 'survivors' ? '🤟 Survivors' :
-                     '💀 Losers'}
-                  </label>
-                  <div className="flex gap-2 flex-wrap">
-                    {newGame.players.length === 0 ? (
-                      <p className="text-xs text-slate-500">Select players first</p>
-                    ) : (
-                      newGame.players.map(p => (
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYERS.map(p => (
                         <Button
                           key={p}
-                          onClick={() => toggleArrayItem(roleKey as any, p)}
+                          onClick={() => toggleArrayItem('players', p)}
                           variant="frosted"
-                          color={
-                            roleKey === 'winners' && newGame.winners.includes(p) ? 'blue' :
-                            roleKey === 'runnersUp' && newGame.runnersUp.includes(p) ? 'blue' :
-                            roleKey === 'survivors' && newGame.survivors.includes(p) ? 'purple' :
-                            roleKey === 'losers' && newGame.losers.includes(p) ? 'red' :
-                            'purple'
-                          }
-                          selected={
-                            (roleKey === 'winners' && newGame.winners.includes(p)) ||
-                            (roleKey === 'runnersUp' && newGame.runnersUp.includes(p)) ||
-                            (roleKey === 'survivors' && newGame.survivors.includes(p)) ||
-                            (roleKey === 'losers' && newGame.losers.includes(p))
-                          }
+                          color={newGame.players.includes(p) ? 'purple' : 'blue'}
+                          selected={newGame.players.includes(p)}
                           className="px-3 py-1.5 text-xs"
                         >
                           {p}
                         </Button>
-                      ))
-                    )}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
 
-              <Button 
-                onClick={addGame} 
-                variant="pop"
-                className="w-full py-3 text-base font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
-                disabled={newGame.type === ''}
-              >
-                ➕ Add Game
-              </Button>
+                  {['winners', 'runnersUp', 'survivors', 'losers'].map(roleKey => (
+                    <div key={roleKey}>
+                      <label className="block mb-2 text-xs font-bold">
+                        {roleKey === 'winners' ? '🏆 Winners' : 
+                         roleKey === 'runnersUp' ? '🥈 Runners-up' : 
+                         roleKey === 'survivors' ? '🤟 Survivors' :
+                         '💀 Losers'}
+                      </label>
+                      <div className="flex gap-2 flex-wrap">
+                        {newGame.players.length === 0 ? (
+                          <p className="text-xs text-slate-500">Select players first</p>
+                        ) : (
+                          newGame.players.map(p => (
+                            <Button
+                              key={p}
+                              onClick={() => toggleArrayItem(roleKey as any, p)}
+                              variant="frosted"
+                              color={
+                                roleKey === 'winners' && newGame.winners.includes(p) ? 'blue' :
+                                roleKey === 'runnersUp' && newGame.runnersUp.includes(p) ? 'blue' :
+                                roleKey === 'survivors' && newGame.survivors.includes(p) ? 'purple' :
+                                roleKey === 'losers' && newGame.losers.includes(p) ? 'red' :
+                                'purple'
+                              }
+                              selected={
+                                (roleKey === 'winners' && newGame.winners.includes(p)) ||
+                                (roleKey === 'runnersUp' && newGame.runnersUp.includes(p)) ||
+                                (roleKey === 'survivors' && newGame.survivors.includes(p)) ||
+                                (roleKey === 'losers' && newGame.losers.includes(p))
+                              }
+                              className="px-3 py-1.5 text-xs"
+                            >
+                              {p}
+                            </Button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  <Button 
+                    onClick={addGame} 
+                    variant="pop"
+                    className="w-full py-3 text-base font-bold bg-gradient-to-br from-emerald-600 to-emerald-900"
+                    disabled={newGame.type === ''}
+                  >
+                    ➕ Add Game
+                  </Button>
+                </>
+              )}
+
+              {/* Rung Team Selection */}
+              {newGame.type === 'Rung' && (
+                <div className="space-y-4">
+                  {rungRounds.length > 0 && (
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">
+                        <span className="text-blue-400">Team 1: {rungScore.team1}</span>
+                        <span className="text-amber-300 mx-3">-</span>
+                        <span className="text-red-400">{rungScore.team2} :Team 2</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Team 1 Column */}
+                    <div>
+                      <label className="block mb-2 text-xs font-bold text-blue-400">
+                        Team 1 {currentRungTeam1.length === 2 ? '✓' : '(Select 2)'}
+                      </label>
+                      <div className="space-y-2">
+                        {PLAYERS.map(p => (
+                          <Button
+                            key={p}
+                            onClick={() => toggleRungTeam1(p)}
+                            variant="frosted"
+                            color={currentRungTeam1.includes(p) ? 'blue' : 'purple'}
+                            selected={currentRungTeam1.includes(p)}
+                            disabled={currentRungTeam2.includes(p) || (currentRungTeam1.length >= 2 && !currentRungTeam1.includes(p))}
+                            className="w-full px-3 py-1.5 text-xs"
+                          >
+                            {p}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Team 2 Column */}
+                    <div>
+                      <label className="block mb-2 text-xs font-bold text-red-400">
+                        Team 2 {currentRungTeam2.length === 2 ? '✓' : '(Select 2)'}
+                      </label>
+                      <div className="space-y-2">
+                        {PLAYERS.map(p => (
+                          <Button
+                            key={p}
+                            onClick={() => toggleRungTeam2(p)}
+                            variant="frosted"
+                            color={currentRungTeam2.includes(p) ? 'red' : 'purple'}
+                            selected={currentRungTeam2.includes(p)}
+                            disabled={currentRungTeam1.includes(p) || (currentRungTeam2.length >= 2 && !currentRungTeam2.includes(p))}
+                            className="w-full px-3 py-1.5 text-xs"
+                          >
+                            {p}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {currentRungTeam1.length === 2 && currentRungTeam2.length === 2 && (
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => recordRungRound(1)}
+                        variant="pop"
+                        color="blue"
+                        className="flex-1 px-3 py-2 text-xs font-bold"
+                      >
+                        {currentRungTeam1.join(' + ')} Won Round
+                      </Button>
+                      <Button
+                        onClick={() => recordRungRound(2)}
+                        variant="pop"
+                        color="red"
+                        className="flex-1 px-3 py-2 text-xs font-bold"
+                      >
+                        {currentRungTeam2.join(' + ')} Won Round
+                      </Button>
+                    </div>
+                  )}
+
+                  {rungRounds.length > 0 && (
+                    <div className="mt-3 p-3 bg-slate-900/40 rounded">
+                      <h4 className="text-xs font-bold mb-2 text-purple-300">Rounds Recorded ({rungRounds.length})</h4>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {rungRounds.map((round, idx) => (
+                          <div key={idx} className="text-xs bg-purple-900/30 rounded p-1.5 flex justify-between">
+                            <span>Round {idx + 1}:</span>
+                            <div className="flex gap-2">
+                              <span className={round.winner === 1 ? 'text-green-400 font-bold' : 'text-slate-400'}>
+                                {round.team1.join(' + ')}
+                              </span>
+                              <span className="text-slate-500">vs</span>
+                              <span className={round.winner === 2 ? 'text-green-400 font-bold' : 'text-slate-400'}>
+                                {round.team2.join(' + ')}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-slate-400 italic">Game continues until one team reaches 5 wins</p>
+                </div>
+              )}
             </div>
           </div>
 
