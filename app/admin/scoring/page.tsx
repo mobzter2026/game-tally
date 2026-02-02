@@ -49,36 +49,8 @@ export default function ScoringPage() {
   const [rungTeam2, setRungTeam2] = useState<string[]>([])
   const [rungRounds, setRungRounds] = useState<Array<{team1: string[], team2: string[], winner: number}>>([])
   const [currentRound, setCurrentRound] = useState(0)
-
-  // Calculate current duo scores from rounds
-  const getDuoScores = () => {
-    const scores: Record<string, number> = {}
-    
-    rungRounds.forEach(round => {
-      const team1Key = round.team1.slice().sort().join(' + ')
-      const team2Key = round.team2.slice().sort().join(' + ')
-      
-      if (!scores[team1Key]) scores[team1Key] = 0
-      if (!scores[team2Key]) scores[team2Key] = 0
-      
-      if (round.winner === 1) scores[team1Key]++
-      else if (round.winner === 2) scores[team2Key]++
-    })
-    
-    return scores
-  }
-
-  const getCurrentTeamScores = () => {
-    const scores = getDuoScores()
-    const team1Key = rungTeam1.slice().sort().join(' + ')
-    const team2Key = rungTeam2.slice().sort().join(' + ')
-    
-    return {
-      team1Score: scores[team1Key] || 0,
-      team2Score: scores[team2Key] || 0,
-      allScores: scores
-    }
-  }
+  const [team1Score, setTeam1Score] = useState(0)
+  const [team2Score, setTeam2Score] = useState(0)
 
   useEffect(() => {
     setLoading(false)
@@ -131,6 +103,12 @@ export default function ScoringPage() {
     }
     setRungRounds([...rungRounds, newRound])
     setCurrentRound(currentRound + 1)
+    
+    if (winningTeam === 1) {
+      setTeam1Score(team1Score + 1)
+    } else {
+      setTeam2Score(team2Score + 1)
+    }
   }
 
   const saveRungSession = async () => {
@@ -257,6 +235,8 @@ export default function ScoringPage() {
     setRungRounds([])
     setRungTeam1([])
     setRungTeam2([])
+    setTeam1Score(0)
+    setTeam2Score(0)
     setCurrentRound(0)
     alert('Rung session saved!')
   }
@@ -487,44 +467,10 @@ export default function ScoringPage() {
 
                 {rungTeam1.length === 2 && rungTeam2.length === 2 && (
                   <>
-                    <div className="bg-slate-900/50 p-4 rounded-lg space-y-3">
-                      <h3 className="text-center font-bold">
-                        Round {currentRound + 1}
+                    <div className="bg-slate-900/50 p-4 rounded-lg">
+                      <h3 className="text-center font-bold mb-3">
+                        Round {currentRound + 1} - Score: {team1Score} - {team2Score}
                       </h3>
-                      
-                      {/* Current Match Score */}
-                      <div className="text-center text-sm">
-                        <div className="font-bold text-purple-300">Current Match:</div>
-                        <div className="flex justify-center items-center gap-3 mt-1">
-                          <span className="text-blue-400 font-bold">
-                            {rungTeam1.join(' + ')}: {getCurrentTeamScores().team1Score}
-                          </span>
-                          <span className="text-slate-500">vs</span>
-                          <span className="text-pink-400 font-bold">
-                            {rungTeam2.join(' + ')}: {getCurrentTeamScores().team2Score}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* All Duo Scores */}
-                      {Object.keys(getCurrentTeamScores().allScores).length > 0 && (
-                        <div className="text-xs bg-purple-900/30 rounded p-2">
-                          <div className="font-bold text-purple-300 mb-1">All Team Scores:</div>
-                          <div className="space-y-0.5">
-                            {Object.entries(getCurrentTeamScores().allScores)
-                              .sort((a, b) => b[1] - a[1])
-                              .map(([team, score]) => (
-                                <div key={team} className="flex justify-between">
-                                  <span className="text-slate-300">{team}</span>
-                                  <span className={`font-bold ${score >= 5 ? 'text-green-400' : 'text-yellow-400'}`}>
-                                    {score} {score >= 5 ? '🏆' : ''}
-                                  </span>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           onClick={() => recordRungRound(1)}
