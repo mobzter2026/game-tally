@@ -94,119 +94,6 @@ export default function PublicView() {
     setLoading(false)
   }
 
-  const groupRungSessions = (games: Game[]) => {
-    const rungSessionMap: Record<string, Game[]> = {}
-    const nonRungGames: Game[] = []
-    
-    games.forEach(game => {
-      if (game.game_type === 'Rung') {
-        if (game.rung_session_id) {
-          // Has session ID - group it
-          if (!rungSessionMap[game.rung_session_id]) {
-            rungSessionMap[game.rung_session_id] = []
-          }
-          rungSessionMap[game.rung_session_id].push(game)
-        } else if (game.winners && game.winners.length > 0) {
-          // Old format without session ID but has winners - already a summary
-          nonRungGames.push(game)
-        }
-        // Skip incomplete rounds (no session ID and no winners)
-      } else {
-        nonRungGames.push(game)
-      }
-    })
-    
-    // Create aggregated session entries
-    const rungSessions: Game[] = []
-    Object.entries(rungSessionMap).forEach(([sessionId, sessionGames]) => {
-      if (sessionGames.length === 0) return
-      
-      sessionGames.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0).getTime()
-        const dateB = new Date(b.created_at || 0).getTime()
-        return dateA - dateB
-      })
-      
-      // Calculate player wins - handle both old and new formats
-      const playerWins: Record<string, number> = {}
-      
-      sessionGames.forEach(round => {
-        // NEW format: winners/losers arrays
-        if (round.winners && round.winners.length > 0) {
-          round.winners.forEach(player => {
-            playerWins[player] = (playerWins[player] || 0) + 1
-          })
-          round.losers?.forEach(player => {
-            if (!playerWins[player]) playerWins[player] = 0
-          })
-        }
-        // OLD format: team1/team2/winning_team
-        else if (round.team1 && round.team2 && round.winning_team) {
-          const winningTeam = round.winning_team === 1 ? round.team1 : round.team2
-          const losingTeam = round.winning_team === 1 ? round.team2 : round.team1
-          
-          winningTeam.forEach(player => {
-            playerWins[player] = (playerWins[player] || 0) + 1
-          })
-          losingTeam.forEach(player => {
-            if (!playerWins[player]) playerWins[player] = 0
-          })
-        }
-      })
-      
-      // Categorize by scores
-      const uniqueScores = [...new Set(Object.values(playerWins))].sort((a, b) => b - a)
-      
-      const finalWinners: string[] = []
-      const finalRunnersUp: string[] = []
-      const finalSurvivors: string[] = []
-      const finalLosers: string[] = []
-      
-      if (uniqueScores.length === 2) {
-        const highScore = uniqueScores[0]
-        Object.entries(playerWins).forEach(([player, wins]) => {
-          if (wins === highScore) {
-            finalWinners.push(player)
-          } else {
-            finalLosers.push(player)
-          }
-        })
-      } else if (uniqueScores.length >= 3) {
-        const highScore = uniqueScores[0]
-        const secondScore = uniqueScores[1]
-        const lowScore = uniqueScores[uniqueScores.length - 1]
-        
-        Object.entries(playerWins).forEach(([player, wins]) => {
-          if (wins === highScore) {
-            finalWinners.push(player)
-          } else if (wins === secondScore) {
-            finalRunnersUp.push(player)
-          } else if (wins === lowScore) {
-            finalLosers.push(player)
-          } else {
-            finalSurvivors.push(player)
-          }
-        })
-      } else if (uniqueScores.length === 1) {
-        Object.keys(playerWins).forEach(player => finalWinners.push(player))
-      }
-      
-      const allPlayers = Object.keys(playerWins)
-      rungSessions.push({
-        ...sessionGames[0],
-        id: sessionId,
-        players_in_game: allPlayers,
-        winners: finalWinners.length > 0 ? finalWinners : null,
-        runners_up: finalRunnersUp.length > 0 ? finalRunnersUp : null,
-        survivors: finalSurvivors.length > 0 ? finalSurvivors : null,
-        losers: finalLosers.length > 0 ? finalLosers : null,
-        rung_session_id: sessionId
-      })
-    })
-    
-    return [...nonRungGames, ...rungSessions]
-  }
-
   const findLastShitheadLoser = (games: Game[]) => {
     const shitheadGames = games.filter(g => g.game_type === 'Shithead')
     if (shitheadGames.length > 0) {
@@ -279,8 +166,7 @@ export default function PublicView() {
   }
 
   const getFilteredGames = () => {
-    // Group Rung sessions for individual/overall scoring
-    let filtered = groupRungSessions(games)
+    let filtered = games
 
     if (selectedPlayers.length > 0) {
       filtered = filtered.filter(game => {
@@ -427,6 +313,11 @@ export default function PublicView() {
     }
 
     allGames.forEach(game => {
+      // For Rung, only count final leaderboard entries (those with winners array)
+      if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
+        return // Skip individual round entries
+      }
+
       if (game.players_in_game) {
         game.players_in_game.forEach(p => {
           if (stats[p]) stats[p].gamesPlayed++
@@ -539,16 +430,8 @@ export default function PublicView() {
   const getRungTeamStats = () => {
     const teamStats: any = {}
 
-    // Use RAW games (not grouped) for duo stats - each round counts
-    const rungRounds = games.filter(g => 
-      g.game_type === 'Rung' && 
-      g.team1 && 
-      g.team2 && 
-      g.winning_team &&
-      g.rung_session_id // Only rounds that are part of a session
-    )
-    
-    rungRounds.forEach(game => {
+    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
+    rungGames.forEach(game => {
       if (game.team1 && game.team2) {
         const team1Key = game.team1.slice().sort().join(' + ')
         const team2Key = game.team2.slice().sort().join(' + ')
@@ -1161,26 +1044,12 @@ export default function PublicView() {
                 </div>
               ) : (
                 recentGames.map(game => {
-                  const isRung = game.game_type === 'Rung'
-                  const isExpanded = expandedGame === game.id
-                  const rounds = isRung && isExpanded ? rungRounds[game.id] : null
-                  
                   return (
                     <div key={game.id} className={`rounded-xl p-6 shadow-[0_0.05px_2px_rgba(0,0,0,0.35),inset_0_2px_6px_rgba(255,255,255,0.2)] bg-gradient-to-b from-purple-950/60 to-purple-900/95 w-full min-h-[120px]`}>
                       <div className="mb-3">
-                        <div className="font-bold text-base text-slate-300 mb-1 flex items-center justify-between">
-                          <span>
-                            {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
-                            {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
-                          </span>
-                          {isRung && game.winners && (
-                            <button
-                              onClick={() => toggleExpandGame(game.id, game.game_date, [], [])}
-                              className="text-purple-300 hover:text-purple-100 transition-colors"
-                            >
-                              {isExpanded ? '▼' : '▶'}
-                            </button>
-                          )}
+                        <div className="font-bold text-base text-slate-300 mb-1">
+                          {GAME_EMOJIS[game.game_type]} {game.game_type} • {new Date(game.game_date).toLocaleDateString()}
+                          {game.created_at && ` • ${new Date(game.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
                         </div>
                       </div>
 
@@ -1207,29 +1076,6 @@ export default function PublicView() {
                           </span>
                         ))}
                       </div>
-
-                      {/* Expanded rounds view for Rung sessions */}
-                      {isRung && isExpanded && rounds && rounds.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-purple-500/30">
-                          <h4 className="text-sm font-bold text-purple-300 mb-2">Session Rounds ({rounds.length})</h4>
-                          <div className="space-y-2">
-                            {rounds.map((round, idx) => (
-                              <div key={round.id} className="text-xs bg-purple-900/40 rounded p-2 flex justify-between items-center">
-                                <span className="text-slate-300">Round {idx + 1}</span>
-                                <div className="flex gap-2">
-                                  <span className={`px-2 py-0.5 rounded ${round.winning_team === 1 ? 'bg-green-600' : 'bg-slate-600'}`}>
-                                    {round.team1?.join(' + ')}
-                                  </span>
-                                  <span className="text-slate-400">vs</span>
-                                  <span className={`px-2 py-0.5 rounded ${round.winning_team === 2 ? 'bg-green-600' : 'bg-slate-600'}`}>
-                                    {round.team2?.join(' + ')}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )
                 })
