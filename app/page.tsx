@@ -94,6 +94,77 @@ export default function PublicView() {
     setLoading(false)
   }
 
+  const groupRungSessions = (games: Game[]) => {
+    const rungSessionMap: Record<string, Game[]> = {}
+    const nonRungGames: Game[] = []
+    
+    games.forEach(game => {
+      if (game.game_type === 'Rung' && game.rung_session_id) {
+        if (!rungSessionMap[game.rung_session_id]) {
+          rungSessionMap[game.rung_session_id] = []
+        }
+        rungSessionMap[game.rung_session_id].push(game)
+      } else {
+        nonRungGames.push(game)
+      }
+    })
+    
+    const rungSessions: Game[] = []
+    Object.entries(rungSessionMap).forEach(([sessionId, sessionGames]) => {
+      if (sessionGames.length === 0) return
+      
+      sessionGames.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
+      
+      const playerWins: Record<string, number> = {}
+      
+      sessionGames.forEach(round => {
+        if (round.winners?.length) {
+          round.winners.forEach(p => { playerWins[p] = (playerWins[p] || 0) + 1 })
+          round.losers?.forEach(p => { if (!playerWins[p]) playerWins[p] = 0 })
+        } else if (round.team1 && round.team2 && round.winning_team) {
+          const winners = round.winning_team === 1 ? round.team1 : round.team2
+          const losers = round.winning_team === 1 ? round.team2 : round.team1
+          winners.forEach(p => { playerWins[p] = (playerWins[p] || 0) + 1 })
+          losers.forEach(p => { if (!playerWins[p]) playerWins[p] = 0 })
+        }
+      })
+      
+      const scores = [...new Set(Object.values(playerWins))].sort((a, b) => b - a)
+      const finalWinners: string[] = []
+      const finalRunnersUp: string[] = []
+      const finalSurvivors: string[] = []
+      const finalLosers: string[] = []
+      
+      if (scores.length === 2) {
+        Object.entries(playerWins).forEach(([p, w]) => {
+          (w === scores[0] ? finalWinners : finalLosers).push(p)
+        })
+      } else if (scores.length >= 3) {
+        Object.entries(playerWins).forEach(([p, w]) => {
+          if (w === scores[0]) finalWinners.push(p)
+          else if (w === scores[1]) finalRunnersUp.push(p)
+          else if (w === scores[scores.length - 1]) finalLosers.push(p)
+          else finalSurvivors.push(p)
+        })
+      } else if (scores.length === 1) {
+        Object.keys(playerWins).forEach(p => finalWinners.push(p))
+      }
+      
+      rungSessions.push({
+        ...sessionGames[0],
+        id: sessionId,
+        players_in_game: Object.keys(playerWins),
+        winners: finalWinners.length ? finalWinners : null,
+        runners_up: finalRunnersUp.length ? finalRunnersUp : null,
+        survivors: finalSurvivors.length ? finalSurvivors : null,
+        losers: finalLosers.length ? finalLosers : null,
+        rung_session_id: sessionId
+      })
+    })
+    
+    return [...nonRungGames, ...rungSessions]
+  }
+
   const findLastShitheadLoser = (games: Game[]) => {
     const shitheadGames = games.filter(g => g.game_type === 'Shithead')
     if (shitheadGames.length > 0) {
@@ -166,7 +237,7 @@ export default function PublicView() {
   }
 
   const getFilteredGames = () => {
-    let filtered = games
+    let filtered = groupRungSessions(games)
 
     if (selectedPlayers.length > 0) {
       filtered = filtered.filter(game => {
@@ -384,11 +455,6 @@ export default function PublicView() {
 
       const reversedGames = allGames.slice().reverse()
       reversedGames.forEach(game => {
-        // Skip Rung rounds that aren't final results
-        if (game.game_type === 'Rung' && (!game.winners || game.winners.length === 0)) {
-          return
-        }
-
         if (game.winners?.includes(player)) {
           currentStreak++
           if (currentStreak > bestStreak) {
@@ -430,7 +496,14 @@ export default function PublicView() {
   const getRungTeamStats = () => {
     const teamStats: any = {}
 
-    const rungGames = filteredGames.filter(g => g.game_type === 'Rung')
+    // Use RAW games (not grouped) for duo stats - every round counts
+    const rungGames = games.filter(g => 
+      g.game_type === 'Rung' && 
+      g.team1 && 
+      g.team2 && 
+      g.winning_team &&
+      g.rung_session_id
+    )
     rungGames.forEach(game => {
       if (game.team1 && game.team2) {
         const team1Key = game.team1.slice().sort().join(' + ')
